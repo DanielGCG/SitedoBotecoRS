@@ -1,19 +1,26 @@
 /* Criando variáveis de cores/estilo personalizadas*/
 :root {
-    --fundo: #80b56b;
-    --header: #9c693a;
+    --cor-fundo: #80b56b;
+    --cor-marrom: #9c693a;
+    --cor-marrom-escuro: #6d4a29;
+    --fonte-padrao: "Montserrat", sans-serif;
+    --fonte-padrao-tamanho: auto;
+    --fonte-padrao-largura: <100>;
+    --fonte-padrao-estilo: normal;
 }
 
-
 body {
-    font-family: comic sans ms;
+    font-family: var(--fonte-padrao);
+    font-optical-sizing: var(--font-optical-sizing);
+    font-weight: var(--fonte-padrao-largura);
+    font-style: var(--fonte-padrao-estilo);
     margin: 0;
     padding: 0;
-    background-color: var(--fundo);
+    background-color: var(--cor-fundo);
 }
 
 header {
-    background-color: var(--header);
+    background-color: var(--cor-marrom);
     padding: 0.01px 0;
     text-align: center;
 }
@@ -21,7 +28,7 @@ header {
 .header__logo{
     color: white;
     text-decoration: none;
-    font-family: comic sans ms;
+    font-family: var(--fonte-padrao);
 }
 .header__nav {
     background-color: #4a693e;
