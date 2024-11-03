@@ -1,0 +1,140 @@
+/* Criando variáveis de cores/estilo personalizadas*/
+:root {
+    --fundo: #80b56b;
+    --header: #9c693a;
+}
+
+
+body {
+    font-family: comic sans ms;
+    margin: 0;
+    padding: 0;
+    background-color: var(--fundo);
+}
+
+header {
+    background-color: var(--header);
+    padding: 0.01px 0;
+    text-align: center;
+}
+
+.header__logo{
+    color: white;
+    text-decoration: none;
+    font-family: comic sans ms;
+}
+.header__nav {
+    background-color: #4a693e;
+    overflow: hidden;
+}
+.header__nav a {
+    float: left;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+.header__nav a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+main {
+    padding: 20px;
+    text-align: center;
+}
+
+footer {
+    background-color: #4a693e;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+.imagem-do-dia {
+    border: 5px solid #9c693a; /* Cor da moldura */
+    border-radius: 10px; /* Bordas arredondadas */
+    padding: 1%; /* Espaçamento interno proporcional */
+    display: inline-block; /* Para que a moldura se ajuste à imagem */
+    background-color: #fff; /* Fundo da moldura */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efeito 3D */
+    width: 80%; /* Largura da moldura como porcentagem */
+    max-width: 400px; /* Largura máxima para evitar que a moldura fique muito larga */
+    height: auto; /* Mantém a proporção da imagem */
+}
+
+.imagem-do-dia img {
+    width: 100%; /* A imagem ocupa 100% da largura da moldura */
+    height: auto; /* Mantém a proporção da imagem */
+}
+
+@media (max-width: 600px) {
+    .imagem-do-dia {
+        padding: 3%; /* Reduz o espaçamento interno em telas menores */
+        border-width: 2px; /* Reduz a largura da borda em telas menores */
+        width: 50%; /* Aumenta a largura em porcentagem para telas menores */
+    }
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 3px solid black;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border: 3px solid black;
+}
+
+th {
+    background-color: #9c693a;
+    color: white;
+}
+
+td {
+    background-color: white;
+}
+
+#mensagem {
+    margin: 15px 0;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    display: none;
+}
+
+.success {
+    color: green;
+    border-color: green;
+}
+
+.error {
+    color: red;
+    border-color: red;
+}
+
+.botao-filme {
+    color: red;
+    cursor: pointer;
+}
+
+.formulario {
+    display: flex;
+    justify-content: center; /* Alinha o conteúdo no centro */
+    margin: 20px 0; /* Adiciona margem acima e abaixo do formulário */
+}
+
+.enviar-filme{
+    background-color: transparent; /* Remove o fundo */
+    border: none; /* Remove a borda */
+    color: inherit; /* Faz o texto herdar a cor do elemento pai */
+    cursor: pointer; /* Muda o cursor para indicar que é clicável */
+    padding: 0; /* Remove o preenchimento interno do botão */
+}
