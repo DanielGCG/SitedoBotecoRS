@@ -1,0 +1,57 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 3px solid black;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border: 3px solid black;
+}
+
+th {
+    background-color: #9c693a;
+    color: white;
+}
+
+td {
+    background-color: white;
+}
+
+#mensagem {
+    margin: 15px 0;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    display: none;
+}
+
+.success {
+    color: green;
+    border-color: green;
+}
+
+.error {
+    color: red;
+    border-color: red;
+}
+
+.botao-filme {
+    color: red;
+    cursor: pointer;
+}
+
+.formulario {
+    display: flex;
+    justify-content: center; /* Alinha o conteúdo no centro */
+    margin: 20px 0; /* Adiciona margem acima e abaixo do formulário */
+}
+
+.enviar-filme{
+    background-color: transparent; /* Remove o fundo */
+    border: none; /* Remove a borda */
+    color: inherit; /* Faz o texto herdar a cor do elemento pai */
+    cursor: pointer; /* Muda o cursor para indicar que é clicável */
+    padding: 0; /* Remove o preenchimento interno do botão */
+}

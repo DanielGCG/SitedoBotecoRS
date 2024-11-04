@@ -20,6 +20,14 @@ router.get('/lista', (req, res) =>{
     res.render('lista');
 });
 
+router.get('/galeria', (req, res) =>{
+    const locals = {
+        title: "Galeria",
+        description: "Muita arte aqui!"
+    }
+
+    res.render('galeria');
+});
 
 router.get('/about', (req, res) =>{
     const locals = {
