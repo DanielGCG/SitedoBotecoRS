@@ -1,3 +1,4 @@
+/* Estilos para a tabela */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -5,9 +6,10 @@ table {
 }
 
 th, td {
-    padding: 8px;
+    padding: 6px; /* Reduz o padding para economizar espaço */
     text-align: left;
     border: 3px solid black;
+    min-width: 100px; /* Define uma largura mínima menor */
 }
 
 th {
@@ -19,6 +21,38 @@ td {
     background-color: white;
 }
 
+/* Contêiner com overflow para evitar que a tabela extrapole */
+.formulario {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    overflow-x: auto; /* Habilita o scroll horizontal */
+}
+
+/* Ajustes para a visualização em dispositivos móveis */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    th, td {
+        padding: 4px; /* Reduz o padding ainda mais em dispositivos móveis */
+        font-size: 12px; /* Diminui o tamanho da fonte */
+    }
+
+    td img {
+        max-width: 60px; /* Reduz a largura da imagem */
+        height: auto;
+    }
+
+    th, td {
+        min-width: 80px; /* Reduz a largura mínima das células para telas menores */
+    }
+}
+
+/* Estilos de mensagens e botões */
 #mensagem {
     margin: 15px 0;
     padding: 10px;
@@ -42,16 +76,10 @@ td {
     cursor: pointer;
 }
 
-.formulario {
-    display: flex;
-    justify-content: center; /* Alinha o conteúdo no centro */
-    margin: 20px 0; /* Adiciona margem acima e abaixo do formulário */
-}
-
-.enviar-filme{
-    background-color: transparent; /* Remove o fundo */
-    border: none; /* Remove a borda */
-    color: inherit; /* Faz o texto herdar a cor do elemento pai */
-    cursor: pointer; /* Muda o cursor para indicar que é clicável */
-    padding: 0; /* Remove o preenchimento interno do botão */
+.enviar-filme {
+    background-color: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
 }
