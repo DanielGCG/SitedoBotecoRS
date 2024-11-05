@@ -15,6 +15,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 
+// Array para manter o estado local dos filmes
+let filmesLocais = [];
+
 async function uploadFile() {
     const fileInput = document.getElementById('fileInput');
     const nomeFilmeInput = document.getElementById('nomeFilme');
@@ -38,8 +41,13 @@ async function uploadFile() {
     try {
         const snapshot = await uploadBytes(imageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
-        exibirMensagem(`Arquivo enviado com sucesso!`, 'success');
+        
+        exibirMensagem('Arquivo enviado com sucesso!', 'success');
+
+        // Atualize o estado local e a interface
+        filmesLocais.push({ nome: nomeFilme, url: downloadURL });
         adicionarItemLista(downloadURL, nomeFilme);
+        
         fileInput.value = '';
         nomeFilmeInput.value = '';
 
@@ -81,7 +89,11 @@ async function removerFilme(nomeFilme, elemento) {
     
     try {
         await deleteObject(ref(storage, imagePath));
+        
+        // Remova o item do array local e da interface
+        filmesLocais = filmesLocais.filter(filme => filme.nome !== nomeFilme);
         elemento.closest('tr').remove();
+        
         exibirMensagem('Filme removido com sucesso!', 'success');
     } catch (error) {
         console.error('Erro ao remover o filme:', error);
@@ -97,34 +109,32 @@ async function listarFilmes() {
     const linhaAdicionar = document.createElement('tr');
     linhaAdicionar.innerHTML = `
         <td style="text-align: center;">
-            <input type="file" id="fileInput" accept="image/*" required>
+            <label for="fileInput" class="upload-label">Buscar📁</label>
+            <input type="file" id="fileInput" accept="image/*" required style="display: none;">
         </td>
         <td>
             <input type="text" id="nomeFilme" placeholder="Nome do Filme/Série" required>
         </td>
         <td style="text-align: center;">
-            <span class="botao-filme" onclick="uploadFile()">📤</span>
+            <span onclick="uploadFile()">Upload📤</span>
         </td>
     `;
     listaFilmes.prepend(linhaAdicionar); // Adiciona a linha no topo da tabela
 
     try {
         const result = await listAll(listaFilmesRef);
-        if (result.items.length === 0) {
-            exibirMensagem('Nenhum filme encontrado. Adicione novos filmes para começar!', 'info');
-            return;
-        }
 
         await Promise.all(result.items.map(async (itemRef) => {
             const nomeFilme = itemRef.name.replace('.png', '');
-
-            try {
-                const imageURL = await getDownloadURL(itemRef);
-                adicionarItemLista(imageURL, nomeFilme);
-            } catch (error) {
-                console.error(`Erro ao obter dados do filme ${nomeFilme}:`, error);
-            }
+            const imageURL = await getDownloadURL(itemRef);
+            
+            filmesLocais.push({ nome: nomeFilme, url: imageURL });
+            adicionarItemLista(imageURL, nomeFilme);
         }));
+
+        if (filmesLocais.length === 0) {
+            exibirMensagem('Nenhum filme encontrado. Adicione novos filmes para começar!', 'info');
+        }
 
     } catch (error) {
         console.error('Erro ao listar filmes:', error);

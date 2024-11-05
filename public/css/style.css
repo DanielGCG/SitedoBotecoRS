@@ -62,28 +62,3 @@ footer {
     width: 100%;
     bottom: 0;
 }
-
-.imagem-do-dia {
-    border: 5px solid #9c693a; /* Cor da moldura */
-    border-radius: 10px; /* Bordas arredondadas */
-    padding: 1%; /* Espaçamento interno proporcional */
-    display: inline-block; /* Para que a moldura se ajuste à imagem */
-    background-color: #fff; /* Fundo da moldura */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efeito 3D */
-    width: 80%; /* Largura da moldura como porcentagem */
-    max-width: 400px; /* Largura máxima para evitar que a moldura fique muito larga */
-    height: auto; /* Mantém a proporção da imagem */
-}
-
-.imagem-do-dia img {
-    width: 100%; /* A imagem ocupa 100% da largura da moldura */
-    height: auto; /* Mantém a proporção da imagem */
-}
-
-@media (max-width: 600px) {
-    .imagem-do-dia {
-        padding: 3%; /* Reduz o espaçamento interno em telas menores */
-        border-width: 2px; /* Reduz a largura da borda em telas menores */
-        width: 50%; /* Aumenta a largura em porcentagem para telas menores */
-    }
-}

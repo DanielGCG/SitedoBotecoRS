@@ -1,0 +1,36 @@
+.imagem-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.imagem {
+    background-image: url('/img/moldura.png'); /* Imagem de fundo para a moldura */
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px; /* Bordas arredondadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Efeito de sombra */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    aspect-ratio: 1; /* Proporção quadrada */
+    width: 100%; /* Ajusta a largura para o tamanho do contêiner */
+    max-width: 400px; /* Limita a largura máxima */
+    margin: auto; /* Centraliza horizontalmente */
+}
+
+.imagem img {
+    width: 87%; /* Tamanho da imagem principal */
+    height: 87%; /* Mantém a proporção da imagem */
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+/* Ajustes para visualização em dispositivos móveis */
+@media (max-width: 768px) {
+    .imagem {
+        max-width: 200px; /* Reduz o tamanho em dispositivos móveis */
+    }
+}

@@ -1,15 +1,15 @@
 /* Estilos para a tabela */
 table {
-    width: 100%;
+    width: auto; /* Permite que a tabela se ajuste ao conteúdo */
     border-collapse: collapse;
     border: 3px solid black;
+    margin: 0 auto; /* Centraliza a tabela */
 }
 
 th, td {
-    padding: 6px; /* Reduz o padding para economizar espaço */
+    padding: 6px;
     text-align: left;
     border: 3px solid black;
-    min-width: 100px; /* Define uma largura mínima menor */
 }
 
 th {
@@ -21,34 +21,49 @@ td {
     background-color: white;
 }
 
+/* Definindo larguras mínimas para cada coluna */
+td:first-child {
+    width: 80px; /* Largura mínima para a imagem */
+}
+
+td:nth-child(2) {
+    width: 120px; /* Largura mínima para o nome */
+}
+
+td:last-child {
+    width: 60px; /* Largura mínima para o ícone de exclusão */
+}
+
 /* Contêiner com overflow para evitar que a tabela extrapole */
 .formulario {
     display: flex;
     justify-content: center;
     margin: 20px 0;
-    overflow-x: auto; /* Habilita o scroll horizontal */
+    overflow-x: auto;
 }
 
-/* Ajustes para a visualização em dispositivos móveis */
+/* Ajustes para visualização em dispositivos móveis */
 @media (max-width: 768px) {
-    table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
     th, td {
-        padding: 4px; /* Reduz o padding ainda mais em dispositivos móveis */
-        font-size: 12px; /* Diminui o tamanho da fonte */
+        padding: 4px;
+        font-size: 12px;
     }
 
     td img {
-        max-width: 60px; /* Reduz a largura da imagem */
+        max-width: 50px;
         height: auto;
     }
 
-    th, td {
-        min-width: 80px; /* Reduz a largura mínima das células para telas menores */
+    td:first-child {
+        width: 50px;
+    }
+
+    td:nth-child(2) {
+        width: 80px;
+    }
+
+    td:last-child {
+        width: 40px;
     }
 }
 
@@ -61,19 +76,9 @@ td {
     display: none;
 }
 
-.success {
-    color: green;
-    border-color: green;
-}
-
 .error {
     color: red;
     border-color: red;
-}
-
-.botao-filme {
-    color: red;
-    cursor: pointer;
 }
 
 .enviar-filme {
@@ -82,4 +87,11 @@ td {
     color: inherit;
     cursor: pointer;
     padding: 0;
+}
+
+.upload-label {
+    font-size: 1.1rem; /* Ajuste o tamanho do emoji */
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px; /* Ajuste o espaçamento */
 }
