@@ -17,19 +17,6 @@ function carregarImagens() {
         divImagem.innerHTML = `<img src="${url}" alt="Imagem">`;
         galeria.appendChild(divImagem);
     });
-
-    exibirMensagem(`Total de imagens carregadas: ${imagens.length}`, 'success');
-}
-
-function exibirMensagem(mensagem, tipo) {
-    const mensagemDiv = document.getElementById('mensagem');
-    mensagemDiv.textContent = mensagem;
-    mensagemDiv.style.display = 'block';
-    mensagemDiv.style.color = tipo === 'success' ? 'green' : 'red';
-    
-    setTimeout(() => {
-        mensagemDiv.style.display = 'none';
-    }, 5000);
 }
 
 // Carregar as imagens quando a página for carregada
