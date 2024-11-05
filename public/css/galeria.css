@@ -1,8 +1,8 @@
 .galeria {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Layout responsivo */
-    gap: 30px; /* Espaçamento entre as imagens */
-    padding: 40px;
+    gap: 40px; /* Espaçamento entre as imagens */
+    padding: 0px;
 }
 
 body {
