@@ -9,7 +9,6 @@
     background-image: url('/img/moldura.png'); /* Imagem de fundo para a moldura */
     background-size: cover;
     background-position: center;
-    border-radius: 10px; /* Bordas arredondadas */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Efeito de sombra */
     display: flex;
     align-items: center;
@@ -25,7 +24,6 @@
 .imagem img {
     width: 87%; /* Tamanho da imagem principal */
     height: 87%; /* Mantém a proporção da imagem */
-    border-radius: 5px;
     object-fit: cover;
 }
 
