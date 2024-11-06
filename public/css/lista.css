@@ -1,6 +1,15 @@
+.formulario {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    overflow-x: auto;  /* Permite rolar horizontalmente em telas pequenas */
+    max-width: 100%;  /* Garante que o formulário não ultrapasse a tela */
+}
+
 /* Estilos para a tabela */
 table {
-    width: auto; /* Permite que a tabela se ajuste ao conteúdo */
+    width: 100%; /* Faz a tabela ocupar toda a largura disponível */
+    max-width: 900px; /* Definindo uma largura máxima para a tabela */
     border-collapse: collapse;
     border: 3px solid black;
     margin: 0 auto; /* Centraliza a tabela */
@@ -23,23 +32,15 @@ td {
 
 /* Definindo larguras mínimas para cada coluna */
 td:first-child {
-    width: 80px; /* Largura mínima para a imagem */
+    width: 130px; /* Largura mínima para a imagem */
 }
 
 td:nth-child(2) {
-    width: 120px; /* Largura mínima para o nome */
+    width: 80px; /* Largura mínima para o nome */
 }
 
 td:last-child {
-    width: 60px; /* Largura mínima para o ícone de exclusão */
-}
-
-/* Contêiner com overflow para evitar que a tabela extrapole */
-.formulario {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-    overflow-x: auto;
+    width: 20px; /* Largura mínima para o ícone de exclusão */
 }
 
 /* Ajustes para visualização em dispositivos móveis */
@@ -50,20 +51,25 @@ td:last-child {
     }
 
     td img {
-        max-width: 50px;
+        max-width: auto;
         height: auto;
     }
 
     td:first-child {
-        width: 50px;
+        height: 100px;
     }
 
     td:nth-child(2) {
-        width: 80px;
+        width: 20px;
     }
 
     td:last-child {
-        width: 40px;
+        width: 0px;
+    }
+
+    /* Adiciona um pequeno espaço para a tabela se ajustar melhor em telas pequenas */
+    .formulario {
+        overflow-x: scroll; /* Permite rolar a tabela se for necessário */
     }
 }
 
@@ -90,7 +96,7 @@ td:last-child {
 }
 
 .upload-label {
-    font-size: 1.1rem; /* Ajuste o tamanho do emoji */
+    font-size: 0.8rem; /* Ajuste o tamanho do emoji */
     cursor: pointer;
     display: inline-block;
     padding: 5px; /* Ajuste o espaçamento */
