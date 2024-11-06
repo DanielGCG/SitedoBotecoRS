@@ -10,7 +10,8 @@ const CACHE_ASSETS = [
     '/img/icon-192x192.png',    // Ícone de 192x192
     '/img/papeldeparede.jpg',   // Imagem de fundo
     '/img/plaquinha.png',       // Imagem da plaquinha
-    '/img/imagemdodia.jpg'      // Imagem do dia
+    '/img/imagemdodia.jpg',     // Imagem do dia
+    '/service-worker.js'
 ];
 
 self.addEventListener('install', (event) => {
