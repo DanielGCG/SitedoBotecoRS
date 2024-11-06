@@ -2,36 +2,40 @@ const express = require('express');
 const router = express.Router();
 
 /* ----- Routes ----- */
-router.get('', (req, res) => {
+router.get('', (req, res) =>{
     const locals = {
         title: "Site do Boteco do R$",
         description: "Oficial hein! :D"
     }
-    res.render('index', { locals: locals });
+
+    res.render('index', { locals });
 });
 
-router.get('/lista', (req, res) => {
+router.get('/lista', (req, res) =>{
     const locals = {
         title: "Lista de Filmes/Séries",
         description: "Oficial hein! :D"
     }
-    res.render('lista', { locals: locals });
+
+    res.render('lista');
 });
 
-router.get('/galeria', (req, res) => {
+router.get('/galeria', (req, res) =>{
     const locals = {
         title: "Galeria",
         description: "Muita arte aqui!"
     }
-    res.render('galeria', { locals: locals });
+
+    res.render('galeria');
 });
 
-router.get('/about', (req, res) => {
+router.get('/about', (req, res) =>{
     const locals = {
         title: "Sobre",
         description: "Oficial hein! :D"
     }
-    res.render('about', { locals: locals });
+    
+    res.render('about');
 });
 
 // Rota para página não encontrada
@@ -41,7 +45,7 @@ router.use((req, res) => {
         description: "Se ferrou KKKKKK"
     }
     res.status(404);
-    res.render('layouts/404', { layout: false, locals: locals });
+    res.render('layouts/404', { layout: false });
 });
 
 module.exports = router;
