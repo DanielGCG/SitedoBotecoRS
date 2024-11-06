@@ -12,16 +12,17 @@ body {
 }
 
 .imagem {
-    background-image: url('/img/moldura.png'); /* Imagem de fundo para a moldura */
+    background-image: url('/img/moldura.png');
     background-size: cover;
     background-position: center;
-    border-radius: 0px; /* Bordas arredondadas */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Efeito de sombra */
+    border-radius: 0px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    aspect-ratio: 1; /* Proporção quadrada */
+    aspect-ratio: 1;
+    position: relative; /* Define o contexto para a plaquinha */
 }
 
 .imagem img {
@@ -31,8 +32,27 @@ body {
     object-fit: cover;
 }
 
-#mensagem {
-    margin: 20px;
-    padding: 10px;
-    border-radius: 5px;
+.plaquinha {
+    position: absolute;
+    bottom: 10px; /* Altura ajustada em relação ao fundo */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%; /* Tamanho proporcional */
+    height: 40px; /* Altura ajustada para a plaquinha */
+    background-image: url('/img/plaquinha.png'); /* Imagem da plaquinha */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center; /* Centraliza a imagem de fundo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #000000;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+

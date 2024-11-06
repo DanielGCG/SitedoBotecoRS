@@ -1,20 +1,23 @@
-// Exemplo de URLs de imagens que você pode usar
+// Lista de imagens com nomes de autores
 const imagens = [
-    "/img/imagemdodia.jpg",
-    "/img/imagemdodia.jpg",
-    "/img/imagemdodia.jpg",
-    "/img/imagemdodia.jpg",
-    "/img/imagemdodia.jpg",
-    "/img/imagemdodia.jpg"
+    { url: "/img/imagemdodia.jpg", autor: "Gabi 1" },
+    { url: "/img/imagemdodia.jpg", autor: "Gabi 2" },
+    { url: "/img/imagemdodia.jpg", autor: "Gabi 3" },
+    { url: "/img/imagemdodia.jpg", autor: "Gabi 4" },
+    { url: "/img/imagemdodia.jpg", autor: "Gabi 5" },
+    { url: "/img/imagemdodia.jpg", autor: "Gabi 6" }
 ];
 
 function carregarImagens() {
     const galeria = document.getElementById('galeria');
 
-    imagens.forEach(url => {
+    imagens.forEach(imagem => {
         const divImagem = document.createElement('div');
         divImagem.className = 'imagem';
-        divImagem.innerHTML = `<img src="${url}" alt="Imagem">`;
+        divImagem.innerHTML = `
+            <img src="${imagem.url}" alt="Imagem">
+            <div class="plaquinha">${imagem.autor}</div>
+        `;
         galeria.appendChild(divImagem);
     });
 }
