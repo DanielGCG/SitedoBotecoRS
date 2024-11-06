@@ -11,10 +11,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-
+    
+    <!-- Progressive Web Apps -->
     <link rel="manifest" href="/manifest.json">
+    <script src="/js/service-worker-registration.js"></script>
 
     <script defer src="/js/script.js"></script>
+    
 </head>
 <body>
     <div class="container">
@@ -24,7 +27,5 @@
         </main>
         <%- include('../partials/footer.ejs')  %>
     </div>
-
-    <script src="/js/service-worker-registration.js"></script>
 </body>
 </html>

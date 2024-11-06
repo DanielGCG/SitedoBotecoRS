@@ -8,7 +8,6 @@ const CACHE_ASSETS = [
     '/js/script.js',            // Scripts JS principais
     '/img/gabi404.png',         // Imagem de erro 404
     '/img/icon-192x192.png',    // Ícone de 192x192
-    '/img/icon-512x512.png',    // Ícone de 512x512
     '/img/papeldeparede.jpg',   // Imagem de fundo
     '/img/plaquinha.png',       // Imagem da plaquinha
     '/img/imagemdodia.jpg'      // Imagem do dia
@@ -26,7 +25,13 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then(cacheResponse => {
-            return cacheResponse || fetch(event.request);
+            // Retorna do cache se disponível ou tenta buscar na rede
+            return cacheResponse || fetch(event.request)
+                .catch(() => {
+                    // Caso a rede falhe, podemos fornecer uma resposta de fallback
+                    return caches.match('/404.ejs');
+                });
         })
     );
 });
+
