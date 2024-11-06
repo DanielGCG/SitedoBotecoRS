@@ -6,19 +6,18 @@
     max-width: 100%;  /* Garante que o formulário não ultrapasse a tela */
 }
 
-/* Estilos para a tabela */
 table {
     width: 100%; /* Faz a tabela ocupar toda a largura disponível */
     max-width: 900px; /* Definindo uma largura máxima para a tabela */
-    border-collapse: collapse;
-    border: 3px solid black;
+    border-collapse: collapse; /* Remove espaços entre as células */
     margin: 0 auto; /* Centraliza a tabela */
+    table-layout: auto; /* Ajusta automaticamente as larguras das colunas */
 }
 
 th, td {
-    padding: 6px;
+    padding: 8px;
     text-align: left;
-    border: 3px solid black;
+    border: 2px solid #000000; /* Usando borda mais suave */
 }
 
 th {
@@ -30,46 +29,36 @@ td {
     background-color: white;
 }
 
-/* Definindo larguras mínimas para cada coluna */
-td:first-child {
-    width: 130px; /* Largura mínima para a imagem */
-}
-
-td:nth-child(2) {
-    width: 80px; /* Largura mínima para o nome */
-}
-
-td:last-child {
-    width: 20px; /* Largura mínima para o ícone de exclusão */
+/* Limitando a altura da imagem e garantindo que ela se ajuste */
+td:first-child img {
+    max-height: 100px; /* Limita a altura da imagem */
+    width: auto; /* Ajusta automaticamente a largura */
 }
 
 /* Ajustes para visualização em dispositivos móveis */
 @media (max-width: 768px) {
     th, td {
-        padding: 4px;
-        font-size: 12px;
+        padding: 6px;
+        font-size: 14px;
     }
 
     td img {
-        max-width: auto;
-        height: auto;
+        max-height: 80px; /* Ajusta a altura das imagens em telas pequenas */
     }
 
-    td:first-child {
-        height: 100px;
+    td:first-child,
+    td:nth-child(2),
+    td:last-child {
+        padding: 4px; /* Diminui o padding para se ajustar melhor */
     }
 
     td:nth-child(2) {
-        width: 20px;
+        font-size: 12px;
     }
 
-    td:last-child {
-        width: 0px;
-    }
-
-    /* Adiciona um pequeno espaço para a tabela se ajustar melhor em telas pequenas */
+    /* Adiciona uma barra de rolagem para a tabela em telas pequenas */
     .formulario {
-        overflow-x: scroll; /* Permite rolar a tabela se for necessário */
+        overflow-x: auto;
     }
 }
 
@@ -87,6 +76,11 @@ td:last-child {
     border-color: red;
 }
 
+.success {
+    color: green;
+    border-color: green;
+}
+
 .enviar-filme {
     background-color: transparent;
     border: none;
@@ -96,8 +90,8 @@ td:last-child {
 }
 
 .upload-label {
-    font-size: 0.8rem; /* Ajuste o tamanho do emoji */
+    font-size: 0.8rem;
     cursor: pointer;
     display: inline-block;
-    padding: 5px; /* Ajuste o espaçamento */
+    padding: 5px;
 }
