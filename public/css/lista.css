@@ -1,15 +1,23 @@
-/* Estilos para a tabela */
+.formulario {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    overflow-x: auto;  /* Permite rolar horizontalmente em telas pequenas */
+    max-width: 100%;  /* Garante que o formulário não ultrapasse a tela */
+}
+
 table {
-    width: auto; /* Permite que a tabela se ajuste ao conteúdo */
-    border-collapse: collapse;
-    border: 3px solid black;
+    width: 100%; /* Faz a tabela ocupar toda a largura disponível */
+    max-width: 900px; /* Definindo uma largura máxima para a tabela */
+    border-collapse: collapse; /* Remove espaços entre as células */
     margin: 0 auto; /* Centraliza a tabela */
+    table-layout: auto; /* Ajusta automaticamente as larguras das colunas */
 }
 
 th, td {
-    padding: 6px;
+    padding: 8px;
     text-align: left;
-    border: 3px solid black;
+    border: 2px solid #000000; /* Usando borda mais suave */
 }
 
 th {
@@ -21,49 +29,36 @@ td {
     background-color: white;
 }
 
-/* Definindo larguras mínimas para cada coluna */
-td:first-child {
-    width: 80px; /* Largura mínima para a imagem */
-}
-
-td:nth-child(2) {
-    width: 120px; /* Largura mínima para o nome */
-}
-
-td:last-child {
-    width: 60px; /* Largura mínima para o ícone de exclusão */
-}
-
-/* Contêiner com overflow para evitar que a tabela extrapole */
-.formulario {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-    overflow-x: auto;
+/* Limitando a altura da imagem e garantindo que ela se ajuste */
+td:first-child img {
+    max-height: 100px; /* Limita a altura da imagem */
+    width: auto; /* Ajusta automaticamente a largura */
 }
 
 /* Ajustes para visualização em dispositivos móveis */
 @media (max-width: 768px) {
     th, td {
-        padding: 4px;
-        font-size: 12px;
+        padding: 6px;
+        font-size: 14px;
     }
 
     td img {
-        max-width: 50px;
-        height: auto;
+        max-height: 80px; /* Ajusta a altura das imagens em telas pequenas */
     }
 
-    td:first-child {
-        width: 50px;
+    td:first-child,
+    td:nth-child(2),
+    td:last-child {
+        padding: 4px; /* Diminui o padding para se ajustar melhor */
     }
 
     td:nth-child(2) {
-        width: 80px;
+        font-size: 12px;
     }
 
-    td:last-child {
-        width: 40px;
+    /* Adiciona uma barra de rolagem para a tabela em telas pequenas */
+    .formulario {
+        overflow-x: auto;
     }
 }
 
@@ -81,6 +76,11 @@ td:last-child {
     border-color: red;
 }
 
+.success {
+    color: green;
+    border-color: green;
+}
+
 .enviar-filme {
     background-color: transparent;
     border: none;
@@ -90,8 +90,8 @@ td:last-child {
 }
 
 .upload-label {
-    font-size: 1.1rem; /* Ajuste o tamanho do emoji */
+    font-size: 0.8rem;
     cursor: pointer;
     display: inline-block;
-    padding: 5px; /* Ajuste o espaçamento */
+    padding: 5px;
 }
