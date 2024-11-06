@@ -109,14 +109,14 @@ async function listarFilmes() {
     const linhaAdicionar = document.createElement('tr');
     linhaAdicionar.innerHTML = `
         <td style="text-align: center;">
-            <label for="fileInput" class="upload-label">Buscar📁</label>
-            <input type="file" id="fileInput" accept="image/*" required style="display: none;">
+            <label for="fileInput" class="upload-label" id="labelFileInput">📁 Adicione imagem</label>
+            <input type="file" id="fileInput" accept="image/*" required style="display: none;" onchange="atualizarNomeArquivo()">
         </td>
         <td>
-            <input type="text" id="nomeFilme" placeholder="Nome do Filme/Série" required>
+            <input type="text" id="nomeFilme" placeholder="Nome" required>
         </td>
         <td style="text-align: center;">
-            <span onclick="uploadFile()">Upload📤</span>
+            <span onclick="uploadFile()">📤</span>
         </td>
     `;
     listaFilmes.prepend(linhaAdicionar); // Adiciona a linha no topo da tabela
@@ -142,11 +142,26 @@ async function listarFilmes() {
     }
 }
 
+function atualizarNomeArquivo() {
+    const fileInput = document.getElementById('fileInput');
+    const label = document.getElementById('labelFileInput');
+    
+    // Verifica se algum arquivo foi selecionado
+    if (fileInput.files.length > 0) {
+        const nomeArquivo = fileInput.files[0].name; // Pega o nome do arquivo
+        label.textContent = `📁 ${nomeArquivo}`; // Atualiza o texto do label
+    } else {
+        label.textContent = '📁 Selecione arq.'; // Caso nenhum arquivo tenha sido selecionado
+    }
+}
+
+
 // Expondo as funções para serem usadas no HTML
 window.uploadFile = uploadFile;
 window.exibirMensagem = exibirMensagem;
 window.adicionarItemLista = adicionarItemLista;
 window.removerFilme = removerFilme;
 window.listarFilmes = listarFilmes;
+window.atualizarNomeArquivo = atualizarNomeArquivo;
 
 listarFilmes();
