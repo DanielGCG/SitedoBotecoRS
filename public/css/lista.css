@@ -83,7 +83,7 @@ td:first-child img {
 .enviar-filme, .botao-filme {
     background-color: transparent;
     border: none;
-    cursor: pointer;
+    cursor: url('/img/cursor-mao.png'), auto;
     padding: 0;
     font-size: 1.2em; /* Aumenta o tamanho dos ícones para destacá-los */
     width: 1.5em; /* Limita a largura para o emoji */
@@ -92,7 +92,7 @@ td:first-child img {
 
 .upload-label {
     font-size: 0.8rem;
-    cursor: pointer;
+    cursor: url('/img/cursor-mao.png'), auto;
     display: inline-block;
     padding: 5px;
 }

@@ -2,7 +2,7 @@ const CACHE_NAME = 'v1';
 const CACHE_ASSETS = [
     '/',
     '/index.ejs',               // Página principal (renderizada via EJS)
-    '/404.ejs',                  // Página 404
+    '/404.ejs',                 // Página 404
     '/css/index.css',           // Estilos principais
     '/css/style.css',           // Estilos adicionais
     '/js/script.js',            // Scripts JS principais
