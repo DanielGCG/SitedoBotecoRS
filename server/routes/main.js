@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-/* ----- Routes ----- */
+/* ----- INICIO ----- */
+
+
 router.get('', (req, res) => {
     const locals = {
         title: "Site do Boteco do R$",
@@ -9,6 +11,10 @@ router.get('', (req, res) => {
     }
     res.render('index', { locals: locals });
 });
+
+
+/* ------ WATCHLIST ------*/
+
 
 router.get('/lista', (req, res) => {
     const locals = {
@@ -18,13 +24,9 @@ router.get('/lista', (req, res) => {
     res.render('lista', { locals: locals });
 });
 
-router.get('/galeria', (req, res) => {
-    const locals = {
-        title: "Galeria",
-        description: "Muita arte aqui!"
-    }
-    res.render('galeria', { locals: locals });
-});
+
+/* ------ SOBRE ------*/
+
 
 router.get('/about', (req, res) => {
     const locals = {
@@ -34,13 +36,37 @@ router.get('/about', (req, res) => {
     res.render('about', { locals: locals });
 });
 
-router.get('/hall', (req, res) => {
+
+/* ------ GALERIA ------*/
+
+
+router.get('/galeria', (req, res) => {
     const locals = {
         title: "Hall da Galeria",
         description: "Aqui tem bastante arte!"
     }
-    res.render('hall', { locals: locals });
+    res.render('galeria', { locals: locals });
 });
+
+router.get('/galeria/jogador', (req, res) => {
+    const locals = {
+        title: "Gabi!!!",
+        description: "Muitas Gabireias!"
+    }
+    res.render('galeria/jogador', { locals: locals });
+});
+
+router.get('/galeria/gabireia', (req, res) => {
+    const locals = {
+        title: "Gabi!!!",
+        description: "Muitas Gabireias!"
+    }
+    res.render('galeria/gabireia', { locals: locals });
+});
+
+
+/* ------ NÃO ENCONTRADO ------*/
+
 
 // Rota para página não encontrada
 router.use((req, res) => {

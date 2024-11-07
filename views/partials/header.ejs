@@ -1,85 +1,86 @@
- <style>
-    /* Reset básico */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<style>
+  /* Reset básico */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-    /* Estilos da navbar */
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--cor-marrom);
-      padding: 1em;
-      color: #fff;
-    }
+  /* Estilos da navbar */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--cor-marrom);
+    padding: 1em;
+    color: #fff;
+  }
 
-    /* Logo */
-    .navbar-logo {
-      display: flex;
-      align-items: center;
-    }
+  /* Logo */
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+  }
 
-    .navbar-logo img {
-      width: 40px;
-      height: 40px;
-      margin-right: 0.5em;
-    }
+  .navbar-logo img {
+    width: 40px;
+    height: 40px;
+    margin-right: 0.5em;
+  }
 
-    .navbar-logo span {
-      font-size: 1em;
-      font-weight: bold;
-    }
+  .navbar-logo span {
+    font-size: 1em;
+    font-weight: bold;
+  }
 
-    /* Links */
+  /* Links */
+  .navbar-links {
+    display: flex;
+    gap: 1em;
+    transition: max-height 0.35s ease-in-out;
+    overflow: hidden;
+    width: auto;  /* Garante que a largura seja apenas o necessário para o conteúdo */
+  }
+
+  .navbar-links a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5em;
+    transition: background-color 0.35s;
+  }
+
+  .navbar-links a:hover {
+    background-color: #ffffff34;
+    border-radius: 5px;
+  }
+
+  /* Botão hambúrguer para modo mobile */
+  .hamburger {
+    display: none;
+    font-size: 1.5em;
+    cursor: pointer;
+  }
+
+  /* Responsivo */
+  @media (max-width: 768px) {
     .navbar-links {
-      display: flex;
-      gap: 1em;
-      transition: max-height 0.3s ease-in-out;
-      overflow: hidden;
+      flex-direction: column;
+      width: auto; /* Garante que os links tenham o tamanho adequado */
+      max-height: 0; /* Começa fechado */
+      translate: 18px;
     }
 
-    .navbar-links a {
-      color: #fff;
-      text-decoration: none;
-      padding: 0.5em;
-      transition: background-color 0.3s;
+    .navbar-links.active {
+      max-height: 500px; /* Ajuste conforme a quantidade de links */
     }
 
-    .navbar-links a:hover {
-      background-color: #ffffff34;
-      border-radius: 5px;
-    }
-
-    /* Botão hambúrguer para modo mobile */
     .hamburger {
-      display: none;
-      font-size: 1.5em;
-      cursor: pointer;
+      display: block;
     }
+  }
+</style>
 
-    /* Responsivo */
-    @media (max-width: 768px) {
-      .navbar-links {
-        flex-direction: column;
-        width: 100%;
-        max-height: 0; /* Começa fechado */
-      }
-
-      .navbar-links.active {
-        max-height: 500px; /* Ajuste conforme a quantidade de links */
-      }
-
-      .hamburger {
-        display: block;
-      }
-    }
-  </style>
-</head>
 <body>
-
   <nav class="navbar">
     <div class="navbar-logo">
       <img src="/img/icon-192x192.png" alt="Logo do Site">
@@ -103,5 +104,4 @@
       links.classList.toggle("active");
     }
   </script>
-  </div>
 </body>
