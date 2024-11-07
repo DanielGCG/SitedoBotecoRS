@@ -77,13 +77,23 @@
       display: block;
     }
   }
+
+  .navbar-logo-link {
+    text-decoration: none;
+    color: #fff; /* Cor do texto do link */
+  }
+
+  .navbar-logo-link span {
+    font-size: 1em;
+  }
+
 </style>
 
 <body>
   <nav class="navbar">
     <div class="navbar-logo">
       <img src="/img/icon-192x192.png" alt="Logo do Site">
-      <span>Boteco do R$</span>
+      <a href="/" class="navbar-logo-link"><span>Boteco do R$</span></a>
     </div>
     <div class="navbar-links" id="navbar-links">
       <!-- Insira seus links aqui -->
@@ -96,11 +106,12 @@
       &#9776;
     </div>
   </nav>
-
-  <script>
-    function toggleMenu() {
-      const links = document.getElementById("navbar-links");
-      links.classList.toggle("active");
-    }
-  </script>
 </body>
+
+<script>
+  function toggleMenu() {
+    const links = document.getElementById("navbar-links");
+    links.classList.toggle("active");
+  }
+</script>
+

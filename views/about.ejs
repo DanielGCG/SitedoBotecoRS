@@ -1,1 +1,84 @@
-<h1>About</h1>
+<body>
+    <main>
+        <div class="container">
+            <h1>Sobre</h1>
+            <div class="divider"></div>
+            <h2>Feito com muito amor por: <span>DanielGCG</span></h2>
+            <div class="signature">Tô ficando doido <3</div>
+            
+            <!-- GIF -->
+            <img src="/img/OIIAIOIIIAI.gif" alt="gif animado" id="gif" style="margin-top: 20px; cursor: pointer;">
+            
+            <!-- Áudio -->
+            <audio id="audio" src="audio/OIIAOIIA.mp3" preload="auto"></audio>
+        </div>
+    </main>
+
+    <script>
+        // Seleciona o GIF e o áudio
+        const gif = document.getElementById('gif');
+        const audio = document.getElementById('audio');
+        
+        // Define o volume do áudio para 50%
+        audio.volume = 0.5;
+    
+        // Adiciona evento de clique ao GIF
+        gif.addEventListener('click', function() {
+            if (audio.paused) {
+                audio.play(); // Toca o som quando o GIF é clicado
+            } else {
+                audio.pause(); // Pausa o som se já estiver tocando
+                audio.currentTime = 0; // Reseta o áudio para o começo
+            }
+        });
+    </script>
+    
+</body>
+
+<style>
+    main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .container {
+        text-align: center;
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        max-width: 600px;
+    }
+
+    h1 {
+        font-size: 3em;
+        color: #4CAF50;
+        margin-bottom: 10px;
+    }
+
+    h2 {
+        font-size: 1.5em;
+        color: #555;
+        margin-top: 0;
+    }
+
+    .signature {
+        margin-top: 30px;
+        font-size: 1.2em;
+        color: #888;
+    }
+
+    .signature span {
+        font-weight: bold;
+        color: #4CAF50;
+    }
+
+    .divider {
+        margin: 20px 0;
+        height: 2px;
+        background-color: #eee;
+    }
+</style>
