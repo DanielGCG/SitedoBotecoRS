@@ -20,45 +20,8 @@ body {
     background-color: var(--cor-fundo);
 }
 
-header {
-    background-color: var(--cor-marrom);
-    padding: 0.01px 0;
-    text-align: center;
-}
-
-.header__logo{
-    color: white;
-    text-decoration: none;
-    font-family: var(--fonte-padrao);
-}
-.header__nav {
-    background-color: var(--cor-verde-escuro);
-    overflow: hidden;
-}
-.header__nav a {
-    float: left;
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 10px 16px;
-    text-decoration: none;
-}
-.header__nav a:hover {
-    background-color: #ddd;
-    color: black;
-}
-
 main {
-    padding: 20px;
-    text-align: center;
-}
-
-footer {
-    background-color: #4a693e;
-    color: white;
-    text-align: center;
-    padding: 5px 0;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-}
+    max-width: 1200px; /* Limita a largura máxima para uma leitura mais confortável */
+    margin: 0 auto; /* Centraliza o conteúdo */
+    padding: 1em; /* Espaçamento de 1em ao redor do conteúdo principal */
+  }

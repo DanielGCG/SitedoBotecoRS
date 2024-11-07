@@ -51,11 +51,15 @@ async function uploadFile() {
         fileInput.value = '';
         nomeFilmeInput.value = '';
 
+        // Retorna o botão ao estado padrão
+        document.getElementById('labelFileInput').textContent = '📁 Adicione imagem';
+
     } catch (error) {
         console.error('Erro ao enviar o arquivo:', error);
         exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
     }
 }
+
 
 function exibirMensagem(mensagem, tipo) {
     const mensagemDiv = document.getElementById('mensagem');
@@ -74,7 +78,7 @@ function adicionarItemLista(url, nome) {
     
     item.innerHTML = `
         <td style="text-align: center;">
-            <img src="${url}" alt="${nome}" style="max-height: 100px; width: auto;">
+            <img src="${url}" alt="${nome}">
         </td>
         <td>${nome}</td>
         <td style="text-align: center;">
@@ -116,7 +120,7 @@ async function listarFilmes() {
             <input type="text" id="nomeFilme" placeholder="Nome" required>
         </td>
         <td style="text-align: center;">
-            <span onclick="uploadFile()">📤</span>
+            <span class="botao-filme" onclick="uploadFile()">📤</span>
         </td>
     `;
     listaFilmes.prepend(linhaAdicionar); // Adiciona a linha no topo da tabela

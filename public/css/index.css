@@ -1,3 +1,8 @@
+main{
+    text-align: center;
+}
+
+
 .imagem-container {
     display: flex;
     justify-content: center;
@@ -16,7 +21,7 @@
     overflow: hidden;
     aspect-ratio: 1; /* Proporção quadrada */
     width: 100%; /* Ajusta a largura para o tamanho do contêiner */
-    max-width: 500px; /* Limita a largura máxima */
+    max-width: 550px; /* Limita a largura máxima */
     margin: auto; /* Centraliza horizontalmente */
     position: relative; /* Necessário para posicionar a plaquinha */
 }
@@ -53,7 +58,7 @@
 /* Ajustes para visualização em dispositivos móveis */
 @media (max-width: 768px) {
     .imagem {
-        max-width: 250px; /* Reduz o tamanho em dispositivos móveis */
+        max-width: 3000px; /* Reduz o tamanho em dispositivos móveis */
     }
     .plaquinha {
         width: 80%; /* Ajusta a largura da plaquinha em dispositivos móveis */

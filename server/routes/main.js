@@ -34,6 +34,14 @@ router.get('/about', (req, res) => {
     res.render('about', { locals: locals });
 });
 
+router.get('/hall', (req, res) => {
+    const locals = {
+        title: "Hall da Galeria",
+        description: "Aqui tem bastante arte!"
+    }
+    res.render('hall', { locals: locals });
+});
+
 // Rota para página não encontrada
 router.use((req, res) => {
     const locals = {
