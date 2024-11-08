@@ -1,4 +1,7 @@
 <main>
+    <div class="titulo">
+        <h1>JogadorStickman</h1>
+    </div>
     <div class="galeria" id="galeria">
         <!-- As imagens serão adicionadas aqui dinamicamente -->
     </div>
@@ -228,7 +231,18 @@
     
 
 <style>
-/* Estilos existentes */
+body{
+    background-color: #71a884;
+    font-family: "Roboto Slab", serif;
+    font-optical-sizing: auto;
+    font-weight: <weight>;
+    font-style: normal;
+}
+
+.titulo{
+    text-align: center;
+}
+
 .galeria {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Layout responsivo */
@@ -357,4 +371,3 @@
     background-color: #f1f1f1; /* Tom mais claro no hover */
 }
 </style>
-
