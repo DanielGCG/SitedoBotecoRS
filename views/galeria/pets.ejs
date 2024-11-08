@@ -1,6 +1,8 @@
 <main>
-    <div class="titulo">
-        <h1>JogadorStickman</h1>
+    <h1>Pets do Boteco do R$</h1>
+    <div class="caixa-texto">
+        <h4>Adicione uma imagem do seu Pet!</h4>
+        <h5>basta clicar no quadro com +</h5>
     </div>
     <div class="galeria" id="galeria">
         <!-- As imagens serão adicionadas aqui dinamicamente -->
@@ -42,7 +44,7 @@
     
     // Carrega imagens locais e Firebase
     async function carregarImagensFirebase() {
-        const galeriaRef = ref(storage, 'galeria/jogador');
+        const galeriaRef = ref(storage, 'galeria/pets');
         const result = await listAll(galeriaRef);
     
         obrasLocais = await Promise.all(result.items.map(async itemRef => {
@@ -106,7 +108,7 @@
         }
     
         const imageName = `${nomeObra}.png`;
-        const imagePath = `galeria/jogador/${imageName}`;
+        const imagePath = `galeria/pets/${imageName}`;
         const imageRef = ref(storage, imagePath);
     
         try {
@@ -129,7 +131,7 @@
     
     // Remoção de obra do Firebase
     async function removerObra(nomeObra) {
-        const imagePath = `galeria/jogador/${nomeObra}.png`;
+        const imagePath = `galeria/pets/${nomeObra}.png`;
         
         try {
             await deleteObject(ref(storage, imagePath));
@@ -193,10 +195,10 @@
         
         // Defina o conteúdo do popup para o formulário de envio de nova obra
         popupConteudo.innerHTML = `
-            <h2>Enviar nova obra</h2>
+            <h2>Enviar novo Pet</h2>
             <form id="formUpload">
                 <label for="nomeObra">Nome da Obra:</label>
-                <input type="text" id="nomeObra" placeholder="Nome da obra" required>
+                <input type="text" id="nomeObra" placeholder="Nome do Pet" required>
                 <br><br>
                 <label for="fileInput">Escolha uma imagem:</label>
                 <input type="file" id="fileInput" accept="image/*" required>
@@ -231,15 +233,7 @@
     
 
 <style>
-body{
-    background-color: #71a884;
-    font-family: "Roboto Slab", serif;
-    font-optical-sizing: auto;
-    font-weight: <weight>;
-    font-style: normal;
-}
-
-.titulo{
+main {
     text-align: center;
 }
 

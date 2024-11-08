@@ -24,6 +24,16 @@ body {
     background-color: var(--cor-fundo);
 }
 
+.caixa-texto {
+    background-color: #f9f9f936;
+    border: 1px solid #ccc; /* Borda suave */
+    border-radius: 10px; /* Borda arredondada */
+    padding: 20px; /* Espaçamento interno */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    display: inline-block; /* Deixa a caixa ajustar ao tamanho do conteúdo */
+    margin: 20px 0; /* Espaçamento vertical */
+}
+
 main {
     max-width: 1200px; /* Limita a largura máxima para uma leitura mais confortável */
     margin: 0 auto; /* Centraliza o conteúdo */

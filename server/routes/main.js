@@ -50,18 +50,18 @@ router.get('/galeria', (req, res) => {
 
 router.get('/galeria/jogador', (req, res) => {
     const locals = {
-        title: "Gabi!!!",
-        description: "Muitas Gabireias!"
+        title: "JogadorStickman!!!",
+        description: "furro?!"
     }
     res.render('galeria/jogador', { locals: locals });
 });
 
-router.get('/galeria/gabireia', (req, res) => {
+router.get('/galeria/pets', (req, res) => {
     const locals = {
-        title: "Gabi!!!",
-        description: "Muitas Gabireias!"
+        title: "Pets do Boteco",
+        description: "Muitos mini-queridos."
     }
-    res.render('galeria/gabireia', { locals: locals });
+    res.render('galeria/pets', { locals: locals });
 });
 
 
