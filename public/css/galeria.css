@@ -5,12 +5,6 @@
     padding: 0px;
 }
 
-body {
-    background-image: url('/img/papeldeparede.jpg');
-    background-repeat: repeat; /* Faz a imagem repetir em ambas as direções */
-    background-size: auto; /* Tamanho original da imagem */
-}
-
 .imagem {
     background-image: url('/img/moldura.png');
     background-size: cover;
@@ -22,7 +16,7 @@ body {
     justify-content: center;
     overflow: hidden;
     aspect-ratio: 1;
-    position: relative; /* Define o contexto para a plaquinha */
+    position: relative;
 }
 
 .imagem img {
@@ -30,19 +24,20 @@ body {
     height: 87%; /* Mantém a proporção da imagem */
     border-radius: 1px;
     object-fit: cover;
+    cursor: url('/img/cursor-mao.png'), auto;
 }
 
 .plaquinha {
     position: absolute;
-    bottom: 10px; /* Altura ajustada em relação ao fundo */
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
     width: 70%; /* Tamanho proporcional */
-    height: 40px; /* Altura ajustada para a plaquinha */
-    background-image: url('/img/plaquinha.png'); /* Imagem da plaquinha */
+    height: 75px; /* Altura ajustada para a plaquinha */
+    background-image: url('/img/plaquinha.png');
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center; /* Centraliza a imagem de fundo */
+    background-position: center;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,7 +47,4 @@ body {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-
-
