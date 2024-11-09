@@ -37,7 +37,6 @@ router.get('/cutucar', (req, res) => {
 
 /* ------ SOBRE ------*/
 
-
 router.get('/about', (req, res) => {
     const locals = {
         title: "Sobre",
@@ -46,6 +45,15 @@ router.get('/about', (req, res) => {
     res.render('about', { locals: locals });
 });
 
+/* ------ TESTE ------*/
+
+router.get('/teste', (req, res) => {
+    const locals = {
+        title: "teste",
+        description: "testetesteteste"
+    }
+    res.render('teste', { locals: locals });
+});
 
 /* ------ GALERIA ------*/
 
