@@ -1,0 +1,29 @@
+<!-- Campo de texto para escrever o tweet -->
+<textarea id="tweetText" placeholder="Escreva seu tweet aqui..."></textarea>
+
+<!-- Botão para enviar o tweet -->
+<button id="tweetButton">Postar Tweet</button>
+
+<script>
+  document.getElementById('tweetButton').addEventListener('click', () => {
+    // Captura o texto digitado no textarea
+    const tweetText = document.getElementById('tweetText').value;
+
+    if (!tweetText) {
+      alert('Por favor, escreva um tweet.');
+      return;
+    }
+
+    // Envia o texto do tweet para o backend
+    fetch('/tweet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',  // Especifica o tipo de conteúdo como JSON
+      },
+      body: JSON.stringify({ text: tweetText }),  // Envia o texto do tweet no corpo
+    })
+      .then(response => response.text())
+      .then(data => alert(data))  // Exibe a resposta do servidor
+      .catch(error => alert('Erro: ' + error));  // Caso haja um erro
+  });
+</script>

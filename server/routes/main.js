@@ -25,6 +25,16 @@ router.get('/lista', (req, res) => {
 });
 
 
+/* ------ Cutucar ------*/
+
+router.get('/cutucar', (req, res) => {
+    const locals = {
+        title: "Cutucar",
+        description: "Cuidado!"
+    }
+    res.render('cutucar', { locals: locals });
+});
+
 /* ------ SOBRE ------*/
 
 
