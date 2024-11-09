@@ -1,18 +1,28 @@
-<!-- Campo de texto para escrever o tweet -->
-<textarea id="tweetText" placeholder="Escreva seu tweet aqui..."></textarea>
+<h1>AINDA EM CONSTRUÇÃO</h1>
+
+<!-- Campo de texto para o @mencionado -->
+<input type="text" id="mention" placeholder="Digite @mencionado" />
+
+<!-- Campo de texto para escrever a mensagem -->
+<textarea id="messageText" placeholder="Escreva o resto da mensagem..."></textarea>
 
 <!-- Botão para enviar o tweet -->
 <button id="tweetButton">Postar Tweet</button>
 
 <script>
   document.getElementById('tweetButton').addEventListener('click', () => {
-    // Captura o texto digitado no textarea
-    const tweetText = document.getElementById('tweetText').value;
+    // Captura o texto do @mencionado e a mensagem
+    const mention = document.getElementById('mention').value.trim();
+    const messageText = document.getElementById('messageText').value.trim();
 
-    if (!tweetText) {
-      alert('Por favor, escreva um tweet.');
+    // Verifica se o @mencionado e a mensagem não estão vazios
+    if (!mention || !messageText) {
+      alert('Por favor, preencha ambos os campos.');
       return;
     }
+
+    // Concatena a mensagem final
+    const tweetText = `${mention}, você foi cutucado!\n${messageText}`;
 
     // Envia o texto do tweet para o backend
     fetch('/tweet', {
