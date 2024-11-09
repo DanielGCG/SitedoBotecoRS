@@ -1,0 +1,77 @@
+<main>
+    <h1 class="titulo">Escolha o Álbum</h1>
+    <div class="galeria">
+        <div class="imagem">
+            <a href="/galeria/jogador">
+                <img src="img/jogador.png" alt="Imagem 1">
+            </a>
+        </div>
+        <div class="imagem">
+            <a href="/galeria/pets">
+                <img src="img/imagemdodia.jpg" alt="Imagem 1">
+            </a>
+        </div>
+    </div>
+</main>
+
+<style>
+    .titulo {
+        text-align: center;
+    }
+
+    .galeria {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 colunas */
+        gap: 10px; /* Espaçamento entre as imagens */
+        width: 100%; /* Largura 100% */
+        max-width: 1200px;
+        margin: 0 auto; /* Centraliza a galeria */
+        padding: 20px; /* Espaçamento em torno da galeria */
+    }
+
+    .imagem {
+        width: 100%;
+        height: 0;
+        padding-top: 100%; /* Faz a altura ser igual à largura (quadrado) */
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        position: relative; /* Para a imagem se ajustar corretamente */
+        max-height: 100px;
+        height: auto; /* Ajusta a altura, mantendo a proporção quadrada */
+    }
+
+    .imagem a {
+        display: block;
+        width: 100%;
+        height: 100%;
+        cursor: url('/img/cursor-mao.png'), auto;
+    }
+
+    .imagem img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Garante que a imagem cubra todo o espaço sem distorção */
+    }
+
+    .imagem:hover {
+        transform: scale(1.05); /* Efeito de expansão ao passar o mouse */
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .galeria {
+            grid-template-columns: 1fr; /* Uma coluna em dispositivos móveis */
+        }
+
+        .imagem {
+            padding-top: 100%; /* Garante a proporção quadrada mesmo em telas pequenas */
+        }
+    }
+</style>
+

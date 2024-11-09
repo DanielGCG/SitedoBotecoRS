@@ -1,0 +1,41 @@
+/* Criando variáveis de cores/estilo personalizadas*/
+:root {
+    --cor-fundo: #80b56b;
+    --cor-marrom: #9c693a;
+    --cor-verde-escuro: #4a693e;
+    --cor-marrom-escuro: #6d4a29;
+    --fonte-padrao: "Montserrat", sans-serif;
+    --fonte-padrao-tamanho: auto;
+    --fonte-padrao-largura: <100>;
+    --fonte-padrao-estilo: normal;
+}
+
+html {
+    cursor: url(/img/cursor.png), auto;
+}
+
+body {
+    font-family: var(--fonte-padrao);
+    font-optical-sizing: var(--font-optical-sizing);
+    font-weight: var(--fonte-padrao-largura);
+    font-style: var(--fonte-padrao-estilo);
+    margin: 0;
+    padding: 0;
+    background-color: var(--cor-fundo);
+}
+
+.caixa-texto {
+    background-color: #f9f9f936;
+    border: 1px solid #ccc; /* Borda suave */
+    border-radius: 10px; /* Borda arredondada */
+    padding: 20px; /* Espaçamento interno */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    display: inline-block; /* Deixa a caixa ajustar ao tamanho do conteúdo */
+    margin: 20px 0; /* Espaçamento vertical */
+}
+
+main {
+    max-width: 1200px; /* Limita a largura máxima para uma leitura mais confortável */
+    margin: 0 auto; /* Centraliza o conteúdo */
+    padding: 1em; /* Espaçamento de 1em ao redor do conteúdo principal */
+  }

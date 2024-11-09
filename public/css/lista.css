@@ -1,0 +1,98 @@
+.formulario {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+table {
+    width: 100%; /* Faz a tabela ocupar toda a largura disponível */
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+th, td {
+    padding: 8px;
+    text-align: center; /* Centraliza conteúdo */
+    border: 2px solid #000000;
+}
+
+th {
+    background-color: #9c693a;
+    color: white;
+}
+
+td {
+    background-color: white;
+}
+
+/* Imagem ocupa maior espaço, texto médio, botões mínimo */
+td:first-child {
+    width: 60%; /* Coluna de imagem ocupa 60% */
+}
+td:nth-child(2) {
+    width: 35%; /* Coluna de texto ocupa 35% */
+    font-size: 26px;
+}
+td:last-child {
+    width: 5%; /* Coluna de ações ocupa apenas 5% */
+}
+
+/* Limite da altura da imagem */
+td:first-child img {
+    max-height: 230px;
+    width: auto;
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+    th, td {
+        padding: 6px;
+        font-size: 14px;
+    }
+
+    td:first-child img {
+        max-height: 150px;
+        width: auto;
+    }
+
+    td:nth-child(2) {
+        font-size: 24px;
+    }
+}
+
+/* Estilos de mensagens */
+#mensagem {
+    margin: 15px 0;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    display: none;
+}
+
+.error {
+    color: red;
+    border-color: red;
+}
+
+.success {
+    color: green;
+    border-color: green;
+}
+
+/* Estilos dos botões, com tamanho mínimo */
+.enviar-filme, .botao-filme {
+    background-color: transparent;
+    border: none;
+    cursor: url('/img/cursor-mao.png'), auto;
+    padding: 0;
+    font-size: 1.2em; /* Aumenta o tamanho dos ícones para destacá-los */
+    width: 1.5em; /* Limita a largura para o emoji */
+    text-align: center;
+}
+
+.upload-label {
+    font-size: 0.8rem;
+    cursor: url('/img/cursor-mao.png'), auto;
+    display: inline-block;
+    padding: 5px;
+}
