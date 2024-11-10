@@ -103,22 +103,64 @@ async function uploadFile() {
     }
 }
 
-// Remoção de obra do Firebase
-async function removerObra(nomeObra) {
-    const imagePath = `galeria/shitpost/${nomeObra}.png`;
+// Função para abrir o popup de confirmação de exclusão
+function abrirConfirmacaoDelecao(nomeObra) {
+    const popupConfirmacao = document.getElementById('popup-confirmacao');
+    const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
+
+    // Armazenar o nome da obra que será deletada
+    confirmarDelecaoBtn.setAttribute('data-nome-obra', nomeObra);
     
+    // Exibe o popup de confirmação
+    popupConfirmacao.style.display = 'flex';
+}
+
+// Função para confirmar a remoção da obra
+async function confirmarRemocao() {
+    const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
+    const nomeObra = confirmarDelecaoBtn.getAttribute('data-nome-obra');
+    
+    // Deletar a obra no Firebase
+    await removerObraNoFirebase(nomeObra);
+
+    // Fechar o popup de confirmação
+    fecharConfirmacao();
+
+    fecharPopup();
+}
+
+// Função para fechar o popup de confirmação sem excluir
+function fecharConfirmacao() {
+    const popupConfirmacao = document.getElementById('popup-confirmacao');
+    popupConfirmacao.style.display = 'none';
+}
+
+// Função para remover a obra no Firebase
+async function removerObraNoFirebase(nomeObra) {
     try {
-        await deleteObject(ref(storage, imagePath));
+        // Referência ao arquivo no Firebase
+        const obraRef = ref(storage, `galeria/shitpost/${nomeObra}.png`);
         
+        // Deletar a obra
+        await deleteObject(obraRef);
+
+        // Remover a obra localmente
         obrasLocais = obrasLocais.filter(obra => obra.nome !== nomeObra);
-        exibirMensagem('Imagem removida com sucesso!', 'success');
-        
-        fecharPopup();
+
+        // Atualizar a galeria
         carregarImagens();
+        
+        exibirMensagem('Obra removida com sucesso!', 'success');
     } catch (error) {
         console.error('Erro ao remover a obra:', error);
         exibirMensagem('Erro ao remover a obra. Tente novamente.', 'error');
     }
+}
+
+// Modificar a função de deletar obra para abrir o popup de confirmação
+function removerObra(nomeObra) {
+    // Chama o popup de confirmação diretamente aqui
+    abrirConfirmacaoDelecao(nomeObra);
 }
 
 // Exibe mensagem de sucesso/erro
@@ -225,10 +267,10 @@ function abrirPopup() {
     
     // Defina o conteúdo do popup para o formulário de envio de nova obra
     popupConteudo.innerHTML = `
-        <h2>Enviar novo CocôPost</h2>
+        <h2>Enviar novo Pet</h2>
         <form id="formUpload" style="margin-top: 10px;">
-            <label for="nomeObra">Nome do CocôPost:</label>
-            <input type="text" id="nomeObra" placeholder="Nome da Obra" required>
+            <label for="nomeObra">Nome da Obra:</label>
+            <input type="text" id="nomeObra" placeholder="Nome do Pet" required>
             <br><br>
             <label for="fileInput">Escolha uma imagem:</label>
             <input type="file" id="fileInput" accept="image/*" required>
@@ -257,3 +299,6 @@ window.fecharPopup = fecharPopup;
 window.abrirPopup = abrirPopup;
 window.onload = carregarImagensFirebase;
 window.editarNomeObra = editarNomeObra;
+window.confirmarRemocao = confirmarRemocao;
+window.fecharConfirmacao = fecharConfirmacao;
+window.abrirConfirmacaoDelecao = abrirConfirmacaoDelecao;

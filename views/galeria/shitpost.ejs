@@ -7,29 +7,38 @@
 </main>
 
 <!-- Popup para exibir a imagem com fundo desfocado e botões -->
-<div id="popup" class="popup">
+<div id="popup" class="popup" style="display: none;">
     <div id="popup-conteudo" class="popup-conteudo">
         <img id="imagem-popup" src="" alt="Imagem da obra">
         <div class="acoes">
-            <button onclick="removerObra(document.getElementById('nome-imagem').textContent)">Deletar</button>
-            <button onclick="fecharPopup()">Fechar</button>
+            <button class="deletar" onclick="removerObra(document.getElementById('nome-imagem').textContent)">Deletar</button>
+            <button class="branco" id="editarNomeBtn">Editar</button>
+            <button class="branco" onclick="fecharPopup()">Fechar</button>
+        </div>
+        <div id="campo-editar" style="display: none; margin-top: 10px;">
+            <input type="text" id="novoNome" placeholder="Novo nome">
+            <button class="salvar" onclick="editarNomeObra()">Salvar</button>
         </div>
         <div id="nome-imagem" style="margin-top: 10px;"></div>
     </div>
 </div>
 
-<script type="module" defer src="/js/galerias/shitpost.js"></script>  
+<!-- Popup de confirmação de exclusão -->
+<div id="popup-confirmacao" class="popup">
+    <div id="popup-confirmacao-conteudo" class="popup-conteudo">
+        <p>Tem certeza de que deseja excluir esta obra?</p>
+        <div class="acoes">
+            <button id="confirmarDelecaoBtn" onclick="confirmarRemocao()">Sim, excluir</button>
+            <button onclick="fecharConfirmacao()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script type="module" defer src="/js/galerias/shitpost.js"></script>
 
 <style>
 main {
     text-align: center;
-}
-
-body {
-    font-family: 'Comic Sans MS', cursive, sans-serif; /* Alterado para Comic Sans */
-    font-optical-sizing: auto;
-    font-weight: normal; /* Substitua <weight> por 'normal' ou outro valor conforme necessário */
-    font-style: normal;
 }
 
 .galeria {
