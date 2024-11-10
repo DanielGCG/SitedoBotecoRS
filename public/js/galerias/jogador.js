@@ -137,28 +137,84 @@ function exibirMensagem(mensagem, tipo) {
 function abrirPopupComImagem(url, nome) {
     const popup = document.getElementById('popup');
     const popupConteudo = document.getElementById('popup-conteudo');
-    const imagemPopup = document.getElementById('imagem-popup');
-    const nomeImagem = document.getElementById('nome-imagem');
-    
-    // Garante que o popup tenha a estrutura de imagem e nome
+
+    // Estrutura do popup com campo para editar o nome inicialmente escondido
     popupConteudo.innerHTML = `
         <img id="imagem-popup" src="${url}" alt="Imagem da obra">
         <div class="acoes">
             <button class="deletar" onclick="removerObra('${nome}')">Deletar</button>
-            <button class="fechar" onclick="fecharPopup()">Fechar</button>
+            <button class="branco" id="editarNomeBtn">Editar</button>
+            <button class="branco" onclick="fecharPopup()">Fechar</button>
+        </div>
+        <div id="campo-editar" style="display: none; margin-top: 10px;">
+            <input type="text" id="novoNome" value="${nome}" placeholder="Novo nome">
+            <button class="salvar" onclick="editarNomeObra('${nome}', '${url}')">Salvar</button>
         </div>
         <div id="nome-imagem" style="margin-top: 10px;">${nome}</div>
     `;
 
-    // Garantir que o layout seja recalculado após a adição da imagem
-    setTimeout(() => {
-        popup.style.display = 'flex';
-    }, 50); // Pequeno atraso para garantir que o layout seja atualizado
-
     // Exibe o popup
     popup.style.display = 'flex';
+
+    // Ação do botão de editar nome
+    const editarNomeBtn = document.getElementById('editarNomeBtn');
+    const campoEditar = document.getElementById('campo-editar');
+    const nomeImagem = document.getElementById('nome-imagem');
+
+    // Quando o botão de editar for clicado, alterna a visibilidade do campo de input e o texto do botão
+    editarNomeBtn.addEventListener('click', () => {
+        if (campoEditar.style.display === 'none') {
+            campoEditar.style.display = 'block';  // Exibe o campo de input
+            nomeImagem.style.display = 'none';    // Esconde o nome da obra
+            editarNomeBtn.textContent = 'Cancelar'; // Muda o texto do botão para "Cancelar"
+        } else {
+            campoEditar.style.display = 'none';   // Esconde o campo de input
+            nomeImagem.style.display = 'block';   // Exibe o nome da obra
+            editarNomeBtn.textContent = 'Editar'; // Muda o texto do botão de volta para "Editar"
+        }
+    });
 }
 
+// Função para editar o nome da obra
+async function editarNomeObra(nomeAtual, url) {
+    const novoNomeInput = document.getElementById('novoNome');
+    const novoNome = novoNomeInput.value.trim();
+
+    // Verifica se o novo nome é diferente do atual
+    if (!novoNome || novoNome === nomeAtual) {
+        exibirMensagem('Insira um novo nome para a imagem.', 'error');
+        return;
+    }
+
+    try {
+        // Baixa o arquivo atual
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        // Referências para o arquivo novo e o antigo no Firebase Storage
+        const novaImagemRef = ref(storage, `galeria/jogador/${novoNome}.png`);
+        const imagemAntigaRef = ref(storage, `galeria/jogador/${nomeAtual}.png`);
+
+        // Faz o upload da imagem com o novo nome
+        await uploadBytes(novaImagemRef, blob);
+
+        // Remove a imagem antiga
+        await deleteObject(imagemAntigaRef);
+
+        // Atualiza localmente: renomeia a obra no array de obrasLocais
+        obrasLocais = obrasLocais.map(obra => obra.nome === nomeAtual ? { nome: novoNome, url } : obra);
+
+        // Recarrega as imagens após a atualização
+        carregarImagens();
+
+        // Exibe mensagem de sucesso
+        exibirMensagem('Nome da obra atualizado com sucesso!', 'success');
+        fecharPopup();
+    } catch (error) {
+        console.error('Erro ao editar o nome da obra:', error);
+        exibirMensagem('Erro ao editar o nome da obra. Tente novamente.', 'error');
+    }
+}
 
 // Função de abrir popup para o formulário de upload
 function abrirPopup() {
@@ -169,10 +225,10 @@ function abrirPopup() {
     
     // Defina o conteúdo do popup para o formulário de envio de nova obra
     popupConteudo.innerHTML = `
-        <h2>Enviar nova obra</h2>
-        <form id="formUpload">
+        <h2>Enviar nova Obra</h2>
+        <form id="formUpload" style="margin-top: 10px;">
             <label for="nomeObra">Nome da Obra:</label>
-            <input type="text" id="nomeObra" placeholder="Nome da obra" required>
+            <input type="text" id="nomeObra" placeholder="Nome da Obra" required>
             <br><br>
             <label for="fileInput">Escolha uma imagem:</label>
             <input type="file" id="fileInput" accept="image/*" required>
@@ -200,5 +256,4 @@ window.abrirPopupComImagem = abrirPopupComImagem; // Corrigido para abrir o popu
 window.fecharPopup = fecharPopup;
 window.abrirPopup = abrirPopup;
 window.onload = carregarImagensFirebase;
-
-// Carregar imagens do Firebase ao iniciar
+window.editarNomeObra = editarNomeObra;

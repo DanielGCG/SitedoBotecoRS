@@ -1,7 +1,5 @@
 <main>
-    <div class="titulo">
-        <h1>JogadorStickman</h1>
-    </div>
+    <h1>JogadorStickman</h1>
     <div class="galeria" id="galeria">
         <!-- As imagens serão adicionadas aqui dinamicamente -->
     </div>
@@ -23,16 +21,16 @@
 <script type="module" defer src="/js/galerias/jogador.js"></script>  
 
 <style>
+main {
+    text-align: center;
+}
+
 body{
     background-color: #71a884;
     font-family: "Roboto Slab", serif;
     font-optical-sizing: auto;
     font-weight: <weight>;
     font-style: normal;
-}
-
-.titulo{
-    text-align: center;
 }
 
 .galeria {
@@ -150,7 +148,7 @@ body{
 }
 
 /* Estilo para o botão de fechar */
-.popup-conteudo .acoes .fechar {
+.popup-conteudo .acoes .branco {
     padding: 10px 20px;
     background-color: white; /* Branco */
     color: #333; /* Cor do texto */
@@ -160,7 +158,7 @@ body{
     transition: background-color 0.3s ease;
 }
 
-.popup-conteudo .acoes .fechar:hover {
+.popup-conteudo .acoes .branco:hover {
     background-color: #f1f1f1; /* Tom mais claro no hover */
     cursor: url('/img/cursor-mao.png'), auto;
 }
