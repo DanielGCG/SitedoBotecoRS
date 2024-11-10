@@ -82,6 +82,14 @@ router.get('/galeria/pets', (req, res) => {
     res.render('galeria/pets', { locals: locals });
 });
 
+router.get('/galeria/shitpost', (req, res) => {
+    const locals = {
+        title: "Muito cocôpost",
+        description: "Cuidado."
+    }
+    res.render('galeria/shitpost', { locals: locals });
+});
+
 
 /* ------ NÃO ENCONTRADO ------*/
 
