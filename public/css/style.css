@@ -25,6 +25,7 @@ body {
 }
 
 .caixa-texto {
+    text-align: center;
     background-color: #f9f9f936;
     border: 1px solid #ccc; /* Borda suave */
     border-radius: 10px; /* Borda arredondada */
@@ -38,4 +39,4 @@ main {
     max-width: 1200px; /* Limita a largura máxima para uma leitura mais confortável */
     margin: 0 auto; /* Centraliza o conteúdo */
     padding: 1em; /* Espaçamento de 1em ao redor do conteúdo principal */
-  }
+}

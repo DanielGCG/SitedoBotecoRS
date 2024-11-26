@@ -91,6 +91,19 @@ router.get('/galeria/shitpost', (req, res) => {
 });
 
 
+/* ------ Página de Recomendações ------*/
+
+
+// Rota para página de recomendações
+router.get('/recomendacao', (req, res) => {
+    const locals = {
+        title: "Recomendações",
+        description: "Trabalho 4"
+    }
+    res.render('recomendacao');
+});
+
+
 /* ------ NÃO ENCONTRADO ------*/
 
 
