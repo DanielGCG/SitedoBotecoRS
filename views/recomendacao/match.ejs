@@ -5,21 +5,27 @@
         <h3>Insira o seu nome/apelido</h3>
         <h4>procuramos para voê</h4>
         <!-- Formulário para inserir o nome do usuário -->
-        <label for="nomeUsuario">Digite seu nome:</label>
         <input type="text" id="nomeUsuario" placeholder="Seu nome">
-        
-        <!-- Botão para acionar a função match -->
-        <button class="branco" id="editarNomeBtn">Match!</button>
+        <div>
+            <!-- Botão para acionar a função match -->
+            <button class="branco" id="editarNomeBtn">Match!</button>
+        </div>
     </div>
 
+    <div id="loading" style="display: none;">
+        <img src="/img/carregando.gif" alt="Carregando..." />
+    </div>
+    
     <div class="pagina do match">
-        <h3>Parece que você e <span id="nomeMatch"></span> tem muito em comum!</h3>
-        <h4>Veja oq vocês mais amam e mais odeiam!</h4>
-
+        <div id="textoMatch" style="display: none;">
+            <h3>Parece que você e <span id="nomeMatch"></span> tem muito em comum!</h3>
+            <h4>Veja o que vocês mais amam e mais odeiam!</h4>
+        </div>
+    
         <div class="galeria" id="galeria">
             <!-- Aqui as imagens e plaquinhas serão carregadas dinamicamente -->
         </div>
-    </div>
+    </div>    
 </main>
 
 
@@ -90,6 +96,43 @@
         white-space: nowrap;
         text-overflow: ellipsis;
     }
+
+    #loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    #loading img {
+        width: 150px; /* Ajuste o tamanho do GIF conforme necessário */
+    }
+
+    input[type="text"] {
+        margin-top: 10px; /* Espaçamento superior para o botão */
+        width: 80%; /* Largura ajustável */
+        max-width: 400px; /* Limita a largura máxima */
+        padding: 12px 20px; /* Espaçamento interno */
+        font-size: 16px; /* Tamanho da fonte */
+        border: 1px solid #ccc; /* Cor da borda */
+        border-radius: 8px; /* Bordas arredondadas */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+        outline: none; /* Remove o outline padrão */
+        transition: all 0.3s ease; /* Animação suave */
+        opacity: 70%;
+        margin-bottom: 20px; /* Adiciona espaçamento abaixo do input */
+    }
+
+    input[type="text"]:focus {
+        border-color: #4caf50; /* Cor da borda ao focar */
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); /* Sombra mais destacada */
+        opacity: 100%;
+    }
+
 </style>
 
 
@@ -194,18 +237,16 @@ async function exibirMatch(nomeUsuario) {
         const { usuarioMaiorDistancia, usuarioMenorDistancia } = await compararUsuarios(vetorUsuarioAtual);
 
         if (usuarioMaiorDistancia && usuarioMenorDistancia) {
-            // Exibe o nome do usuário com maior similaridade
             document.getElementById('nomeMatch').textContent = usuarioMenorDistancia.name.replace('.txt', '');
             const galeria = document.getElementById('galeria');
-            galeria.innerHTML = "";  // Limpa a galeria antes de adicionar novas imagens
+            galeria.innerHTML = ""; // Limpa a galeria antes de adicionar novas imagens
 
             const notasMaiorDistancia = await obterNotasDoArquivo(usuarioMaiorDistancia.name.replace('.txt', ''));
             const notasMenorDistancia = await obterNotasDoArquivo(usuarioMenorDistancia.name.replace('.txt', ''));
 
             if (notasMaiorDistancia && notasMenorDistancia) {
-                // Busca filmes bons (nota média alta para ambos)
+                // Busca filmes bons e ruins
                 const filmesBons = getAcordoFilme(notasMaiorDistancia, notasMenorDistancia, 'bom');
-                // Busca filmes ruins (nota média baixa para ambos)
                 const filmesRuins = getAcordoFilme(notasMaiorDistancia, notasMenorDistancia, 'ruim');
 
                 // Exibe filmes bons
@@ -224,6 +265,9 @@ async function exibirMatch(nomeUsuario) {
                     galeria.appendChild(img);
                 });
             }
+
+            // Mostra o texto do match
+            document.getElementById("textoMatch").style.display = 'block';
 
             // Exibe a seção de match
             document.getElementById("paginaMatch").style.display = 'block';
@@ -252,9 +296,22 @@ function getAcordoFilme(vetor1, vetor2, tipo) {
 }
 
 // Evento para buscar o match quando o botão for clicado
-document.getElementById("editarNomeBtn").addEventListener("click", function() {
+document.getElementById("editarNomeBtn").addEventListener("click", async function() {
     const nomeUsuario = document.getElementById("nomeUsuario").value;
-    exibirMatch(nomeUsuario);
+
+    // Mostra o GIF de carregamento
+    const loadingElement = document.getElementById("loading");
+    loadingElement.style.display = 'block';
+
+    try {
+        // Chama a função de exibir o match
+        await exibirMatch(nomeUsuario);
+    } catch (error) {
+        console.error("Erro ao exibir match:", error);
+    } finally {
+        // Esconde o GIF de carregamento
+        loadingElement.style.display = 'none';
+    }
 });
 
 </script>  
