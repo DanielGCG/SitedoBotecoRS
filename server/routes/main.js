@@ -112,6 +112,15 @@ router.get('/recomendacao/questionario', (req, res) => {
     res.render('recomendacao/questionario');
 });
 
+// Rota para página de o match das recomendações
+router.get('/recomendacao/match', (req, res) => {
+    const locals = {
+        title: "Recomendações",
+        description: "Trabalho 4"
+    }
+    res.render('recomendacao/match');
+});
+
 
 /* ------ NÃO ENCONTRADO ------*/
 

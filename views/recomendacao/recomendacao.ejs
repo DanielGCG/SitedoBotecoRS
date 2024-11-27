@@ -1,9 +1,16 @@
 <main>
     <h2 style="text-align: center;">Filme da Galera</h2>
-    <div class="caixa-texto">
-        <h4>Obras que são muito a gente!</h4>
-        <h5>responda aqui para participar</h5>
-        <a class="branco" href="/recomendacao/questionario">Questionário</a>
+    <div class="caixas">
+        <div class="caixa-texto">
+            <h4>Obras que são muito a gente!</h4>
+            <h5>responda aqui para participar</h5>
+            <a class="branco" href="/recomendacao/questionario">Questionário</a>
+        </div>
+        <div class="caixa-texto">
+            <h4>Veja seu match cinematográfico!</h4>
+            <h5>se já fez o questionario</h5>
+            <a class="branco" href="/recomendacao/match">Confira!</a>
+        </div>
     </div>
 
     <div class="formulario">
@@ -28,27 +35,55 @@
     main {
         text-align: center;
     }
-
-    .caixa-texto h5 {
-        margin-bottom: 20px; /* Espaço entre o texto e o botão */
+    /* Container para as caixas de texto */
+    .caixas {
+        display: flex;
+        justify-content: space-between; /* Para espaçar as caixas na horizontal */
+        gap: 30px; /* Distância entre as caixas de texto */
+        flex-wrap: wrap; /* Permite que as caixas "quebrem" em dispositivos móveis */
+        margin-top: 20px;
     }
 
-    /* Estilo para o botão (agora um link) */
+    /* Ajuste das caixas de texto */
+    .caixa-texto {
+        flex: 1;
+        min-width: 280px; /* Tamanho mínimo para que as caixas não fiquem muito pequenas */
+    }
+
+    /* Estilo para o título */
+    .caixa-texto h4 {
+        margin-bottom: 10px;
+    }
+
+    .caixa-texto h5 {
+        margin-bottom: 20px;
+    }
+
+    /* Estilo para o link/botão */
     .branco {
-        display: inline-block; /* Necessário para comportar margens como um botão */
+        display: inline-block;
         padding: 10px 20px;
-        background-color: white; /* Branco */
-        color: #333; /* Cor do texto */
-        border: 1px solid #ccc; /* Borda clara */
+        background-color: white;
+        color: #333;
+        border: 1px solid #ccc;
         border-radius: 5px;
-        text-decoration: none; /* Remove o sublinhado padrão dos links */
+        text-decoration: none;
         cursor: pointer;
         transition: background-color 0.3s ease;
     }
 
+    /* Hover do link */
     .branco:hover {
-        background-color: #f1f1f1; /* Tom mais claro no hover */
+        background-color: #f1f1f1;
         cursor: url('/img/cursor-mao.png'), auto;
+    }
+
+    /* Responsividade para dispositivos móveis */
+    @media (max-width: 768px) {
+        .caixas {
+            flex-direction: column; /* Empilha as caixas uma sobre a outra em dispositivos móveis */
+            gap: 15px; /* Menor distância entre elas no mobile */
+        }
     }
 </style>
 
