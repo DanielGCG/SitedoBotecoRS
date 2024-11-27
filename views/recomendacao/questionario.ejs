@@ -170,89 +170,123 @@
   
     <!-- Botão para salvar os dados -->
     <button onclick="salvarAvaliacoes()">Salvar</button>
+
+<script type="module">
+  /* ------- FUNÇÕES DO FIREBASE ------- */
+
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+
+  // Configuração do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
+    authDomain: "boteco-6fcfa.firebaseapp.com",
+    projectId: "boteco-6fcfa",
+    storageBucket: "boteco-6fcfa.appspot.com",
+    messagingSenderId: "531032694476",
+    appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const storage = getStorage(app);
+
+
+  // Função genérica para upload de arquivos para o Firebase Storage
+  async function uploadFile(file, destinationPath) {
+    if (!file) {
+      exibirMensagem('Por favor, selecione um arquivo!', 'error');
+      return false;  // Retorna false para indicar falha
+    }
+
+    // O nome do arquivo será o nome original (no caso do arquivo de texto gerado)
+    const fileName = file.name; 
+    const fileRef = ref(storage, `${destinationPath}/${fileName}`); // Definindo o caminho de destino no Firebase Storage
+
+    try {
+      // Fazendo o upload do arquivo
+      const snapshot = await uploadBytes(fileRef, file);
+
+      // Após o upload, retorna a URL de download
+      exibirMensagem('Arquivo enviado com sucesso!', 'success');
+
+      // Você pode, se necessário, retornar a URL do arquivo
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      console.log('Arquivo enviado. URL de download:', downloadURL);
+
+      return true;  // Retorna true para indicar sucesso
+    } catch (error) {
+      console.error('Erro ao enviar o arquivo:', error);
+      exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
+      return false;  // Retorna false em caso de erro
+    }
+  }
+
+  /* ------- FUNÇÕES DO QUESTIONÁRIO ------- */
   
-    <script>
-    function salvarAvaliacoes() {
-        const nomeUsuario = document.getElementById('nomeUsuario').value.trim();
-        const notas = [];
 
-        // Pega todas as notas inseridas dinamicamente
-        const inputsNotas = document.querySelectorAll('input[type="number"]');
-        inputsNotas.forEach(input => {
-        const nota = input.value.trim();
-        if (nota === '') {
-            alert('Por favor, insira notas para todos os filmes.');
-            return;
-        }
-        notas.push(parseInt(nota, 10));
-        });
+  // Função para exibir mensagens de sucesso ou erro
+  function exibirMensagem(mensagem, tipo) {
+    const msgContainer = document.createElement('div');
+    msgContainer.textContent = mensagem;
+    msgContainer.style.padding = '10px';
+    msgContainer.style.margin = '10px';
+    msgContainer.style.borderRadius = '5px';
+    if (tipo === 'success') {
+      msgContainer.style.backgroundColor = '#4caf50';
+      msgContainer.style.color = 'white';
+    } else if (tipo === 'error') {
+      msgContainer.style.backgroundColor = '#f44336';
+      msgContainer.style.color = 'white';
+    }
+    document.body.appendChild(msgContainer);
 
-        if (!nomeUsuario) {
-        alert('Por favor, insira seu nome.');
+    // Remover mensagem após 3 segundos
+    setTimeout(() => {
+      msgContainer.remove();
+    }, 3000);
+  }
+
+  // Função para salvar as avaliações do usuário
+  async function salvarAvaliacoes() {
+    const nomeUsuario = document.getElementById('nomeUsuario').value.trim();
+    const notas = [];
+
+    // Pega todas as notas inseridas dinamicamente
+    const inputsNotas = document.querySelectorAll('input[type="number"]');
+    inputsNotas.forEach(input => {
+      const nota = input.value.trim();
+      if (nota === '') {
+        alert('Por favor, insira notas para todos os filmes.');
         return;
-        }
+      }
+      notas.push(parseInt(nota, 10));
+    });
 
-        const conteudo = `${nomeUsuario}\n[${notas.map(nota => `${nota}`).join(', ')}]`;
-
-        // Cria o arquivo para download
-        const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `${nomeUsuario}.txt`; // Define o nome do arquivo usando o nome do usuário
-        link.click();
-
-        // Após salvar, redirecionar o usuário para a página /recomendacao
-        window.location.href = '/recomendacao';
+    if (!nomeUsuario) {
+      alert('Por favor, insira seu nome.');
+      return;
     }
 
+    const conteudo = `${nomeUsuario}\n[${notas.map(nota => `${nota}`).join(', ')}]`;
 
+    // Criar um arquivo de texto com as avaliações
+    const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+    const file = new File([blob], `${nomeUsuario}.txt`, { type: 'text/plain' });
 
+    const destinationPath = 'recomendacoes/usuarios'; // Caminho de destino no Firebase Storage
+    const sucesso = await uploadFile(file, destinationPath);
 
-    
-    async function uploadFile() {
-      const fileInput = document.getElementById('fileInput');
-      const nomeFilmeInput = document.getElementById('nomeFilme');
-      const nomeFilme = nomeFilmeInput.value.trim();
-
-      if (fileInput.files.length === 0) {
-          exibirMensagem('Por favor, selecione um arquivo!', 'error');
-          return;
-      }
-
-      const file = fileInput.files[0];
-      if (!file.type.startsWith('image/')) {
-          exibirMensagem('Por favor, selecione um arquivo de imagem válido!', 'error');
-          return;
-      }
-
-      const imageName = `${nomeFilme}.png`;
-      const imagePath = `listaFilmes/${imageName}`;
-      const imageRef = ref(storage, imagePath);
-
-      try {
-          const snapshot = await uploadBytes(imageRef, file);
-          const downloadURL = await getDownloadURL(snapshot.ref);
-          
-          exibirMensagem('Arquivo enviado com sucesso!', 'success');
-
-          // Atualize o estado local e a interface
-          filmesLocais.push({ nome: nomeFilme, url: downloadURL });
-          adicionarItemLista(downloadURL, nomeFilme);
-          
-          fileInput.value = '';
-          nomeFilmeInput.value = '';
-
-          // Retorna o botão ao estado padrão
-          document.getElementById('labelFileInput').textContent = '📁 Adicione imagem';
-
-      } catch (error) {
-          console.error('Erro ao enviar o arquivo:', error);
-          exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
-      }
+    // Redirecionar somente se o envio for bem-sucedido
+    if (sucesso) {
+      window.location.href = '/recomendacao'; // Redireciona para a página de recomendações
     }
+  }
+
+  // Tornar Funções visíveis ao html
+  window.salvarAvaliacoes = salvarAvaliacoes;
 </script>
-
-
+    
+    
 <link rel="stylesheet" href="/css/lista.css">
 
 <style>

@@ -3,25 +3,258 @@
 
     <div class="caixa-texto">
         <h3>Insira o seu nome/apelido</h3>
-        <h4>e iremos procurar a pessoa</h4>
-        <h4>que é muito você!</h4>
+        <h4>procuramos para voê</h4>
         <!-- Formulário para inserir o nome do usuário -->
         <label for="nomeUsuario">Digite seu nome:</label>
         <input type="text" id="nomeUsuario" placeholder="Seu nome">
         
         <!-- Botão para acionar a função match -->
-        <button id="botaoMatch">Match</button>
+        <button class="branco" id="editarNomeBtn">Match!</button>
+    </div>
+
+    <div class="pagina do match">
+        <h3>Parece que você e <span id="nomeMatch"></span> tem muito em comum!</h3>
+        <h4>Veja oq vocês mais amam e mais odeiam!</h4>
+
+        <div class="galeria" id="galeria">
+            <!-- Aqui as imagens e plaquinhas serão carregadas dinamicamente -->
+        </div>
     </div>
 </main>
+
 
 <style>
     main {
         text-align: center;
     }
-    #botaoMatch {
-        margin-top: 10px;
+    .branco {
         padding: 10px 20px;
-        font-size: 16px;
+        background-color: white; /* Branco */
+        color: #333; /* Cor do texto */
+        border: 1px solid #ccc; /* Borda clara */
+        border-radius: 5px;
         cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .branco:hover {
+        background-color: #f1f1f1; /* Tom mais claro no hover */
+        cursor: url('/img/cursor-mao.png'), auto;
+    }
+
+    .galeria {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Layout responsivo */
+        gap: 40px; /* Espaçamento entre as imagens */
+        padding: 20px; /* Espaçamento em torno da galeria */
+    }
+
+    .imagem {
+        background-image: url('/img/moldura.png');
+        background-size: cover;
+        background-position: center;
+        border-radius: 0px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        aspect-ratio: 1;
+        position: relative;
+    }
+
+    .imagem img {
+        width: 87%; /* Tamanho da imagem principal */
+        height: 87%; /* Mantém a proporção da imagem */
+        object-fit: cover;
+    }
+
+    .plaquinha {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 70%; /* Tamanho proporcional */
+        height: 75px; /* Altura ajustada para a plaquinha */
+        background-image: url('/img/plaquinha.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #000000;
+        text-align: center;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 </style>
+
+
+<script type="module">
+    import { getStorage, ref, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+  
+    // Configuração do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
+        authDomain: "boteco-6fcfa.firebaseapp.com",
+        projectId: "boteco-6fcfa",
+        storageBucket: "boteco-6fcfa.appspot.com",
+        messagingSenderId: "531032694476",
+        appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+  
+    // Função para calcular a distância Euclidiana entre dois vetores
+    function calcularDistancia(vetor1, vetor2) {
+        if (vetor1.length !== vetor2.length) {
+            throw new Error("Ambos os vetores devem ter o mesmo número de elementos.");
+        }
+
+        let somaQuadrados = 0;
+        for (let i = 0; i < vetor1.length; i++) {
+            somaQuadrados += Math.pow(vetor1[i] - vetor2[i], 2);
+        }
+        return Math.sqrt(somaQuadrados);  // Distância Euclidiana
+    }
+
+  
+    // Função para obter o vetor de notas do arquivo de um usuário específico
+    async function obterNotasDoArquivo(nomeUsuario) {
+        // Garante que a extensão .txt não seja duplicada
+        const nomeSemExtensao = nomeUsuario.replace('.txt', ''); // Remove .txt se já estiver no nome
+        const filePath = `recomendacoes/usuarios/${nomeSemExtensao}.txt`; // Adiciona a extensão .txt apenas uma vez
+        const fileRef = ref(storage, filePath);
+
+        try {
+            const fileUrl = await getDownloadURL(fileRef);
+            const response = await fetch(fileUrl);
+            const texto = await response.text();
+            
+            const linhas = texto.split('\n');
+            const notasString = linhas[1];  // A segunda linha contém o array de notas
+            const notas = JSON.parse(notasString); // Converte o array JSON para um vetor de números
+            
+            return notas;
+        } catch (error) {
+            console.error("Erro ao obter notas:", error);
+            return null;
+        }
+    }
+
+    // Função para comparar o usuário atual com outros usuários
+async function compararUsuarios(vetorUsuarioAtual) {
+    const listaUsuariosRef = ref(storage, 'recomendacoes/usuarios');
+    const snapshot = await listAll(listaUsuariosRef);
+    
+    let maiorDistancia = -Infinity;
+    let menorDistancia = Infinity;
+    let usuarioMaiorDistancia = null;
+    let usuarioMenorDistancia = null;
+
+    for (const itemRef of snapshot.items) {
+        // Não compara com o próprio usuário
+        if (itemRef.name === `${document.getElementById("nomeUsuario").value}.txt`) continue;  // Comparar com o nome inserido pelo usuário
+
+        const fileUrl = await getDownloadURL(itemRef);
+        const notasOutroUsuario = await obterNotasDoArquivo(itemRef.name); // Função que extrai as notas do arquivo
+
+        if (notasOutroUsuario) {
+            const distancia = calcularDistancia(vetorUsuarioAtual, notasOutroUsuario);
+            
+            if (distancia > maiorDistancia) {
+                maiorDistancia = distancia;
+                usuarioMaiorDistancia = itemRef;
+            }
+            
+            if (distancia < menorDistancia) {
+                menorDistancia = distancia;
+                usuarioMenorDistancia = itemRef;
+            }
+        }
+    }
+
+    console.log('Maior Distância:', maiorDistancia, 'Usuário:', usuarioMaiorDistancia);
+    console.log('Menor Distância:', menorDistancia, 'Usuário:', usuarioMenorDistancia);
+
+    return { usuarioMaiorDistancia, usuarioMenorDistancia };
+}
+
+// Função para exibir o match com o usuário
+async function exibirMatch(nomeUsuario) {
+    const nomeExibicao = nomeUsuario.replace('.txt', '');
+    const vetorUsuarioAtual = await obterNotasDoArquivo(nomeExibicao);
+
+    if (vetorUsuarioAtual) {
+        const { usuarioMaiorDistancia, usuarioMenorDistancia } = await compararUsuarios(vetorUsuarioAtual);
+
+        if (usuarioMaiorDistancia && usuarioMenorDistancia) {
+            // Exibe o nome do usuário com maior similaridade
+            document.getElementById('nomeMatch').textContent = usuarioMenorDistancia.name.replace('.txt', '');
+            const galeria = document.getElementById('galeria');
+            galeria.innerHTML = "";  // Limpa a galeria antes de adicionar novas imagens
+
+            const notasMaiorDistancia = await obterNotasDoArquivo(usuarioMaiorDistancia.name.replace('.txt', ''));
+            const notasMenorDistancia = await obterNotasDoArquivo(usuarioMenorDistancia.name.replace('.txt', ''));
+
+            if (notasMaiorDistancia && notasMenorDistancia) {
+                // Busca filmes bons (nota média alta para ambos)
+                const filmesBons = getAcordoFilme(notasMaiorDistancia, notasMenorDistancia, 'bom');
+                // Busca filmes ruins (nota média baixa para ambos)
+                const filmesRuins = getAcordoFilme(notasMaiorDistancia, notasMenorDistancia, 'ruim');
+
+                // Exibe filmes bons
+                filmesBons.forEach(filme => {
+                    const img = document.createElement('div');
+                    img.classList.add('imagem');
+                    img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">Bomzão! :D</div>`;
+                    galeria.appendChild(img);
+                });
+
+                // Exibe filmes ruins
+                filmesRuins.forEach(filme => {
+                    const img = document.createElement('div');
+                    img.classList.add('imagem');
+                    img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">Ruinzinho</div>`;
+                    galeria.appendChild(img);
+                });
+            }
+
+            // Exibe a seção de match
+            document.getElementById("paginaMatch").style.display = 'block';
+        }
+    }
+}
+
+// Função para encontrar os filmes que ambos os usuários concordam ser bons ou ruins
+function getAcordoFilme(vetor1, vetor2, tipo) {
+    let filmesBons = [];
+    let filmesRuins = [];
+    
+    for (let i = 0; i < vetor1.length; i++) {
+        const mediaNota = (vetor1[i] + vetor2[i]) / 2;  // Média das notas dos dois usuários
+
+        if (tipo === 'bom' && mediaNota >= 7) {
+            // Se o filme for considerado bom (nota média maior ou igual a 7)
+            filmesBons.push({indice: i + 1, mediaNota});
+        } else if (tipo === 'ruim' && mediaNota <= 3) {
+            // Se o filme for considerado ruim (nota média menor ou igual a 3)
+            filmesRuins.push({indice: i + 1, mediaNota});
+        }
+    }
+
+    return tipo === 'bom' ? filmesBons : filmesRuins;
+}
+
+// Evento para buscar o match quando o botão for clicado
+document.getElementById("editarNomeBtn").addEventListener("click", function() {
+    const nomeUsuario = document.getElementById("nomeUsuario").value;
+    exibirMatch(nomeUsuario);
+});
+
+</script>  
