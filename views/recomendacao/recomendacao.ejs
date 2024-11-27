@@ -16,7 +16,7 @@
             <thead>
                 <tr>
                     <th>Capa</th>
-                    <th>Porcentagem</th>
+                    <th>Nota Atual</th>
                 </tr>
             </thead>
             <tbody id="listaFilmes">
@@ -286,7 +286,7 @@
             );
 
             // Calcula a porcentagem para cada filme
-            const porcentagens = somaNotas.map((soma) => Math.round((soma / (totalUsuarios * 10)) * 100));
+            const porcentagens = somaNotas.map((soma) => parseFloat(((soma / (totalUsuarios * 10)) * 10).toFixed(1)));
 
             // Preenche a tabela com as porcentagens
             preencherPorcentagens(porcentagens);
@@ -374,7 +374,7 @@
         // Itera sobre as células e o vetor ao mesmo tempo
         vetor.forEach((valor, index) => {
             if (index < celulasPorcentagem.length) {
-                celulasPorcentagem[index].textContent = `${valor}%`; // Adiciona o valor com o símbolo de porcentagem
+                celulasPorcentagem[index].textContent = `${valor}`; // Adiciona o valor com o símbolo de porcentagem
             }
         });
     }

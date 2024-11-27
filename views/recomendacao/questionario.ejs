@@ -8,8 +8,7 @@
 
     <div>
       <!-- Formulário para inserir o nome do usuário -->
-      <label for="nomeUsuario">Digite seu nome/apelido:</label>
-      <input type="text" id="nomeUsuario" placeholder="Nome/Apelido">
+      <input type="text" id="nomeUsuario" placeholder="Nome">
     </div>
 
     <!-- Tabela de filmes -->
@@ -169,7 +168,55 @@
     </table>
   
     <!-- Botão para salvar os dados -->
-    <button onclick="salvarAvaliacoes()">Salvar</button>
+    <button class="branco" onclick="salvarAvaliacoes()" style="margin-top: 10px;">Salvar</button>
+
+
+<style>
+  main {
+      text-align: center;
+  }
+  /* Estilo para o botão (agora um link) */
+  .branco {
+      display: inline-block; /* Necessário para comportar margens como um botão */
+      padding: 10px 20px;
+      background-color: white; /* Branco */
+      color: #333; /* Cor do texto */
+      border: 1px solid #ccc; /* Borda clara */
+      border-radius: 5px;
+      text-decoration: none; /* Remove o sublinhado padrão dos links */
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  }
+
+  .branco:hover {
+      background-color: #f1f1f1; /* Tom mais claro no hover */
+      cursor: url('/img/cursor-mao.png'), auto;
+  }
+
+  input[type="text"] {
+      margin-top: 10px; /* Espaçamento superior para o botão */
+      width: 80%; /* Largura ajustável */
+      max-width: 400px; /* Limita a largura máxima */
+      padding: 12px 20px; /* Espaçamento interno */
+      font-size: 16px; /* Tamanho da fonte */
+      border: 1px solid #ccc; /* Cor da borda */
+      border-radius: 8px; /* Bordas arredondadas */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+      outline: none; /* Remove o outline padrão */
+      transition: all 0.3s ease; /* Animação suave */
+      opacity: 70%;
+      margin-bottom: 20px; /* Adiciona espaçamento abaixo do input */
+      cursor: url('/img/cursor-texto.png'), auto;
+  }
+
+  input[type="text"]:focus {
+      border-color: #4caf50; /* Cor da borda ao focar */
+      box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); /* Sombra mais destacada */
+      opacity: 100%;
+      cursor: url('/img/cursor-texto.png'), auto;
+  }
+</style>
+
 
 <script type="module">
   /* ------- FUNÇÕES DO FIREBASE ------- */
@@ -289,25 +336,3 @@
     
 <link rel="stylesheet" href="/css/lista.css">
 
-<style>
-    main {
-        text-align: center;
-    }
-    /* Estilo para o botão (agora um link) */
-    .branco {
-        display: inline-block; /* Necessário para comportar margens como um botão */
-        padding: 10px 20px;
-        background-color: white; /* Branco */
-        color: #333; /* Cor do texto */
-        border: 1px solid #ccc; /* Borda clara */
-        border-radius: 5px;
-        text-decoration: none; /* Remove o sublinhado padrão dos links */
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .branco:hover {
-        background-color: #f1f1f1; /* Tom mais claro no hover */
-        cursor: url('/img/cursor-mao.png'), auto;
-    }
-</style>
