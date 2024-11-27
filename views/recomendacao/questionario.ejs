@@ -193,6 +193,9 @@
         link.href = URL.createObjectURL(blob);
         link.download = `${nomeUsuario}.txt`; // Define o nome do arquivo usando o nome do usuário
         link.click();
+
+        // Após salvar, redirecionar o usuário para a página /recomendacao
+        window.location.href = '/recomendacao';
     }
 </script>
 
