@@ -239,10 +239,10 @@ function getAcordoFilme(vetor1, vetor2, tipo) {
     for (let i = 0; i < vetor1.length; i++) {
         const mediaNota = (vetor1[i] + vetor2[i]) / 2;  // Média das notas dos dois usuários
 
-        if (tipo === 'bom' && mediaNota >= 7) {
+        if (tipo === 'bom' && mediaNota > 8) {
             // Se o filme for considerado bom (nota média maior ou igual a 7)
             filmesBons.push({indice: i + 1, mediaNota});
-        } else if (tipo === 'ruim' && mediaNota <= 3) {
+        } else if (tipo === 'ruim' && mediaNota <= 4) {
             // Se o filme for considerado ruim (nota média menor ou igual a 3)
             filmesRuins.push({indice: i + 1, mediaNota});
         }
