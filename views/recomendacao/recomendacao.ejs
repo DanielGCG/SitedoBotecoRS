@@ -11,22 +11,161 @@
             <h5>se já fez o questionario</h5>
             <a class="branco" href="/recomendacao/match">Confira!</a>
         </div>
-    </div>
-
-    <div class="formulario">
+    </div class="formulario">
         <table>
             <thead>
                 <tr>
-                    <th>Obras</th>
-                    <th>Pessoas</th>
+                    <th>Capa</th>
+                    <th>Porcentagem</th>
                 </tr>
             </thead>
             <tbody id="listaFilmes">
-                <!-- A linha para adicionar filme/série será gerada dinamicamente -->
+                <tr>
+                    <td>
+                      <img src="/img/recomendacao/1.png" alt="Minha Mãe é uma Peça">
+                    </td>
+                    <td>
+                      
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <img src="/img/recomendacao/2.png" alt="Até que a sorte nos separe">
+                    </td>
+                    <td>
+                      
+                    </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/3.png" alt="Pânico">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/4.png" alt="IT: A coisa">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/5.png" alt="Vingadores">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/6.png" alt="Velozes e Furiosos">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/7.png" alt="Jumanji">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/8.png" alt="Avatar">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/9.png" alt="Star Wars">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/10.png" alt="Interestelar">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/11.png" alt="Lala Land">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/12.png" alt="Crepúsculo">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/13.png" alt="Homem-Aranha: Aranhaverso">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/14.png" alt="Shrek">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/15.png" alt="A Vida é Bela">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/16.png" alt="Euphoria">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/17.png" alt="Turma da Mônica">
+                      </td>
+                      <td>
+                        
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <img src="/img/recomendacao/18.png" alt="Procurando Nemo">
+                      </td>
+                      <td>
+                        
+                  </tr>
             </tbody>
         </table>
     </div>
-    <div id="mensagem" style="display: none;"></div> <!-- Adicionando a div para mensagens -->
 </main>
 
 <link rel="stylesheet" href="/css/lista.css">
@@ -35,19 +174,24 @@
     main {
         text-align: center;
     }
+
     /* Container para as caixas de texto */
     .caixas {
         display: flex;
-        justify-content: space-between; /* Para espaçar as caixas na horizontal */
-        gap: 30px; /* Distância entre as caixas de texto */
-        flex-wrap: wrap; /* Permite que as caixas "quebrem" em dispositivos móveis */
+        justify-content: space-between;
+        /* Para espaçar as caixas na horizontal */
+        gap: 30px;
+        /* Distância entre as caixas de texto */
+        flex-wrap: wrap;
+        /* Permite que as caixas "quebrem" em dispositivos móveis */
         margin-top: 20px;
     }
 
     /* Ajuste das caixas de texto */
     .caixa-texto {
         flex: 1;
-        min-width: 280px; /* Tamanho mínimo para que as caixas não fiquem muito pequenas */
+        min-width: 280px;
+        /* Tamanho mínimo para que as caixas não fiquem muito pequenas */
     }
 
     /* Estilo para o título */
@@ -81,136 +225,163 @@
     /* Responsividade para dispositivos móveis */
     @media (max-width: 768px) {
         .caixas {
-            flex-direction: column; /* Empilha as caixas uma sobre a outra em dispositivos móveis */
-            gap: 15px; /* Menor distância entre elas no mobile */
+            flex-direction: column;
+            /* Empilha as caixas uma sobre a outra em dispositivos móveis */
+            gap: 15px;
+            /* Menor distância entre elas no mobile */
         }
     }
 </style>
 
 <script type="module">
-import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 
 
-// Configuração do Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
-    authDomain: "boteco-6fcfa.firebaseapp.com",
-    projectId: "boteco-6fcfa",
-    storageBucket: "boteco-6fcfa.appspot.com",
-    messagingSenderId: "531032694476",
-    appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
-};
+    // Configuração do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
+        authDomain: "boteco-6fcfa.firebaseapp.com",
+        projectId: "boteco-6fcfa",
+        storageBucket: "boteco-6fcfa.appspot.com",
+        messagingSenderId: "531032694476",
+        appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
+    };
 
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
 
-// Array para manter o estado local dos filmes
-let filmesLocais = [];
+    // Array para manter o estado local dos filmes
+    let filmesLocais = [];
 
-async function uploadFile() {
-    const fileInput = document.getElementById('fileInput');
-    const nomeFilmeInput = document.getElementById('nomeFilme');
-    const nomeFilme = nomeFilmeInput.value.trim();
-
-    if (fileInput.files.length === 0) {
-        exibirMensagem('Por favor, selecione um arquivo!', 'error');
-        return;
-    }
-
-    const file = fileInput.files[0];
-    if (!file.type.startsWith('image/')) {
-        exibirMensagem('Por favor, selecione um arquivo de imagem válido!', 'error');
-        return;
-    }
-
-    const imageName = `${nomeFilme}.png`;
-    const imagePath = `listaFilmes/${imageName}`;
-    const imageRef = ref(storage, imagePath);
-
-    try {
-        const snapshot = await uploadBytes(imageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        
-        exibirMensagem('Arquivo enviado com sucesso!', 'success');
-
-        // Atualize o estado local e a interface
-        filmesLocais.push({ nome: nomeFilme, url: downloadURL });
-        adicionarItemLista(downloadURL, nomeFilme);
-        
-        fileInput.value = '';
-        nomeFilmeInput.value = '';
-
-        // Retorna o botão ao estado padrão
-        document.getElementById('labelFileInput').textContent = '📁 Adicione imagem';
-
-    } catch (error) {
-        console.error('Erro ao enviar o arquivo:', error);
-        exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
-    }
-}
-
-
-function exibirMensagem(mensagem, tipo) {
-    const mensagemDiv = document.getElementById('mensagem');
-    mensagemDiv.textContent = mensagem;
-    mensagemDiv.className = tipo === 'success' ? 'success' : 'error';
-    mensagemDiv.style.display = 'block';
-
-    setTimeout(() => {
-        mensagemDiv.style.display = 'none';
-    }, 5000);
-}
-
-function adicionarItemLista(url, vetorNomes) {
-    const listaFilmes = document.getElementById('listaFilmes');
-    const item = document.createElement('tr');
     
-    item.innerHTML = `
+    async function geraPorcentagemFilmes() {
+        const listaUsuariosRef = ref(storage, 'recomendacoes/usuarios');
+        const totalFilmes = 18; // Quantidade de filmes na lista
+        const somaNotas = Array(totalFilmes).fill(0); // Array para somar as notas de cada filme
+        let totalUsuarios = 0; // Contador para o número de usuários
+
+        try {
+            const result = await listAll(listaUsuariosRef);
+            const arquivosUsuarios = result.items;
+
+            // Processa cada arquivo de usuário
+            await Promise.all(
+                arquivosUsuarios.map(async (arquivoRef) => {
+                    const arquivoURL = await getDownloadURL(arquivoRef);
+                    const response = await fetch(arquivoURL);
+                    const texto = await response.text();
+
+                    // Extrai as notas do arquivo do usuário
+                    const linhas = texto.split('\n').filter(Boolean); // Divide o texto por linhas
+                    const notas = JSON.parse(linhas[1]); // Pega a segunda linha como JSON das notas
+
+                    // Soma as notas de cada filme
+                    notas.forEach((nota, index) => {
+                        somaNotas[index] += nota;
+                    });
+
+                    totalUsuarios++;
+                })
+            );
+
+            // Calcula a porcentagem para cada filme
+            const porcentagens = somaNotas.map((soma) => Math.round((soma / (totalUsuarios * 10)) * 100));
+
+            // Preenche a tabela com as porcentagens
+            preencherPorcentagens(porcentagens);
+
+            console.log('Porcentagens calculadas:', porcentagens);
+        } catch (error) {
+            console.error('Erro ao gerar porcentagem dos filmes:', error);
+        }
+    }
+
+
+    function ordenaFilmes(lista) {
+        return lista.sort((a, b) => {
+            // Tenta converter os nomes para números
+            const numA = parseInt(a.nome, 10);
+            const numB = parseInt(b.nome, 10);
+
+            // Se ambos forem números, ordena como números
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return numA - numB;
+            }
+
+            // Caso contrário, ordena como strings
+            return a.nome.localeCompare(b.nome);
+        });
+    }
+
+    /*precisamos gerar o vetor de nomes de cada elemento antes de printar*/
+    async function listarFilmes() {
+        const listaFilmesRef = ref(storage, 'recomendacoes/imagensfilmes');
+        const listaFilmes = document.getElementById('listaFilmes');
+
+        listaFilmes.innerHTML = ""; // Limpa a tabela antes de re-renderizar
+
+        try {
+            const result = await listAll(listaFilmesRef);
+
+            filmesLocais = []; // Resetar o array local antes de adicionar novos itens
+
+            await Promise.all(result.items.map(async (itemRef) => {
+                const nomeFilme = itemRef.name.replace('.png', ''); // Remove a extensão do arquivo
+                const imageURL = await getDownloadURL(itemRef);
+
+                filmesLocais.push({ nome: nomeFilme, url: imageURL });
+            }));
+
+            // Ordenar os filmes antes de exibir
+            filmesLocais = ordenaFilmes(filmesLocais);
+
+            // Re-adicionar os filmes ordenados na tabela
+            filmesLocais.forEach((filme) => {
+                adicionarItemLista(filme.url, filme.nome, filme.vetorNomes);
+            });
+
+            if (filmesLocais.length === 0) {
+                exibirMensagem('Nenhum filme encontrado. Adicione novos filmes para começar!', 'info');
+            }
+
+        } catch (error) {
+            console.error('Erro ao listar filmes:', error);
+            exibirMensagem('Erro ao listar filmes. Tente novamente.', 'error');
+        }
+    }
+
+    function adicionarItemLista(url, nome, vetorNomes) {
+        const listaFilmes = document.getElementById('listaFilmes');
+        const item = document.createElement('tr');
+
+        item.innerHTML = `
         <td style="text-align: center;">
-            ${vetorNomes}
+            ${nome}
             <img src="${url}">
         </td>
-        <td>${vetorNomes}</td>
+        <td>${nome}</td>
     `;
-    listaFilmes.appendChild(item);
-}
-
-async function listarFilmes() {
-    const listaFilmesRef = ref(storage, 'recomendacoes/imagensfilmes');
-    const listaFilmes = document.getElementById('imagensfilmes');
-
-    // Criar a linha para adicionar novo filme/série
-    const linhaAdicionar = document.createElement('tr');
-
-    try {
-        const result = await listAll(listaFilmesRef);
-
-        await Promise.all(result.items.map(async (itemRef) => {
-            const nomeFilme = itemRef.name.replace('.png', '');
-            const imageURL = await getDownloadURL(itemRef);
-            
-            filmesLocais.push({ nome: nomeFilme, url: imageURL });
-            adicionarItemLista(imageURL, nomeFilme);
-        }));
-
-        if (filmesLocais.length === 0) {
-            exibirMensagem('Nenhum filme encontrado. Adicione novos filmes para começar!', 'info');
-        }
-
-    } catch (error) {
-        console.error('Erro ao listar filmes:', error);
-        exibirMensagem('Erro ao listar filmes. Tente novamente.', 'error');
+        listaFilmes.appendChild(item);
     }
-}
 
 
-// Expondo as funções para serem usadas no HTML
-window.uploadFile = uploadFile;
-window.exibirMensagem = exibirMensagem;
-window.adicionarItemLista = adicionarItemLista;
-window.listarFilmes = listarFilmes;
+    // Função para preencher as porcentagens na tabela
+    function preencherPorcentagens(vetor) {
+        // Seleciona todas as células <td> correspondentes à porcentagem
+        const celulasPorcentagem = document.querySelectorAll('#listaFilmes tr td:last-child');
+        
+        // Itera sobre as células e o vetor ao mesmo tempo
+        vetor.forEach((valor, index) => {
+            if (index < celulasPorcentagem.length) {
+                celulasPorcentagem[index].textContent = `${valor}%`; // Adiciona o valor com o símbolo de porcentagem
+            }
+        });
+    }
 
-listarFilmes();
+    geraPorcentagemFilmes();
+
+    // Expondo as funções para serem usadas no HTML
+    window.adicionarItemLista = adicionarItemLista;
 </script>
 </body>

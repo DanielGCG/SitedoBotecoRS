@@ -204,6 +204,52 @@
         // Após salvar, redirecionar o usuário para a página /recomendacao
         window.location.href = '/recomendacao';
     }
+
+
+
+
+    
+    async function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const nomeFilmeInput = document.getElementById('nomeFilme');
+      const nomeFilme = nomeFilmeInput.value.trim();
+
+      if (fileInput.files.length === 0) {
+          exibirMensagem('Por favor, selecione um arquivo!', 'error');
+          return;
+      }
+
+      const file = fileInput.files[0];
+      if (!file.type.startsWith('image/')) {
+          exibirMensagem('Por favor, selecione um arquivo de imagem válido!', 'error');
+          return;
+      }
+
+      const imageName = `${nomeFilme}.png`;
+      const imagePath = `listaFilmes/${imageName}`;
+      const imageRef = ref(storage, imagePath);
+
+      try {
+          const snapshot = await uploadBytes(imageRef, file);
+          const downloadURL = await getDownloadURL(snapshot.ref);
+          
+          exibirMensagem('Arquivo enviado com sucesso!', 'success');
+
+          // Atualize o estado local e a interface
+          filmesLocais.push({ nome: nomeFilme, url: downloadURL });
+          adicionarItemLista(downloadURL, nomeFilme);
+          
+          fileInput.value = '';
+          nomeFilmeInput.value = '';
+
+          // Retorna o botão ao estado padrão
+          document.getElementById('labelFileInput').textContent = '📁 Adicione imagem';
+
+      } catch (error) {
+          console.error('Erro ao enviar o arquivo:', error);
+          exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
+      }
+    }
 </script>
 
 
