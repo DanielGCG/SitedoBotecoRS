@@ -1,9 +1,9 @@
 <main>
     <h2 style="text-align: center;">Filme da Galera</h2>
     <div class="caixa-texto">
-        <h4>Filmes que são muito você!</h4>
+        <h4>Obras que são muito a gente!</h4>
         <h5>responda aqui para participar</h5>
-        <button class="branco" href="/recomendacao/questionario">Questionário</button>
+        <a class="branco" href="/recomendacao/questionario">Questionário</a>
     </div>
 
     <div class="formulario">
@@ -25,13 +25,23 @@
 <link rel="stylesheet" href="/css/lista.css">
 
 <style>
-    /* Estilo para o botão de fechar */
+    main {
+        text-align: center;
+    }
+
+    .caixa-texto h5 {
+        margin-bottom: 20px; /* Espaço entre o texto e o botão */
+    }
+
+    /* Estilo para o botão (agora um link) */
     .branco {
+        display: inline-block; /* Necessário para comportar margens como um botão */
         padding: 10px 20px;
         background-color: white; /* Branco */
         color: #333; /* Cor do texto */
         border: 1px solid #ccc; /* Borda clara */
         border-radius: 5px;
+        text-decoration: none; /* Remove o sublinhado padrão dos links */
         cursor: pointer;
         transition: background-color 0.3s ease;
     }
@@ -41,8 +51,6 @@
         cursor: url('/img/cursor-mao.png'), auto;
     }
 </style>
-
-
 
 <script type="module">
 import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
@@ -125,7 +133,7 @@ function adicionarItemLista(url, vetorNomes) {
     
     item.innerHTML = `
         <td style="text-align: center;">
-            Nome do Gênero
+            ${vetorNomes}
             <img src="${url}">
         </td>
         <td>${vetorNomes}</td>

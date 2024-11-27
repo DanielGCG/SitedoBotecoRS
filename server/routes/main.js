@@ -100,7 +100,16 @@ router.get('/recomendacao', (req, res) => {
         title: "Recomendações",
         description: "Trabalho 4"
     }
-    res.render('recomendacao');
+    res.render('recomendacao/recomendacao');
+});
+
+// Rota para página de o questionário das recomendações
+router.get('/recomendacao/questionario', (req, res) => {
+    const locals = {
+        title: "Recomendações",
+        description: "Trabalho 4"
+    }
+    res.render('recomendacao/questionario');
 });
 
 

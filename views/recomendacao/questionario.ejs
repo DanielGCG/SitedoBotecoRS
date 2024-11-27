@@ -1,0 +1,223 @@
+<main>
+    <h1>Avaliação de Filmes</h1>
+
+    <!-- Formulário para inserir o nome do usuário -->
+    <label for="nomeUsuario">Digite seu nome:</label>
+    <input type="text" id="nomeUsuario" placeholder="Seu nome">
+    
+    <!-- Tabela de filmes -->
+    <table style="margin-top: 20px;">
+      <thead>
+        <tr>
+          <th>Filme</th>
+          <th>Avaliação (0 a 10)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <img src="/img/recomendacao/1.png" alt="Minha Mãe é uma Peça">
+          </td>
+          <td>
+            <input type="number" id="notaFilme1" min="0" max="10" placeholder="Nota">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <img src="/img/recomendacao/2.png" alt="Até que a sorte nos separe">
+          </td>
+          <td>
+            <input type="number" id="notaFilme2" min="0" max="10" placeholder="Nota">
+          </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/3.png" alt="Pânico">
+            </td>
+            <td>
+              <input type="number" id="notaFilme3" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/4.png" alt="IT: A coisa">
+            </td>
+            <td>
+              <input type="number" id="notaFilme4" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/5.png" alt="Vingadores">
+            </td>
+            <td>
+              <input type="number" id="notaFilme5" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/6.png" alt="Velozes e Furiosos">
+            </td>
+            <td>
+              <input type="number" id="notaFilme6" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/7.png" alt="Jumanji">
+            </td>
+            <td>
+              <input type="number" id="notaFilme7" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/8.png" alt="Avatar">
+            </td>
+            <td>
+              <input type="number" id="notaFilme8" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/9.png" alt="Star Wars">
+            </td>
+            <td>
+              <input type="number" id="notaFilme9" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/10.png" alt="Interestelar">
+            </td>
+            <td>
+              <input type="number" id="notaFilme10" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/11.png" alt="Lala Land">
+            </td>
+            <td>
+              <input type="number" id="notaFilme11" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/12.png" alt="Crepúsculo">
+            </td>
+            <td>
+              <input type="number" id="notaFilme12" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/13.png" alt="Homem-Aranha: Aranhaverso">
+            </td>
+            <td>
+              <input type="number" id="notaFilme13" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/14.png" alt="Shrek">
+            </td>
+            <td>
+              <input type="number" id="notaFilme14" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/15.png" alt="A Vida é Bela">
+            </td>
+            <td>
+              <input type="number" id="notaFilme15" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/16.png" alt="Euphoria">
+            </td>
+            <td>
+              <input type="number" id="notaFilme16" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/17.png" alt="Turma da Mônica">
+            </td>
+            <td>
+              <input type="number" id="notaFilme17" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <img src="/img/recomendacao/18.png" alt="Procurando Nemo">
+            </td>
+            <td>
+              <input type="number" id="notaFilme18" min="0" max="10" placeholder="Nota">
+            </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <!-- Botão para salvar os dados -->
+    <button onclick="salvarAvaliacoes()">Salvar</button>
+  
+    <script>
+    function salvarAvaliacoes() {
+        const nomeUsuario = document.getElementById('nomeUsuario').value.trim();
+        const notas = [];
+
+        // Pega todas as notas inseridas dinamicamente
+        const inputsNotas = document.querySelectorAll('input[type="number"]');
+        inputsNotas.forEach(input => {
+        const nota = input.value.trim();
+        if (nota === '') {
+            alert('Por favor, insira notas para todos os filmes.');
+            return;
+        }
+        notas.push(parseInt(nota, 10));
+        });
+
+        if (!nomeUsuario) {
+        alert('Por favor, insira seu nome.');
+        return;
+        }
+
+        const conteudo = `${nomeUsuario}\n[${notas.map(nota => `${nota}`).join(', ')}]`;
+
+        // Cria o arquivo para download
+        const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${nomeUsuario}.txt`; // Define o nome do arquivo usando o nome do usuário
+        link.click();
+    }
+</script>
+
+
+<link rel="stylesheet" href="/css/lista.css">
+
+<style>
+    main {
+        text-align: center;
+    }
+    /* Estilo para o botão (agora um link) */
+    .branco {
+        display: inline-block; /* Necessário para comportar margens como um botão */
+        padding: 10px 20px;
+        background-color: white; /* Branco */
+        color: #333; /* Cor do texto */
+        border: 1px solid #ccc; /* Borda clara */
+        border-radius: 5px;
+        text-decoration: none; /* Remove o sublinhado padrão dos links */
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .branco:hover {
+        background-color: #f1f1f1; /* Tom mais claro no hover */
+        cursor: url('/img/cursor-mao.png'), auto;
+    }
+</style>
