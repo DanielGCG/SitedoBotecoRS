@@ -82,6 +82,14 @@ router.get('/galeria/pets', (req, res) => {
     res.render('galeria/pets', { locals: locals });
 });
 
+router.get('/galeria/destaques', (req, res) => {
+    const locals = {
+        title: "Destaques do Boteco",
+        description: "Só coisa boa"
+    }
+    res.render('galeria/destaques', { locals: locals });
+});
+
 router.get('/galeria/shitpost', (req, res) => {
     const locals = {
         title: "Muito cocôpost",
