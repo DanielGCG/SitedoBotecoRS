@@ -19,7 +19,7 @@
     <div class="pagina do match">
         <div id="textoMatch" style="display: none;">
             <h3>Parece que você e <span id="nomeMatch"></span> tem muito em comum!</h3>
-            <h4>Veja o que vocês mais amam e mais odeiam!</h4>
+            <h4>Veja as obras que vocês concordam em amar e odiar!</h4>
         </div>
     
         <div class="galeria" id="galeria">
@@ -285,7 +285,7 @@ function getAcordoFilme(vetor1, vetor2, tipo) {
     for (let i = 0; i < vetor1.length; i++) {
         const mediaNota = (vetor1[i] + vetor2[i]) / 2;  // Média das notas dos dois usuários
 
-        if (tipo === 'bom' && mediaNota > 8) {
+        if (tipo === 'bom' && mediaNota >= 9) {
             // Se o filme for considerado bom (nota média maior ou igual a 7)
             filmesBons.push({indice: i + 1, mediaNota});
         } else if (tipo === 'ruim' && mediaNota <= 4) {
