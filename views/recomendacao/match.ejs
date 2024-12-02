@@ -28,7 +28,6 @@
     </div>    
 </main>
 
-
 <style>
     main {
         text-align: center;
@@ -197,25 +196,18 @@ async function compararUsuarios(vetorUsuarioAtual) {
     const listaUsuariosRef = ref(storage, 'recomendacoes/usuarios');
     const snapshot = await listAll(listaUsuariosRef);
     
-    let maiorDistancia = -Infinity;
     let menorDistancia = Infinity;
-    let usuarioMaiorDistancia = null;
     let usuarioMenorDistancia = null;
 
     for (const itemRef of snapshot.items) {
         // Não compara com o próprio usuário
-        if (itemRef.name === `${document.getElementById("nomeUsuario").value}.txt`) continue;  // Comparar com o nome inserido pelo usuário
+        if (itemRef.name === `${document.getElementById("nomeUsuario").value}.txt`) continue;
 
         const fileUrl = await getDownloadURL(itemRef);
         const notasOutroUsuario = await obterNotasDoArquivo(itemRef.name); // Função que extrai as notas do arquivo
 
         if (notasOutroUsuario) {
             const distancia = calcularDistancia(vetorUsuarioAtual, notasOutroUsuario);
-            
-            if (distancia > maiorDistancia) {
-                maiorDistancia = distancia;
-                usuarioMaiorDistancia = itemRef;
-            }
             
             if (distancia < menorDistancia) {
                 menorDistancia = distancia;
@@ -224,10 +216,9 @@ async function compararUsuarios(vetorUsuarioAtual) {
         }
     }
 
-    console.log('Maior Distância:', maiorDistancia, 'Usuário:', usuarioMaiorDistancia);
-    console.log('Menor Distância:', menorDistancia, 'Usuário:', usuarioMenorDistancia);
+    console.log('Menor Distância:', menorDistancia, 'Usuário:', usuarioMenorDistancia?.name.replace('.txt', ''));
 
-    return { usuarioMaiorDistancia, usuarioMenorDistancia };
+    return usuarioMenorDistancia;
 }
 
 // Função para exibir o match com o usuário
@@ -236,43 +227,40 @@ async function exibirMatch(nomeUsuario) {
     const vetorUsuarioAtual = await obterNotasDoArquivo(nomeExibicao);
 
     if (vetorUsuarioAtual) {
-        const { usuarioMaiorDistancia, usuarioMenorDistancia } = await compararUsuarios(vetorUsuarioAtual);
+        const usuarioMenorDistancia = await compararUsuarios(vetorUsuarioAtual);
 
-        if (usuarioMaiorDistancia && usuarioMenorDistancia) {
-            document.getElementById('nomeMatch').textContent = usuarioMenorDistancia.name.replace('.txt', '');
+        if (!usuarioMenorDistancia) {
+            alert("Nenhum outro usuário foi encontrado para comparação.");
+            return;
+        }
+
+        document.getElementById('nomeMatch').textContent = usuarioMenorDistancia.name.replace('.txt', '');
+
+        // Carrega os dados para a galeria
+        const notasMenorDistancia = await obterNotasDoArquivo(usuarioMenorDistancia.name.replace('.txt', ''));
+        if (notasMenorDistancia) {
+            const filmesBons = getAcordoFilme(vetorUsuarioAtual, notasMenorDistancia, 'bom');
+            const filmesRuins = getAcordoFilme(vetorUsuarioAtual, notasMenorDistancia, 'ruim');
+
             const galeria = document.getElementById('galeria');
-            galeria.innerHTML = ""; // Limpa a galeria antes de adicionar novas imagens
+            galeria.innerHTML = ""; // Limpa a galeria
 
-            const notasMaiorDistancia = await obterNotasDoArquivo(usuarioMaiorDistancia.name.replace('.txt', ''));
-            const notasMenorDistancia = await obterNotasDoArquivo(usuarioMenorDistancia.name.replace('.txt', ''));
+            filmesBons.forEach(filme => {
+                const img = document.createElement('div');
+                img.classList.add('imagem');
+                img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">Bomzão! :D</div>`;
+                galeria.appendChild(img);
+            });
 
-            if (notasMaiorDistancia && notasMenorDistancia) {
-                // Busca filmes bons e ruins
-                const filmesBons = getAcordoFilme(notasMaiorDistancia, notasMenorDistancia, 'bom');
-                const filmesRuins = getAcordoFilme(notasMaiorDistancia, notasMenorDistancia, 'ruim');
+            filmesRuins.forEach(filme => {
+                const img = document.createElement('div');
+                img.classList.add('imagem');
+                img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">💩Ruinzinho💩</div>`;
+                galeria.appendChild(img);
+            });
 
-                // Exibe filmes bons
-                filmesBons.forEach(filme => {
-                    const img = document.createElement('div');
-                    img.classList.add('imagem');
-                    img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">Bomzão! :D</div>`;
-                    galeria.appendChild(img);
-                });
-
-                // Exibe filmes ruins
-                filmesRuins.forEach(filme => {
-                    const img = document.createElement('div');
-                    img.classList.add('imagem');
-                    img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">Ruinzinho</div>`;
-                    galeria.appendChild(img);
-                });
-            }
-
-            // Mostra o texto do match
+            // Exibe o texto do match
             document.getElementById("textoMatch").style.display = 'block';
-
-            // Exibe a seção de match
-            document.getElementById("paginaMatch").style.display = 'block';
         }
     }
 }
@@ -286,10 +274,10 @@ function getAcordoFilme(vetor1, vetor2, tipo) {
         const mediaNota = (vetor1[i] + vetor2[i]) / 2;  // Média das notas dos dois usuários
 
         if (tipo === 'bom' && mediaNota >= 9) {
-            // Se o filme for considerado bom (nota média maior ou igual a 7)
+            // Se o filme for considerado bom (nota média maior ou igual a 9)
             filmesBons.push({indice: i + 1, mediaNota});
         } else if (tipo === 'ruim' && mediaNota <= 4) {
-            // Se o filme for considerado ruim (nota média menor ou igual a 3)
+            // Se o filme for considerado ruim (nota média menor ou igual a 4)
             filmesRuins.push({indice: i + 1, mediaNota});
         }
     }
