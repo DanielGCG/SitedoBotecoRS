@@ -1,0 +1,112 @@
+.velas-container {
+  width: 100%;
+  display: flex;
+  overflow: auto;
+  min-height: 100vh;
+  align-items: center;
+  flex-direction: column;
+}
+.velas-velas {
+  width: 100%;
+  height: 1080px;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  align-items: flex-start;
+  flex-shrink: 0;
+  background-color: rgba(0, 0, 0, 1);
+}
+.velas-wfmbt {
+  top: 347px;
+  left: -235px;
+  width: 954px;
+  height: 652px;
+  position: absolute;
+}
+.velas-wfmbtwfmbt {
+  top: 749px;
+  left: 1325px;
+  width: 735px;
+  height: 500px;
+  position: absolute;
+}
+.velas-oolho {
+  top: 415px;
+  left: 320px;
+  width: 1254px;
+  height: 751px;
+  position: absolute;
+}
+.velas-hell {
+  top: 0px;
+  left: 0px;
+  width: 1920px;
+  height: 540px;
+  position: absolute;
+}
+.velas-v {
+  top: 146px;
+  left: 120px;
+  width: 216px;
+  height: 176px;
+  position: absolute;
+}
+.velas-e {
+  top: 299px;
+  left: 417px;
+  width: 200px;
+  height: 200px;
+  position: absolute;
+}
+.velas-l {
+  top: 146px;
+  left: 708px;
+  width: 277px;
+  height: 293px;
+  position: absolute;
+}
+.velas-a {
+  top: 232px;
+  left: 904px;
+  width: 471px;
+  height: 308px;
+  position: absolute;
+}
+.velas-s {
+  top: 15px;
+  left: 1342px;
+  width: 240px;
+  height: 451px;
+  position: absolute;
+}
+.velas-wfmbtwfmbtwfmbtwfmbtwfmbtwfmbtwfmbt {
+  top: 692px;
+  left: -130px;
+  width: 499px;
+  height: 442px;
+  position: absolute;
+}
+.velas-ptpmiptrvfuvepwf {
+  top: 605px;
+  left: 1462px;
+  width: 476px;
+  height: 191px;
+  position: absolute;
+}
+.velas-imagerftgf {
+  top: 540px;
+  left: 1284px;
+  width: 721px;
+  height: 256px;
+  position: absolute;
+}
+.velas-link {
+  display: contents;
+}
+.velas-image3 {
+  top: 740px;
+  left: 887px;
+  width: 146px;
+  height: 248px;
+  position: absolute;
+}

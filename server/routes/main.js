@@ -98,8 +98,19 @@ router.get('/galeria/shitpost', (req, res) => {
     res.render('galeria/shitpost', { locals: locals });
 });
 
+/* ------ EASTER EGGS ------*/
 
-/* ------ Página de Recomendações ------*/
+
+router.get('/velas', (req, res) => {
+    const locals = {
+        title: "Velas",
+        description: "VelasVelasVelasVelasVelasVelasVelas"
+    }
+    res.render('eastereggs/velas', { locals: locals });
+});
+
+
+/* ------ Página de TRABALHO DE ALA ------*/
 
 
 // Rota para página de recomendações
