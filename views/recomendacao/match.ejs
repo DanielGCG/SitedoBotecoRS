@@ -14,7 +14,13 @@
 
     <div id="loading" style="display: none;">
         <img src="/img/carregando.gif" alt="Carregando..." />
+        <div id="indicadorStatus" style="display: none;">
+            <p id="statusTexto">Baixando vetores...</p>
+            <!-- Barra de carregamento -->
+            <progress id="barraCarregamento" value="0" max="100" style="width: 100%; height: 20px;"></progress>
+        </div>
     </div>
+    
     
     <div class="pagina do match">
         <div id="textoMatch" style="display: none;">
@@ -111,6 +117,30 @@
         width: 150px; /* Ajuste o tamanho do GIF conforme necessário */
     }
 
+    #barraCarregamento {
+        -webkit-appearance: none; /* Para o Safari */
+        appearance: none;
+        width: 100%;
+        height: 20px;
+        border-radius: 10px;
+        background-color: #f1f1f1; /* Cor do fundo */
+    }
+
+    #barraCarregamento::-webkit-progress-bar {
+        background-color: #f1f1f1; /* Cor do fundo da barra */
+        border-radius: 10px;
+    }
+
+    #barraCarregamento::-webkit-progress-value {
+        background-color: var(--cor-marrom); /* Cor da parte preenchida da barra */
+        border-radius: 10px;
+    }
+
+    #barraCarregamento::-moz-progress-bar {
+        background-color: var(--cor-marrom); /* Cor da parte preenchida da barra para Firefox */
+        border-radius: 10px;
+    }
+
     input[type="text"] {
         margin-top: 10px; /* Espaçamento superior para o botão */
         width: 80%; /* Largura ajustável */
@@ -138,60 +168,69 @@
 
 
 <script type="module">
-    import { getStorage, ref, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-  
-    // Configuração do Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
-        authDomain: "boteco-6fcfa.firebaseapp.com",
-        projectId: "boteco-6fcfa",
-        storageBucket: "boteco-6fcfa.appspot.com",
-        messagingSenderId: "531032694476",
-        appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
-    };
-  
-    const app = initializeApp(firebaseConfig);
-    const storage = getStorage(app);
-  
-    // Função para calcular a distância Euclidiana entre dois vetores
-    function calcularDistancia(vetor1, vetor2) {
-        if (vetor1.length !== vetor2.length) {
-            throw new Error("Ambos os vetores devem ter o mesmo número de elementos.");
-        }
+import { getStorage, ref, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 
-        let somaQuadrados = 0;
-        for (let i = 0; i < vetor1.length; i++) {
-            somaQuadrados += Math.pow(vetor1[i] - vetor2[i], 2);
-        }
-        return Math.sqrt(somaQuadrados);  // Distância Euclidiana
+// Configuração do Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
+    authDomain: "boteco-6fcfa.firebaseapp.com",
+    projectId: "boteco-6fcfa",
+    storageBucket: "boteco-6fcfa.appspot.com",
+    messagingSenderId: "531032694476",
+    appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
+};
+
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+
+// Função para calcular a distância Euclidiana entre dois vetores
+function calcularDistancia(vetor1, vetor2) {
+    if (vetor1.length !== vetor2.length) {
+        throw new Error("Ambos os vetores devem ter o mesmo número de elementos.");
     }
 
-  
-    // Função para obter o vetor de notas do arquivo de um usuário específico
-    async function obterNotasDoArquivo(nomeUsuario) {
-        // Garante que a extensão .txt não seja duplicada
-        const nomeSemExtensao = nomeUsuario.replace('.txt', ''); // Remove .txt se já estiver no nome
-        const filePath = `recomendacoes/usuarios/${nomeSemExtensao}.txt`; // Adiciona a extensão .txt apenas uma vez
-        const fileRef = ref(storage, filePath);
+    let somaQuadrados = 0;
+    for (let i = 0; i < vetor1.length; i++) {
+        somaQuadrados += Math.pow(vetor1[i] - vetor2[i], 2);
+    }
+    return Math.sqrt(somaQuadrados);  // Distância Euclidiana
+}
 
-        try {
-            const fileUrl = await getDownloadURL(fileRef);
-            const response = await fetch(fileUrl);
-            const texto = await response.text();
-            
-            const linhas = texto.split('\n');
-            const notasString = linhas[1];  // A segunda linha contém o array de notas
-            const notas = JSON.parse(notasString); // Converte o array JSON para um vetor de números
-            
-            return notas;
-        } catch (error) {
-            console.error("Erro ao obter notas:", error);
-            return null;
-        }
+// Objeto para armazenar os dados localmente (cache)
+let cacheNotas = {}; 
+
+// Função para obter o vetor de notas do arquivo de um usuário específico
+async function obterNotasDoArquivo(nomeUsuario) {
+    // Verifica se já temos os dados no cache
+    if (cacheNotas[nomeUsuario]) {
+        return cacheNotas[nomeUsuario]; // Retorna os dados do cache
     }
 
-    // Função para comparar o usuário atual com outros usuários
+    // Garante que a extensão .txt não seja duplicada
+    const nomeSemExtensao = nomeUsuario.replace('.txt', ''); // Remove .txt se já estiver no nome
+    const filePath = `recomendacoes/usuarios/${nomeSemExtensao}.txt`; // Adiciona a extensão .txt apenas uma vez
+    const fileRef = ref(storage, filePath);
+
+    try {
+        const fileUrl = await getDownloadURL(fileRef);
+        const response = await fetch(fileUrl);
+        const texto = await response.text();
+        
+        const linhas = texto.split('\n');
+        const notasString = linhas[1];  // A segunda linha contém o array de notas
+        const notas = JSON.parse(notasString); // Converte o array JSON para um vetor de números
+        
+        // Armazena os dados no cache
+        cacheNotas[nomeUsuario] = notas;
+        return notas;
+    } catch (error) {
+        console.error("Erro ao obter notas:", error);
+        return null;
+    }
+}
+
+// Função para comparar o usuário atual com outros usuários
 async function compararUsuarios(vetorUsuarioAtual) {
     const listaUsuariosRef = ref(storage, 'recomendacoes/usuarios');
     const snapshot = await listAll(listaUsuariosRef);
@@ -199,9 +238,26 @@ async function compararUsuarios(vetorUsuarioAtual) {
     let menorDistancia = Infinity;
     let usuarioMenorDistancia = null;
 
+    // Obtém o elemento do status
+    const indicadorStatus = document.getElementById("indicadorStatus");
+    const statusTexto = document.getElementById("statusTexto");
+    const barraCarregamento = document.getElementById("barraCarregamento");
+
+    // Mostra o indicador de status
+    indicadorStatus.style.display = 'block';
+
+    // Inicializa o contador de comparações
+    let comparacoesFeitas = 0;
+    const totalUsuarios = (snapshot.items.length) - 1;
+
     for (const itemRef of snapshot.items) {
         // Não compara com o próprio usuário
         if (itemRef.name === `${document.getElementById("nomeUsuario").value}.txt`) continue;
+
+        // Atualiza o status e a barra de progresso
+        comparacoesFeitas++;
+        statusTexto.textContent = `Comparei ${comparacoesFeitas} de ${totalUsuarios} vetores`;
+        barraCarregamento.value = (comparacoesFeitas / totalUsuarios) * 100; // Atualiza a barra de progresso
 
         const fileUrl = await getDownloadURL(itemRef);
         const notasOutroUsuario = await obterNotasDoArquivo(itemRef.name); // Função que extrai as notas do arquivo
@@ -217,6 +273,9 @@ async function compararUsuarios(vetorUsuarioAtual) {
     }
 
     console.log('Menor Distância:', menorDistancia, 'Usuário:', usuarioMenorDistancia?.name.replace('.txt', ''));
+
+    // Esconde o indicador de status e barra de progresso ao final
+    indicadorStatus.style.display = 'none';
 
     return usuarioMenorDistancia;
 }
@@ -248,7 +307,7 @@ async function exibirMatch(nomeUsuario) {
             filmesBons.forEach(filme => {
                 const img = document.createElement('div');
                 img.classList.add('imagem');
-                img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">Bomzão! :D</div>`;
+                img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">⭐Bomzão!⭐</div>`;
                 galeria.appendChild(img);
             });
 
