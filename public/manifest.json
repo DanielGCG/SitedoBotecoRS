@@ -3,8 +3,8 @@
     "short_name": "Boteco do R$",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#ffffff",
+    "background_color": "#80b56b",
+    "theme_color": "#80b56b",
     "icons": [
       {
         "src": "/img/icon-192x192.png",
