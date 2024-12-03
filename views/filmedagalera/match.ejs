@@ -211,7 +211,7 @@ function getAcordoFilme(vetor1, vetor2, tipo) {
             // Se o filme for considerado bom (nota média maior ou igual a 9)
             filmesBons.push({indice: i + 1, mediaNota});
         } else if (tipo === 'ruim' && mediaNota <= 4 && vetor1[i] <= 5 && vetor2[i] <= 5) {
-            // Se o filme for considerado ruim (nota média menor <= a 4) e nenhuma nota maior que 6
+            // Se o filme for considerado ruim (nota média menor <= a 4) e nenhuma nota maior que 5
             filmesRuins.push({indice: i + 1, mediaNota});
         }
     }
