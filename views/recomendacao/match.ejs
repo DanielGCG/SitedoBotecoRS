@@ -184,6 +184,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 
+/* ----- FUNÇÕES COM RELAÇÃO A ÁLGEBRA LINEAR ----- */
+
 // Função para calcular a distância Euclidiana entre dois vetores
 function calcularDistancia(vetor1, vetor2) {
     if (vetor1.length !== vetor2.length) {
@@ -197,37 +199,24 @@ function calcularDistancia(vetor1, vetor2) {
     return Math.sqrt(somaQuadrados);  // Distância Euclidiana
 }
 
-// Objeto para armazenar os dados localmente (cache)
-let cacheNotas = {}; 
+// Função para encontrar os filmes que ambos os usuários concordam ser bons ou ruins
+function getAcordoFilme(vetor1, vetor2, tipo) {
+    let filmesBons = [];
+    let filmesRuins = [];
+    
+    for (let i = 0; i < vetor1.length; i++) {
+        const mediaNota = (vetor1[i] + vetor2[i]) / 2;  // Média das notas dos dois usuários
 
-// Função para obter o vetor de notas do arquivo de um usuário específico
-async function obterNotasDoArquivo(nomeUsuario) {
-    // Verifica se já temos os dados no cache
-    if (cacheNotas[nomeUsuario]) {
-        return cacheNotas[nomeUsuario]; // Retorna os dados do cache
+        if (tipo === 'bom' && mediaNota >= 9) {
+            // Se o filme for considerado bom (nota média maior ou igual a 9)
+            filmesBons.push({indice: i + 1, mediaNota});
+        } else if (tipo === 'ruim' && mediaNota <= 4) {
+            // Se o filme for considerado ruim (nota média menor ou igual a 4)
+            filmesRuins.push({indice: i + 1, mediaNota});
+        }
     }
 
-    // Garante que a extensão .txt não seja duplicada
-    const nomeSemExtensao = nomeUsuario.replace('.txt', ''); // Remove .txt se já estiver no nome
-    const filePath = `recomendacoes/usuarios/${nomeSemExtensao}.txt`; // Adiciona a extensão .txt apenas uma vez
-    const fileRef = ref(storage, filePath);
-
-    try {
-        const fileUrl = await getDownloadURL(fileRef);
-        const response = await fetch(fileUrl);
-        const texto = await response.text();
-        
-        const linhas = texto.split('\n');
-        const notasString = linhas[1];  // A segunda linha contém o array de notas
-        const notas = JSON.parse(notasString); // Converte o array JSON para um vetor de números
-        
-        // Armazena os dados no cache
-        cacheNotas[nomeUsuario] = notas;
-        return notas;
-    } catch (error) {
-        console.error("Erro ao obter notas:", error);
-        return null;
-    }
+    return tipo === 'bom' ? filmesBons : filmesRuins;
 }
 
 // Função para comparar o usuário atual com outros usuários
@@ -280,6 +269,43 @@ async function compararUsuarios(vetorUsuarioAtual) {
     return usuarioMenorDistancia;
 }
 
+// Objeto para armazenar os dados localmente (cache)
+let cacheNotas = {};
+
+/* ----- FUNÇÕES DE LEITURA DA NÚVEM ----- */
+
+// Função para obter o vetor de notas do arquivo de um usuário específico
+async function obterNotasDoArquivo(nomeUsuario) {
+    // Verifica se já temos os dados no cache
+    if (cacheNotas[nomeUsuario]) {
+        return cacheNotas[nomeUsuario]; // Retorna os dados do cache
+    }
+
+    // Garante que a extensão .txt não seja duplicada
+    const nomeSemExtensao = nomeUsuario.replace('.txt', ''); // Remove .txt se já estiver no nome
+    const filePath = `recomendacoes/usuarios/${nomeSemExtensao}.txt`; // Adiciona a extensão .txt apenas uma vez
+    const fileRef = ref(storage, filePath);
+
+    try {
+        const fileUrl = await getDownloadURL(fileRef);
+        const response = await fetch(fileUrl);
+        const texto = await response.text();
+        
+        const linhas = texto.split('\n');
+        const notasString = linhas[1];  // A segunda linha contém o array de notas
+        const notas = JSON.parse(notasString); // Converte o array JSON para um vetor de números
+        
+        // Armazena os dados no cache
+        cacheNotas[nomeUsuario] = notas;
+        return notas;
+    } catch (error) {
+        console.error("Erro ao obter notas:", error);
+        return null;
+    }
+}
+
+/* ----- FUNÇÕES DE LEITURA ----- */
+
 // Função para exibir o match com o usuário
 async function exibirMatch(nomeUsuario) {
     const nomeExibicao = nomeUsuario.replace('.txt', '');
@@ -324,25 +350,7 @@ async function exibirMatch(nomeUsuario) {
     }
 }
 
-// Função para encontrar os filmes que ambos os usuários concordam ser bons ou ruins
-function getAcordoFilme(vetor1, vetor2, tipo) {
-    let filmesBons = [];
-    let filmesRuins = [];
-    
-    for (let i = 0; i < vetor1.length; i++) {
-        const mediaNota = (vetor1[i] + vetor2[i]) / 2;  // Média das notas dos dois usuários
-
-        if (tipo === 'bom' && mediaNota >= 9) {
-            // Se o filme for considerado bom (nota média maior ou igual a 9)
-            filmesBons.push({indice: i + 1, mediaNota});
-        } else if (tipo === 'ruim' && mediaNota <= 4) {
-            // Se o filme for considerado ruim (nota média menor ou igual a 4)
-            filmesRuins.push({indice: i + 1, mediaNota});
-        }
-    }
-
-    return tipo === 'bom' ? filmesBons : filmesRuins;
-}
+/* ----- BOTAÇÃO DE AÇÃO ----- */
 
 // Evento para buscar o match quando o botão for clicado
 document.getElementById("editarNomeBtn").addEventListener("click", async function() {
