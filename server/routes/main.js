@@ -103,30 +103,30 @@ router.get('/galeria/shitpost', (req, res) => {
 
 
 // Rota para página de recomendações
-router.get('/recomendacao', (req, res) => {
+router.get('/filmedagalera', (req, res) => {
     const locals = {
-        title: "Recomendações",
-        description: "Trabalho 4"
+        title: "Filme da Galera",
+        description: "Trabalho de ALA"
     }
-    res.render('recomendacao/recomendacao');
+    res.render('filmedagalera/filmedagalera', { locals: locals });
 });
 
 // Rota para página de o questionário das recomendações
 router.get('/recomendacao/questionario', (req, res) => {
     const locals = {
-        title: "Recomendações",
-        description: "Trabalho 4"
+        title: "Questionário",
+        description: "Responda com sinceridade!"
     }
-    res.render('recomendacao/questionario');
+    res.render('filmedagalera/questionario', { locals: locals });
 });
 
 // Rota para página de o match das recomendações
 router.get('/recomendacao/match', (req, res) => {
     const locals = {
-        title: "Recomendações",
-        description: "Trabalho 4"
+        title: "Match!",
+        description: "Veja quem é muito você!"
     }
-    res.render('recomendacao/match');
+    res.render('filmedagalera/match', { locals: locals });
 });
 
 

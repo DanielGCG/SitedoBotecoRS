@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="cursor: url('/img/cursor.png'), auto;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,14 +12,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
+
     <!-- Progressive Web Apps -->
     <link rel="manifest" href="/manifest.json">
-    <script src="/public/js/service-worker-registration.js"></script>
+    <script src="/service-worker-registration.js"></script>
 
+    <!-- Favicon -->
+    <link rel="icon" href="/img/icon-192x192.png" type="image/png">
+
+    <!-- Script da Main -->
     <script defer src="/js/script.js"></script>
+
 </head>
     <body>
-        <%- include('../partials/header.ejs')  %>
             <%- body %>
     </body>
 </html>
