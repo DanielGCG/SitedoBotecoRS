@@ -112,7 +112,7 @@ router.get('/filmedagalera', (req, res) => {
 });
 
 // Rota para página de o questionário das recomendações
-router.get('/recomendacao/questionario', (req, res) => {
+router.get('/filmedagalera/questionario', (req, res) => {
     const locals = {
         title: "Questionário",
         description: "Responda com sinceridade!"
@@ -121,7 +121,7 @@ router.get('/recomendacao/questionario', (req, res) => {
 });
 
 // Rota para página de o match das recomendações
-router.get('/recomendacao/match', (req, res) => {
+router.get('/filmedagalera/match', (req, res) => {
     const locals = {
         title: "Match!",
         description: "Veja quem é muito você!"
