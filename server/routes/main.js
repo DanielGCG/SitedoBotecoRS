@@ -109,6 +109,14 @@ router.get('/velas', (req, res) => {
     res.render('eastereggs/velas', { locals: locals });
 });
 
+router.get('/notificacoes', (req, res) => {
+    const locals = {
+        title: "Match!",
+        description: "Veja quem é muito você!"
+    }
+    res.render('notificacoes', { locals: locals });
+});
+
 
 /* ------ Página de TRABALHO DE ALA ------*/
 
