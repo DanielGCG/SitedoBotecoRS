@@ -1,39 +1,102 @@
-<h1>AINDA EM CONSTRUÇÃO</h1>
+<main>
+    <h2>Cutuque alguém!</h2>
 
-<!-- Campo de texto para o @mencionado -->
-<input type="text" id="mention" placeholder="Digite @mencionado" />
+    <!-- Caixa de texto bonitinha -->
+    <div class="caixa-texto">
+        <h4>Para cutucar no twitter</h4>
+        <h5>Use o @dapessoa e escreva uma mensagem!</h5>
+    </div>
 
-<!-- Campo de texto para escrever a mensagem -->
-<textarea id="messageText" placeholder="Escreva o resto da mensagem..."></textarea>
+    <div class="caixa-texto">
+        <!-- Campo de texto para o @mencionado -->
+        <input type="text" id="mention" placeholder="Digite @marcado" />
 
-<!-- Botão para enviar o tweet -->
-<button id="tweetButton">Postar Tweet</button>
+        <!-- Campo de texto para escrever a mensagem -->
+        <textarea id="messageText" placeholder="Escreva o resto da mensagem..."></textarea>
 
-<script>
-  document.getElementById('tweetButton').addEventListener('click', () => {
-    // Captura o texto do @mencionado e a mensagem
-    const mention = document.getElementById('mention').value.trim();
-    const messageText = document.getElementById('messageText').value.trim();
+        <!-- Botão para enviar o tweet -->
+        <button id="tweetButton">Postar Tweet</button>
+    </div>
 
-    // Verifica se o @mencionado e a mensagem não estão vazios
-    if (!mention || !messageText) {
-      alert('Por favor, preencha ambos os campos.');
-      return;
+    <!-- Embed do Twitter (vazia inicialmente, será preenchida após o envio do tweet) -->
+    <div class="post-twitter"></div>
+</main>
+
+<style>
+    main {
+        text-align: center;
     }
 
-    // Concatena a mensagem final
-    const tweetText = `Você foi cutucado 😯 ${mention}!\n${messageText}`;
+    .caixa-texto {
+        margin: 20px auto; /* Centraliza a caixa e adiciona espaçamento */
+        display: flex;
+        flex-direction: column; /* Coloca os elementos em coluna */
+        align-items: center; /* Centraliza os elementos horizontalmente */
+    }
 
-    // Envia o texto do tweet para o backend
-    fetch('/tweet', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',  // Especifica o tipo de conteúdo como JSON
-      },
-      body: JSON.stringify({ text: tweetText }),  // Envia o texto do tweet no corpo
-    })
-      .then(response => response.text())
-      .then(data => alert(data))  // Exibe a resposta do servidor
-      .catch(error => alert('Erro: ' + error));  // Caso haja um erro
-  });
+    #mention,
+    #messageText,
+    #tweetButton {
+        margin: 10px 0; /* Adiciona espaçamento vertical entre os elementos */
+        width: 80%; /* Ajusta a largura dos campos para alinhamento */
+        max-width: 400px; /* Limita o tamanho máximo */
+    }
+
+    #messageText {
+        height: 100px; /* Define a altura da área de texto */
+        resize: vertical; /* Permite redimensionar verticalmente */
+    }
+
+    #tweetButton {
+        cursor: pointer; /* Indica que é clicável */
+    }
+
+    .post-twitter {
+        margin-top: 20px;
+    }
+</style>
+
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<script>
+    document.getElementById('tweetButton').addEventListener('click', () => {
+      // Captura o texto do @mencionado e a mensagem
+      const mention = document.getElementById('mention').value.trim();
+      const messageText = document.getElementById('messageText').value.trim();
+  
+      // Verifica se o @mencionado e a mensagem não estão vazios
+      if (!mention || !messageText) {
+        alert('Por favor, preencha ambos os campos.');
+        return;
+      }
+  
+      // Concatena a mensagem final
+      const tweetText = `${mention}, ${messageText}`;
+  
+      // Envia o texto do tweet para o backend
+      fetch('/tweet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',  // Especifica o tipo de conteúdo como JSON
+        },
+        body: JSON.stringify({ text: tweetText }),  // Envia o texto do tweet no corpo
+      })
+        .then(response => response.json())  // Espera o JSON com a URL do tweet
+        .then(data => {
+            if (data.tweetUrl) {
+                // Atualiza a embed com o novo tweet
+                const postTwitterDiv = document.querySelector('.post-twitter');
+                postTwitterDiv.innerHTML = `
+                    <blockquote class="twitter-tweet">
+                        <a href="${data.tweetUrl}"></a>
+                    </blockquote>
+                `;
+                // Recarrega o script da plataforma do Twitter para renderizar o embed
+                twttr.widgets.load();
+            } else {
+                alert('Tweet enviado, mas o URL do tweet não foi retornado.');
+            }
+        })
+        .catch(error => alert('Erro: ' + error));  // Caso haja um erro
+    });
 </script>
