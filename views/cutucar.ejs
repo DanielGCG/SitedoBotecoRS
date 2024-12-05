@@ -1,24 +1,24 @@
 <main>
     <h2>Cutuque alguém!</h2>
 
-    <!-- Caixa de texto bonitinha -->
     <div class="caixa-texto">
-        <h4>Para cutucar no twitter</h4>
-        <h5>Use o @dapessoa e escreva uma mensagem!</h5>
+        <h4>Para cutucar no Twitter</h4>
+        <h5>Use o @dapessoa e escreva uma mensagem anônima!</h5>
     </div>
 
     <div class="caixa-texto">
         <!-- Campo de texto para o @mencionado -->
-        <input type="text" id="mention" placeholder="Digite @marcado" />
-
+        <input class="entrada-texto" type="text" id="mention" placeholder="Digite @marcado" autocomplete="off" />
+        <!-- Div para mostrar sugestões -->
+        <div id="suggestions" class="suggestions"></div>
+    
         <!-- Campo de texto para escrever a mensagem -->
-        <textarea id="messageText" placeholder="Escreva o resto da mensagem..."></textarea>
-
+        <textarea class="entrada-texto-grande" id="messageText" placeholder="Escreva o resto da mensagem..."></textarea>
+    
         <!-- Botão para enviar o tweet -->
         <button id="tweetButton">Postar Tweet</button>
-    </div>
+    </div>    
 
-    <!-- Embed do Twitter (vazia inicialmente, será preenchida após o envio do tweet) -->
     <div class="post-twitter"></div>
 </main>
 
@@ -28,75 +28,198 @@
     }
 
     .caixa-texto {
-        margin: 20px auto; /* Centraliza a caixa e adiciona espaçamento */
+        margin: 20px auto;
         display: flex;
-        flex-direction: column; /* Coloca os elementos em coluna */
-        align-items: center; /* Centraliza os elementos horizontalmente */
+        flex-direction: column;
+        align-items: center;
     }
 
-    #mention,
-    #messageText,
+    .entrada-texto {
+        margin-top: 10px; /* Espaçamento superior para o botão */
+        width: 80%; /* Largura ajustável */
+        max-width: 400px; /* Limita a largura máxima */
+        padding: 12px 20px; /* Espaçamento interno */
+        font-size: 16px; /* Tamanho da fonte */
+        border: 1px solid #ccc; /* Cor da borda */
+        border-radius: 8px; /* Bordas arredondadas */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+        outline: none; /* Remove o outline padrão */
+        transition: all 0.3s ease; /* Animação suave */
+        opacity: 70%;
+        margin-bottom: 20px; /* Adiciona espaçamento abaixo do input */
+        cursor: url('/img/cursor-texto.png'), auto;
+    }
+
+    .entrada-texto-grande {
+        margin-top: 10px; /* Espaçamento superior */
+        width: 80%; /* Largura ajustável */
+        max-width: 400px; /* Limita a largura máxima */
+        height: 200px; /* Aumenta a altura vertical */
+        padding: 12px 20px; /* Espaçamento interno */
+        font-size: 16px; /* Tamanho da fonte */
+        border: 1px solid #ccc; /* Cor da borda */
+        border-radius: 8px; /* Bordas arredondadas */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+        outline: none; /* Remove o outline padrão */
+        transition: all 0.3s ease; /* Animação suave */
+        opacity: 70%;
+        margin-bottom: 20px; /* Espaçamento abaixo */
+        cursor: url('/img/cursor-texto.png'), auto;
+        resize: vertical; /* Permite redimensionar somente verticalmente */
+    }
+
+    .entrada-texto:focus {
+        border-color: #4caf50; /* Cor da borda ao focar */
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); /* Sombra mais destacada */
+        opacity: 100%;
+        cursor: url('/img/cursor-texto.png'), auto;
+    }
+
+    .entrada-texto-grande:focus {
+        border-color: #4caf50; /* Cor da borda ao focar */
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); /* Sombra mais destacada */
+        opacity: 100%;
+        cursor: url('/img/cursor-texto.png'), auto;
+    }
+
     #tweetButton {
-        margin: 10px 0; /* Adiciona espaçamento vertical entre os elementos */
-        width: 80%; /* Ajusta a largura dos campos para alinhamento */
-        max-width: 400px; /* Limita o tamanho máximo */
+        display: inline-block; /* Necessário para comportar margens como um botão */
+        padding: 10px 20px;
+        background-color: white; /* Branco */
+        color: #333; /* Cor do texto */
+        border: 1px solid #ccc; /* Borda clara */
+        border-radius: 5px;
+        text-decoration: none; /* Remove o sublinhado padrão dos links */
+        transition: background-color 0.3s ease;
     }
 
-    #messageText {
-        height: 100px; /* Define a altura da área de texto */
-        resize: vertical; /* Permite redimensionar verticalmente */
+    #tweetButton:hover {
+        background-color: #f1f1f1; /* Tom mais claro no hover */
+        cursor: url('/img/cursor-mao.png'), auto;
     }
 
-    #tweetButton {
-        cursor: pointer; /* Indica que é clicável */
+    /* Estilo da aba de sugestões */
+    #suggestions {
+        display: none; /* Inicialmente oculto */
+        width: 80%;
+        max-width: 400px;
+        background-color: white;
+        text-align: left;
+        max-height: 150px;
+        overflow-y: auto;
+        margin-bottom: 10px; /* Espaçamento entre sugestões e próximo campo */
+        font-size: 13px;
+        border: 1px solid #ccc; /* Cor da borda */
+        border-radius: 8px; /* Bordas arredondadas */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
     }
 
-    .post-twitter {
-        margin-top: 20px;
+    #suggestions div {
+        padding: 8px;
+    }
+
+    #suggestions div:hover {
+        background-color: #f0f0f0;
+        cursor: url('/img/cursor-mao.png'), auto;
     }
 </style>
 
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 <script>
-    document.getElementById('tweetButton').addEventListener('click', () => {
-      // Captura o texto do @mencionado e a mensagem
-      const mention = document.getElementById('mention').value.trim();
-      const messageText = document.getElementById('messageText').value.trim();
-  
-      // Verifica se o @mencionado e a mensagem não estão vazios
-      if (!mention || !messageText) {
-        alert('Por favor, preencha ambos os campos.');
-        return;
-      }
-  
-      // Concatena a mensagem final
-      const tweetText = `${mention}, ${messageText}`;
-  
-      // Envia o texto do tweet para o backend
-      fetch('/tweet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',  // Especifica o tipo de conteúdo como JSON
-        },
-        body: JSON.stringify({ text: tweetText }),  // Envia o texto do tweet no corpo
-      })
-        .then(response => response.json())  // Espera o JSON com a URL do tweet
-        .then(data => {
-            if (data.tweetUrl) {
-                // Atualiza a embed com o novo tweet
-                const postTwitterDiv = document.querySelector('.post-twitter');
-                postTwitterDiv.innerHTML = `
-                    <blockquote class="twitter-tweet">
-                        <a href="${data.tweetUrl}"></a>
-                    </blockquote>
-                `;
-                // Recarrega o script da plataforma do Twitter para renderizar o embed
-                twttr.widgets.load();
+    const suggestionsList = [
+        '@Bagriieeel',
+        '@Darksols_',
+        '@f3rnandesz',
+        '@GabrielXoxota',
+        '@Renan_PTA',
+        '@Tal_Lento',
+        '@carollssssssss',
+        '@chammittoo',
+        '@gcg_daniel',
+        '@giapropria',
+        '@i2camacho',
+        '@jogadorStick',
+        '@lbbhangelita',
+        '@liraotrem',
+        '@palettelilith',
+        '@snake_sorrel',
+        '@whoisnenes',
+        '@yuzzu_94',
+        '@Regis_trado18'
+    ];
+
+    const mentionInput = document.getElementById('mention');
+    const suggestionsDiv = document.getElementById('suggestions');
+
+    // Filtrar e mostrar sugestões
+    mentionInput.addEventListener('input', () => {
+        const query = mentionInput.value.toLowerCase();
+        suggestionsDiv.innerHTML = ''; // Limpar sugestões anteriores
+
+        if (query.startsWith('@')) {
+            const filteredSuggestions = suggestionsList.filter(item =>
+                item.toLowerCase().startsWith(query)
+            );
+
+            // Exibir sugestões, se houver correspondências
+            if (filteredSuggestions.length > 0) {
+                suggestionsDiv.style.display = 'block';
+                filteredSuggestions.forEach(suggestion => {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.textContent = suggestion;
+
+                    // Selecionar a sugestão ao clicar
+                    suggestionDiv.addEventListener('click', () => {
+                        mentionInput.value = suggestion;
+                        suggestionsDiv.style.display = 'none'; // Esconde sugestões
+                    });
+
+                    suggestionsDiv.appendChild(suggestionDiv);
+                });
             } else {
-                alert('Tweet enviado, mas o URL do tweet não foi retornado.');
+                suggestionsDiv.style.display = 'none'; // Oculta se não houver sugestões
             }
+        } else {
+            suggestionsDiv.style.display = 'none'; // Oculta se a entrada não começar com "@"
+        }
+    });
+
+    // Esconder sugestões ao clicar fora do campo de texto
+    document.addEventListener('click', event => {
+        if (event.target !== mentionInput && event.target.parentNode !== suggestionsDiv) {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
+
+    // Lógica para envio de tweet
+    document.getElementById('tweetButton').addEventListener('click', () => {
+        const mention = mentionInput.value.trim();
+        const messageText = document.getElementById('messageText').value.trim();
+
+        if (!mention || !messageText) {
+            alert('Por favor, preencha ambos os campos.');
+            return;
+        }
+
+        const tweetText = `${mention}, ${messageText}`;
+
+        fetch('/tweet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: tweetText }),
         })
-        .catch(error => alert('Erro: ' + error));  // Caso haja um erro
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Tweet enviado com sucesso!');
+                    document.getElementById('messageText').value = '';
+                    document.getElementById('mention').value = '';
+                } else {
+                    alert('Erro ao enviar o tweet.');
+                }
+            })
+            .catch(error => alert('Erro: ' + error.message));
     });
 </script>

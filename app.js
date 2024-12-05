@@ -50,9 +50,9 @@ app.post('/tweet', async (req, res) => {
 
   try {
     const tweet = await rwClient.v2.tweet(text); // Envia o tweet com o texto
-    res.send('Tweet enviado com sucesso!');
+    res.json({ success: true, message: 'Tweet enviado com sucesso!' });
   } catch (error) {
-    res.status(500).send('Erro ao postar o tweet: ' + error.message);
+    res.status(500).json({ success: false, message: 'Erro ao postar o tweet: ' + error.message });
   }
 });
 
