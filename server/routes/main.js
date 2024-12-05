@@ -93,6 +93,14 @@ router.get('/velas', (req, res) => {
     res.render('eastereggs/velas', { locals: locals });
 });
 
+router.get('/carolls', (req, res) => {
+    const locals = {
+        title: "carolls",
+        description: "carollscarollscarollscarolls"
+    }
+    res.render('eastereggs/carolls', { locals: locals });
+});
+
 router.get('/notificacoes', (req, res) => {
     const locals = {
         title: "Match!",
