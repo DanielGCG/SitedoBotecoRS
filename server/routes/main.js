@@ -3,7 +3,6 @@ const router = express.Router();
 
 /* ----- INICIO ----- */
 
-
 router.get('', (req, res) => {
     const locals = {
         title: "Site do Boteco do R$",
@@ -12,9 +11,7 @@ router.get('', (req, res) => {
     res.render('index', { locals: locals });
 });
 
-
 /* ------ WATCHLIST ------*/
-
 
 router.get('/lista', (req, res) => {
     const locals = {
@@ -23,7 +20,6 @@ router.get('/lista', (req, res) => {
     }
     res.render('lista', { locals: locals });
 });
-
 
 /* ------ Cutucar ------*/
 
@@ -45,18 +41,7 @@ router.get('/about', (req, res) => {
     res.render('about', { locals: locals });
 });
 
-/* ------ TESTE ------*/
-
-router.get('/teste', (req, res) => {
-    const locals = {
-        title: "teste",
-        description: "testetesteteste"
-    }
-    res.render('teste', { locals: locals });
-});
-
 /* ------ GALERIA ------*/
-
 
 router.get('/galeria', (req, res) => {
     const locals = {
@@ -100,7 +85,6 @@ router.get('/galeria/shitpost', (req, res) => {
 
 /* ------ EASTER EGGS ------*/
 
-
 router.get('/velas', (req, res) => {
     const locals = {
         title: "Velas",
@@ -117,9 +101,17 @@ router.get('/notificacoes', (req, res) => {
     res.render('notificacoes', { locals: locals });
 });
 
+/* ------ TESTE ------*/
+
+router.get('/teste', (req, res) => {
+    const locals = {
+        title: "teste",
+        description: "testetesteteste"
+    }
+    res.render('teste', { locals: locals });
+});
 
 /* ------ Página de TRABALHO DE ALA ------*/
-
 
 // Rota para página de recomendações
 router.get('/filmedagalera', (req, res) => {
@@ -148,9 +140,7 @@ router.get('/filmedagalera/match', (req, res) => {
     res.render('filmedagalera/match', { locals: locals });
 });
 
-
 /* ------ NÃO ENCONTRADO ------*/
-
 
 // Rota para página não encontrada
 router.use((req, res) => {
