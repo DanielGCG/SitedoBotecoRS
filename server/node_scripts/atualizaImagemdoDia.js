@@ -1,12 +1,12 @@
-// Importar módulos necessários
-const { Storage } = require('@google-cloud/storage');
 const admin = require("firebase-admin");
 const dayjs = require("dayjs");
+const serviceAccount = require("boteco-6fcfa-firebase-adminsdk-p8xqu-b4d444639d.json");  // Substitua o caminho
 
-// Inicializar Firebase
+// Inicializar Firebase com Storage e Database
 admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-    storageBucket: "boteco-6fcfa.appspot.com"
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: "boteco-6fcfa.appspot.com",  // Para o Storage
+  databaseURL: "https://boteco-6fcfa-default-rtdb.firebaseio.com"  // Para o Realtime Database (se necessário)
 });
 
 const storage = admin.storage().bucket();
