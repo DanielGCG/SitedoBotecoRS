@@ -80,7 +80,7 @@
         const agora = new Date();
         const dataISO = agora.toISOString().replace(/:/g, '-'); // Substitui ":" por "-" no ISO
         const textoFormatado = texto.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
-        return `${dataISO}-${textoFormatado}.png`;
+        return `${dataISO}-${textoFormatado}.gif`;
     }
 
     // Manipulador do botão de envio
