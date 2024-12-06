@@ -1,3 +1,5 @@
+console.log("Processando imagem do dia...");
+
 const admin = require("firebase-admin");
 const dayjs = require("dayjs");
 const serviceAccount = require("boteco-6fcfa-firebase-adminsdk-p8xqu-b4d444639d.json");  // Substitua o caminho
