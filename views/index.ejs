@@ -1,6 +1,5 @@
 <main>
     <h2>Imagem do Dia</h2>
-
     <!-- Caixa de texto bonitinha -->
     <div class="caixa-texto">
         <h4>Dê uma olhada na Galeria!</h4>
@@ -12,6 +11,11 @@
             <img src="/img/imagemdodia.gif" alt="">
             <div class="plaquinha"><a href="https://www.tiktok.com/@jaeluvzyouu/video/7440902939583024439?is_from_webapp=1&sender_device=pc" style="color: #8ace00; cursor: url('/img/cursor-mao.png'), auto;">BOOM CLAP</a></div>
         </div>
+    </div>
+
+    <div class="caixa-texto">
+        <h5>Quer sugerir imagem do dia?</h5>
+        <a class="branco" id="editarNomeBtn" href="/sugerir">Sugerir</a>
     </div>
 </main>
 
@@ -49,6 +53,27 @@
         width: 87%; /* Tamanho da imagem principal */
         height: 87%; /* Mantém a proporção da imagem */
         object-fit: cover;
+    }
+
+    .imagem img {
+        cursor: url('/img/cursor.png'), auto;
+    }
+
+    .branco {
+        display: inline-block; /* Necessário para comportar margens como um botão */
+        padding: 10px 20px;
+        background-color: white; /* Branco */
+        color: #333; /* Cor do texto */
+        border: 1px solid #ccc; /* Borda clara */
+        border-radius: 5px;
+        text-decoration: none; /* Remove o sublinhado padrão dos links */
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .branco:hover {
+        background-color: #f1f1f1; /* Tom mais claro no hover */
+        cursor: url('/img/cursor-mao.png'), auto;
     }
 
     /* Ajustes para visualização em dispositivos móveis */

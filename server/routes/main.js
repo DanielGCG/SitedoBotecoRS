@@ -11,6 +11,14 @@ router.get('', (req, res) => {
     res.render('index', { locals: locals });
 });
 
+router.get('/sugerir', (req, res) => {
+    const locals = {
+        title: "Sugerir Imagem do Dia",
+        description: "deixe a sua imagem na fila!"
+    }
+    res.render('sugerir', { locals: locals });
+});
+
 /* ------ WATCHLIST ------*/
 
 router.get('/lista', (req, res) => {

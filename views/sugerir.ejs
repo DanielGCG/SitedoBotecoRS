@@ -1,0 +1,116 @@
+<main>
+    <h2>Sugira uma Imagem do Dia</h2>
+    <!-- Caixa de texto bonitinha -->
+    <div class="caixa-texto">
+        <h4>Adicione uma imagem à fila</h4>
+        <h5>Deixe também um texto para a plaquinha</h5>
+    </div>
+
+    <div class="caixa-texto">
+        <!-- Campo de seleção de imagem -->
+        <input type="file" id="imagem">
+        
+        <!-- Campo de texto para o nome -->
+        <input class="entrada-texto" type="text" id="texto" placeholder="Texto da plaquinha" autocomplete="off" />
+        
+        <!-- Botão para adicionar ao Firebase -->
+        <button id="adicionarButton">Adicionar ao Firebase</button>
+    </div>
+</main>
+
+<style>
+    main {
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+
+    .caixa-texto {
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    input {
+        margin: 10px 0;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 400px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #4caf50;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
+        authDomain: "boteco-6fcfa.firebaseapp.com",
+        projectId: "boteco-6fcfa",
+        storageBucket: "boteco-6fcfa.appspot.com",
+        messagingSenderId: "531032694476",
+        appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
+    };
+
+    // Inicialização do Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    // Função para capturar data e hora atual no formato desejado
+    function gerarNomeArquivo(texto) {
+        const agora = new Date();
+        const dataISO = agora.toISOString().replace(/:/g, '-'); // Substitui ":" por "-" no ISO
+        const textoFormatado = texto.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+        return `${dataISO}-${textoFormatado}.png`;
+    }
+
+    // Manipulador do botão de envio
+    document.getElementById("adicionarButton").addEventListener("click", async () => {
+        const imagemInput = document.getElementById("imagem");
+        const textoInput = document.getElementById("texto");
+
+        // Validações
+        if (!imagemInput.files[0]) {
+            alert("Por favor, selecione uma imagem.");
+            return;
+        }
+        if (!textoInput.value.trim()) {
+            alert("Por favor, insira um texto para o nome do arquivo.");
+            return;
+        }
+
+        const arquivo = imagemInput.files[0];
+        const nomeArquivo = gerarNomeArquivo(textoInput.value.trim().replace(/[^a-zA-Z0-9]/g, "_"));
+
+        // Referência no Firebase Storage
+        const storageRef = ref(storage, `imagensdodia/${nomeArquivo}`);
+
+        try {
+            // Upload do arquivo
+            await uploadBytes(storageRef, arquivo);
+            alert("Imagem adicionada com sucesso ao Firebase!");
+        } catch (error) {
+            console.error("Erro ao enviar imagem:", error);
+            alert("Houve um erro ao adicionar a imagem. Tente novamente.");
+        }
+    });
+</script>

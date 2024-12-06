@@ -182,7 +182,7 @@ function abrirPopupComImagem(url, nome) {
 
     // Estrutura do popup com campo para editar o nome inicialmente escondido
     popupConteudo.innerHTML = `
-        <img id="imagem-popup" src="${url}" alt="Imagem da obra">
+        <img id="imagem-popup" src="${url}" alt="">
         <div class="acoes">
             <button class="deletar" onclick="removerObra('${nome}')">Deletar</button>
             <button class="branco" id="editarNomeBtn">Editar</button>
