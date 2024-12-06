@@ -74,8 +74,4 @@ async function processarImagemDoDia() {
     }
 }
 
-// Agendamento do processamento diariamente
-const cron = require("node-cron");
-cron.schedule("0 0 * * *", processarImagemDoDia); // Executa todos os dias à meia-noite
-
 module.exports = { processarImagemDoDia };
