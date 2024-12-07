@@ -2,8 +2,11 @@ console.log("Processando imagem do dia...");
 
 const admin = require("firebase-admin");
 const dayjs = require("dayjs");
-const path = require("path");
-const serviceAccount = require(path.resolve(process.cwd(), "serviceAccountKey.json"));
+const { CronJob } = require("cron");
+const path = require('path');
+const serviceAccount = require(path.resolve(__dirname, 'serviceAccountKey.json'));
+
+
 
 // Inicializar Firebase com Storage e Database
 admin.initializeApp({
@@ -33,8 +36,8 @@ async function processarImagemDoDia() {
       const nomeA = a.name.split("/").pop();
       const nomeB = b.name.split("/").pop();
 
-      const dataA = new Date(nomeA.split("-")[0]);
-      const dataB = new Date(nomeB.split("-")[0]);
+      const dataA = new Date(nomeA.split("-").slice(0, 3).join("-")); // Data no formato YYYY-MM-DD
+      const dataB = new Date(nomeB.split("-").slice(0, 3).join("-")); // Data no formato YYYY-MM-DD
 
       return dataA - dataB;
     });
@@ -76,5 +79,19 @@ async function processarImagemDoDia() {
     console.error("Erro ao processar imagens do dia:", error);
   }
 }
+
+// Agendar a tarefa para rodar a cada minuto
+const job = new CronJob(
+  "* * * * *", // Cron expression para rodar à meia-noite
+  () => {
+    console.log("Executando tarefa agendada: processarImagemDoDia");
+    processarImagemDoDia();
+  },
+  null,
+  true, // Iniciar o job automaticamente
+  "America/Sao_Paulo" // Fuso horário
+);
+
+console.log("Tarefa agendada para rodar a cada minuto");
 
 module.exports = { processarImagemDoDia };
