@@ -93,6 +93,7 @@ async function processarImagemDoDia() {
 
     // Detectar o tipo MIME da imagem com base na extensão
     const mimeType = nomeImagem.endsWith('.gif') ? 'image/gif' : 'image/png';
+    console.log(`Tipo MIME detectado: ${mimeType}`);
 
     // Salvar a imagem com o novo nome
     const novoArquivo = storage.file(novoNome);
@@ -107,6 +108,11 @@ async function processarImagemDoDia() {
 
     // Carregar a imagem no Twitter
     const mediaId = await rwClient.v1.uploadMedia(arquivo, { mimeType: mimeType });
+    console.log(`Media ID retornado: ${mediaId}`);
+
+    if (!mediaId) {
+      throw new Error("Erro ao obter o Media ID");
+    }
 
     // Enviar o tweet com a imagem
     await rwClient.v2.tweet({
