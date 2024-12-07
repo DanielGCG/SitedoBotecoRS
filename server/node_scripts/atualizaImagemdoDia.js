@@ -85,11 +85,16 @@ async function processarImagemDoDia() {
 
     // Atualizar a próxima imagem como imagemdodia
     const novaImagem = imagens[0];
-    const novoNome = `${pasta}imagemdodia-${novaImagem.name.split("/").pop()}`;
+    const nomeImagem = novaImagem.name.split("/").pop(); // nome da imagem
+    const novoNome = `${pasta}imagemdodia-${nomeImagem}`;
 
     console.log(`Renomeando ${novaImagem.name} para ${novoNome}`);
     const [arquivo] = await storage.file(novaImagem.name).download();
 
+    // Detectar o tipo MIME da imagem com base na extensão
+    const mimeType = nomeImagem.endsWith('.gif') ? 'image/gif' : 'image/png';
+
+    // Salvar a imagem com o novo nome
     const novoArquivo = storage.file(novoNome);
     await novoArquivo.save(arquivo);
     await novoArquivo.makePublic();
@@ -99,9 +104,6 @@ async function processarImagemDoDia() {
 
     // Agora enviar o tweet com a imagem e o texto da plaquinha
     const textoDoTweet = `Imagem do dia: ${novoNome.split("/").pop()}!\nhttps://www.boteco.live\n#ImagemDoDia`;
-
-    // Verificar o tipo MIME da imagem
-    const mimeType = arquivo.name.endsWith('.gif') ? 'image/gif' : 'image/png';
 
     // Carregar a imagem no Twitter
     const mediaId = await rwClient.v1.uploadMedia(arquivo, { mimeType: mimeType });
@@ -114,9 +116,14 @@ async function processarImagemDoDia() {
 
     console.log("Tweet enviado com sucesso!");
   } catch (error) {
-    console.error("Erro ao processar imagens do dia:", error);
+    console.error("Erro ao processar imagens do dia:", error.message);
+    console.error("Stack trace:", error.stack);  // Exibir a stack trace para ajudar na depuração
+    if (error.response) {
+      console.error("Detalhes da resposta de erro:", error.response.data);
+    }
   }
 }
+
 processarImagemDoDia();
 
 module.exports = { processarImagemDoDia };
