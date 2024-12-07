@@ -92,19 +92,7 @@ async function processarImagemDoDia() {
     console.error("Erro ao processar imagens do dia:", error);
   }
 }
+processarImagemDoDia();
 
-// Agendar a tarefa para rodar a cada minuto
-const job = new CronJob(
-  "* * * * *", // Cron expression para rodar à meia-noite
-  () => {
-    console.log("Executando tarefa agendada: processarImagemDoDia");
-    processarImagemDoDia();
-  },
-  null,
-  true, // Iniciar o job automaticamente
-  "America/Sao_Paulo" // Fuso horário
-);
-
-console.log("Tarefa agendada para rodar a cada minuto");
 
 module.exports = { processarImagemDoDia };
