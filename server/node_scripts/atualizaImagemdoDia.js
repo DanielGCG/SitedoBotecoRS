@@ -77,18 +77,4 @@ async function processarImagemDoDia() {
   }
 }
 
-// Agendar a tarefa para rodar diariamente às 00:00
-const job = new CronJob(
-  "* * * * *", // Cron expression para rodar à meia-noite
-  () => {
-    console.log("Executando tarefa agendada: processarImagemDoDia");
-    processarImagemDoDia();
-  },
-  null,
-  true, // Iniciar o job automaticamente
-  "America/Sao_Paulo" // Fuso horário
-);
-
-console.log("Tarefa agendada para rodar diariamente às 00:00.");
-
 module.exports = { processarImagemDoDia };
