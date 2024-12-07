@@ -3,7 +3,7 @@ console.log("Processando imagem do dia...");
 const admin = require("firebase-admin");
 const dayjs = require("dayjs");
 const path = require("path");
-const serviceAccount = require(path.resolve(process.cwd(), "serviceAccountKey.json")) || FIREBASE_SERVICE_ACCOUNT_KEY;
+const serviceAccount = require(path.resolve(process.cwd(), "serviceAccountKey.json"));
 
 // Inicializar Firebase com Storage e Database
 admin.initializeApp({

@@ -3,4 +3,3 @@ node_modules/
 firebase.json
 .firebaserc
 storage.rules
-serviceAccountKey.json
