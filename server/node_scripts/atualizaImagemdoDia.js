@@ -3,7 +3,6 @@ require('dotenv').config();
 
 const admin = require("firebase-admin");
 const dayjs = require("dayjs");
-const { CronJob } = require("cron");
 const { TwitterApi } = require('twitter-api-v2'); // Importar a biblioteca do Twitter
 
 const serviceAccount = {
@@ -91,6 +90,11 @@ async function processarImagemDoDia() {
     console.log(`Renomeando ${novaImagem.name} para ${novoNome}`);
     const [arquivo] = await storage.file(novaImagem.name).download();
 
+    // Verifique se o arquivo é um Buffer válido
+    if (!Buffer.isBuffer(arquivo)) {
+      throw new Error("O arquivo não foi carregado corretamente.");
+    }
+
     // Detectar o tipo MIME da imagem com base na extensão
     const mimeType = nomeImagem.endsWith('.gif') ? 'image/gif' : 'image/png';
     console.log(`Tipo MIME detectado: ${mimeType}`);
@@ -104,10 +108,17 @@ async function processarImagemDoDia() {
     await storage.file(novaImagem.name).delete();
 
     // Agora enviar o tweet com a imagem e o texto da plaquinha
-    const textoDoTweet = `Imagem do dia: ${novoNome.split("/").pop()}!\nhttps://www.boteco.live\n#ImagemDoDia`;
+    const nomeImagemLimpo = novoNome.split("/").pop().replace(/^imagemdodia-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}(\.\d{3}Z)?-/, '');
+
+    const textoDoTweet = `Imagem do dia: ${nomeImagemLimpo}!\nhttps://www.boteco.live\n#ImagemDoDia`;
+    console.log(`texto do tweet: ${textoDoTweet}`);
 
     // Carregar a imagem no Twitter
-    const mediaId = await rwClient.v1.uploadMedia(arquivo, { mimeType: mimeType });
+    const mediaId = await rwClient.v1.uploadMedia(arquivo, { 
+      mimeType: mimeType, 
+      mediaCategory: 'tweet_image'  // Categoria recomendada para imagens de tweet
+    });
+
     console.log(`Media ID retornado: ${mediaId}`);
 
     if (!mediaId) {
@@ -115,12 +126,13 @@ async function processarImagemDoDia() {
     }
 
     // Enviar o tweet com a imagem
-    await rwClient.v2.tweet({
-      status: textoDoTweet,
+    const tweetResponse = await rwClient.v2.tweet({
+      text: textoDoTweet,  // Usando 'text' ao invés de 'status'
       media_ids: [mediaId],
     });
 
-    console.log("Tweet enviado com sucesso!");
+    console.log(`Tweet enviado com sucesso: ${JSON.stringify(tweetResponse)}`);
+
   } catch (error) {
     console.error("Erro ao processar imagens do dia:", error.message);
     console.error("Stack trace:", error.stack);  // Exibir a stack trace para ajudar na depuração
