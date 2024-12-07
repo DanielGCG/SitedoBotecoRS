@@ -65,6 +65,8 @@ async function processarImagemDoDia() {
 
     const agora = dayjs();
 
+    let imagemAtualizada = false;
+
     for (let i = 0; i < imagens.length; i++) {
       const imagem = imagens[i];
       const nomeAtual = imagem.name.split("/").pop();
@@ -73,9 +75,10 @@ async function processarImagemDoDia() {
         const dataImagem = dayjs(nomeAtual.split("-")[1]);
         const horasDiferenca = agora.diff(dataImagem, "hour");
 
-        if (horasDiferenca > 24 && imagens.length > 1) {
-          console.log(`Removendo imagem mais antiga: ${imagem.name}`);
-          await storage.file(imagem.name).delete();
+        if (horasDiferenca > 24) {
+          console.log(`A imagem atual tem mais de 24 horas. Atualizando imagem...`);
+          imagemAtualizada = true;
+          break;
         } else {
           console.log("A imagem atual ainda é válida como imagemdodia.");
           return;
@@ -83,34 +86,35 @@ async function processarImagemDoDia() {
       }
     }
 
-    // Atualizar a próxima imagem como imagemdodia
-    const novaImagem = imagens[0];
-    const novoNome = `${pasta}imagemdodia-${novaImagem.name.split("/").pop()}`;
+    if (!imagemAtualizada) {
+      // Atualizar a próxima imagem como imagemdodia
+      const novaImagem = imagens[0];
+      const novoNome = `${pasta}imagemdodia-${novaImagem.name.split("/").pop()}`;
 
-    console.log(`Renomeando ${novaImagem.name} para ${novoNome}`);
-    const [arquivo] = await storage.file(novaImagem.name).download();
+      console.log(`Renomeando ${novaImagem.name} para ${novoNome}`);
+      const [arquivo] = await storage.file(novaImagem.name).download();
 
-    const novoArquivo = storage.file(novoNome);
-    await novoArquivo.save(arquivo);
-    await novoArquivo.makePublic();
+      const novoArquivo = storage.file(novoNome);
+      await novoArquivo.save(arquivo);
+      await novoArquivo.makePublic();
 
-    console.log(`Nova imagem do dia: ${novoNome}`);
-    await storage.file(novaImagem.name).delete();
+      console.log(`Nova imagem do dia: ${novoNome}`);
+      await storage.file(novaImagem.name).delete();
 
-    // Agora enviar o tweet com a imagem e o texto da plaquinha
-    const textoDoTweet = `Imagem do dia: ${novoNome.split("/").pop()}!\nhttps://www.boteco.live\n#ImagemDoDia`;
+      // Agora enviar o tweet com a imagem e o texto da plaquinha
+      const textoDoTweet = `Imagem do dia: ${novoNome.split("/").pop()}!\nhttps://www.boteco.live\n#ImagemDoDia`;
 
+      // Carregar a imagem no Twitter
+      const mediaId = await rwClient.v1.uploadMedia(arquivo, { type: 'image/gif' });
 
-    // Carregar a imagem no Twitter
-    const mediaId = await rwClient.v1.uploadMedia(arquivo, { type: 'image/gif' });
+      // Enviar o tweet com a imagem
+      await rwClient.v2.tweet({
+        status: textoDoTweet,
+        media_ids: [mediaId],
+      });
 
-    // Enviar o tweet com a imagem
-    await rwClient.v2.tweet({
-      status: textoDoTweet,
-      media_ids: [mediaId],
-    });
-
-    console.log("Tweet enviado com sucesso!");
+      console.log("Tweet enviado com sucesso!");
+    }
   } catch (error) {
     console.error("Erro ao processar imagens do dia:", error);
   }
