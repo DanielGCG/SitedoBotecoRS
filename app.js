@@ -32,10 +32,10 @@ app.use(express.static('public'));
 
 // Configuração do Twitter API
 const twitterClient = new TwitterApi({
-  appKey: "157Atzi8sPb2kdKuRP92QzmU7",
-  appSecret: "2nvykVjG9hmgeuVgoGnQORf7e9OgXMTiKTc2vW66o0iY5mcQdD",
-  accessToken: "1816898320909934592-PJRI2dgehtUcXIlucAcGnham2xmdfd",
-  accessSecret: "0TkHDoWVPiWpnhCqzpcx3Rz47mGzD6xTHlwlR49QTX5ji",
+  appKey: process.env.TWITTER_APP_KEY,
+  appSecret: process.env.TWITTER_APP_SECRET,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN,
+  accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
 const rwClient = twitterClient.readWrite;

@@ -1,10 +1,11 @@
 console.log("Processando imagem do dia...");
 require('dotenv').config();
 
-
 const admin = require("firebase-admin");
 const dayjs = require("dayjs");
 const { CronJob } = require("cron");
+const { TwitterApi } = require('twitter-api-v2'); // Importar a biblioteca do Twitter
+
 const serviceAccount = {
   type: process.env.TYPE,
   project_id: process.env.PROJECT_ID,
@@ -19,8 +20,6 @@ const serviceAccount = {
   universe_domain: process.env.UNIVERSE_DOMAIN,
 };
 
-
-
 // Inicializar Firebase com Storage e Database
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -29,6 +28,15 @@ admin.initializeApp({
 });
 
 const storage = admin.storage().bucket();
+
+// Configuração da API do Twitter
+const twitterClient = new TwitterApi({
+  appKey: process.env.TWITTER_APP_KEY,
+  appSecret: process.env.TWITTER_APP_SECRET,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN,
+  accessSecret: process.env.TWITTER_ACCESS_SECRET,
+});
+const rwClient = twitterClient.readWrite;
 
 // Função para processar imagens do dia
 async function processarImagemDoDia() {
@@ -88,11 +96,24 @@ async function processarImagemDoDia() {
 
     console.log(`Nova imagem do dia: ${novoNome}`);
     await storage.file(novaImagem.name).delete();
+
+    // Agora enviar o tweet com a imagem e o texto da plaquinha
+    const textoDoTweet = `Imagem do dia: ${novoNome.split("/").pop()}! #ImagemDoDia`;
+
+    // Carregar a imagem no Twitter
+    const mediaId = await rwClient.v1.uploadMedia(arquivo, { type: 'image/gif' });
+
+    // Enviar o tweet com a imagem
+    await rwClient.v2.tweet({
+      status: textoDoTweet,
+      media_ids: [mediaId],
+    });
+
+    console.log("Tweet enviado com sucesso!");
   } catch (error) {
     console.error("Erro ao processar imagens do dia:", error);
   }
 }
 processarImagemDoDia();
-
 
 module.exports = { processarImagemDoDia };
