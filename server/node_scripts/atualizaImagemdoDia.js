@@ -98,7 +98,8 @@ async function processarImagemDoDia() {
     await storage.file(novaImagem.name).delete();
 
     // Agora enviar o tweet com a imagem e o texto da plaquinha
-    const textoDoTweet = `Imagem do dia: ${novoNome.split("/").pop()}! #ImagemDoDia`;
+    const textoDoTweet = `Imagem do dia: ${novoNome.split("/").pop()}!\nhttps://www.boteco.live\n#ImagemDoDia`;
+
 
     // Carregar a imagem no Twitter
     const mediaId = await rwClient.v1.uploadMedia(arquivo, { type: 'image/gif' });
