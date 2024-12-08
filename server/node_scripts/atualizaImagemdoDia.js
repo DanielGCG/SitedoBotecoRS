@@ -126,7 +126,7 @@ async function processarImagemDoDia() {
     console.log(`Nova imagem do dia: ${novoNome}`);
     await storage.file(novaImagem.name).delete();
 
-    const nomeImagemLimpo = novoNome.split("/").pop().replace(/^imagemdodia-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}(\.\d{3}Z)?-/, '');
+    const nomeImagemLimpo = novoNome.split("/").pop().replace(/^imagemdodia-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}(\.\d{3}Z)?-/, '').replace(/\.[^.]+$/, '');
 
     const textoDoTweet = `Imagem do dia!
 
