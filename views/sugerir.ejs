@@ -14,7 +14,7 @@
         <input class="entrada-texto" type="text" id="texto" placeholder="Texto da plaquinha" autocomplete="off" />
         
         <!-- Botão para adicionar ao Firebase -->
-        <button id="adicionarButton">Adicionar ao Firebase</button>
+        <button class="branco" id="adicionarButton">Adicionar</button>
     </div>
 </main>
 
@@ -41,19 +41,42 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    button {
+    .branco {
         padding: 10px 20px;
-        border: none;
-        background-color: #4caf50;
-        color: white;
+        background-color: white; /* Branco */
+        color: #333; /* Cor do texto */
+        border: 1px solid #ccc; /* Borda clara */
         border-radius: 5px;
         cursor: pointer;
-        font-size: 16px;
         transition: background-color 0.3s ease;
     }
 
-    button:hover {
-        background-color: #45a049;
+    .branco:hover {
+        background-color: #f1f1f1; /* Tom mais claro no hover */
+        cursor: url('/img/cursor-mao.png'), auto;
+    }
+
+    input[type="text"] {
+        margin-top: 10px; /* Espaçamento superior para o botão */
+        width: 80%; /* Largura ajustável */
+        max-width: 400px; /* Limita a largura máxima */
+        padding: 12px 20px; /* Espaçamento interno */
+        font-size: 16px; /* Tamanho da fonte */
+        border: 1px solid #ccc; /* Cor da borda */
+        border-radius: 8px; /* Bordas arredondadas */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+        outline: none; /* Remove o outline padrão */
+        transition: all 0.3s ease; /* Animação suave */
+        opacity: 70%;
+        margin-bottom: 20px; /* Adiciona espaçamento abaixo do input */
+        cursor: url('/img/cursor-texto.png'), auto;
+    }
+
+    input[type="text"]:focus {
+        border-color: #4caf50; /* Cor da borda ao focar */
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); /* Sombra mais destacada */
+        opacity: 100%;
+        cursor: url('/img/cursor-texto.png'), auto;
     }
 </style>
 
@@ -107,7 +130,11 @@
         try {
             // Upload do arquivo
             await uploadBytes(storageRef, arquivo);
-            alert("Imagem adicionada com sucesso ao Firebase!");
+            alert("Imagem adicionada com sucesso!");
+
+            // Limpar campos após sucesso
+            imagemInput.value = "";
+            textoInput.value = "";
         } catch (error) {
             console.error("Erro ao enviar imagem:", error);
             alert("Houve um erro ao adicionar a imagem. Tente novamente.");

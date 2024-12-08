@@ -3,7 +3,8 @@ require('dotenv').config();
 
 const admin = require("firebase-admin");
 const dayjs = require("dayjs");
-const { TwitterApi } = require('twitter-api-v2'); // Importar a biblioteca do Twitter
+const mime = require('mime-types'); // Biblioteca para detectar MIME
+const { TwitterApi } = require('twitter-api-v2');
 
 const serviceAccount = {
   type: process.env.TYPE,
@@ -22,8 +23,8 @@ const serviceAccount = {
 // Inicializar Firebase com Storage e Database
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: "boteco-6fcfa.appspot.com", // Para o Storage
-  databaseURL: "https://boteco-6fcfa-default-rtdb.firebaseio.com" // Para o Realtime Database (se necessário)
+  storageBucket: "boteco-6fcfa.appspot.com",
+  databaseURL: "https://boteco-6fcfa-default-rtdb.firebaseio.com"
 });
 
 const storage = admin.storage().bucket();
@@ -37,12 +38,35 @@ const twitterClient = new TwitterApi({
 });
 const rwClient = twitterClient.readWrite;
 
+// Função para enviar tweet com texto e mídia
+async function enviarTweetComImagem(texto, arquivo, mimeType) {
+  try {
+    console.log(`Enviando mídia para o Twitter...`);
+    const mediaId = await rwClient.v1.uploadMedia(arquivo, { mimeType: 'image/png' });
+    console.log(`Mídia enviada com sucesso. Media ID: ${mediaId}`);
+
+    console.log(`Enviando tweet: ${texto}`);
+    const tweetResponse = await rwClient.v2.tweet({
+      text: texto,
+      media: { media_ids: [mediaId] },
+    });
+
+    console.log(`Tweet enviado com sucesso: ${JSON.stringify(tweetResponse)}`);
+    return tweetResponse;
+  } catch (error) {
+    console.error("Erro ao enviar tweet:", error.message);
+    if (error.response) {
+      console.error("Detalhes da resposta de erro:", error.response.data);
+    }
+    throw error;
+  }
+}
+
 // Função para processar imagens do dia
 async function processarImagemDoDia() {
-  const pasta = "imagensdodia/"; // Caminho da pasta onde as imagens são armazenadas
+  const pasta = "imagensdodia/";
 
   try {
-    // Listar todas as imagens na pasta
     const [arquivos] = await storage.getFiles({ prefix: pasta });
     const imagens = arquivos.filter(arquivo => arquivo.name.endsWith(".gif") || arquivo.name.endsWith(".png"));
 
@@ -51,13 +75,12 @@ async function processarImagemDoDia() {
       return;
     }
 
-    // Ordenar imagens por data de criação (assumindo que a data está no nome do arquivo)
     imagens.sort((a, b) => {
       const nomeA = a.name.split("/").pop();
       const nomeB = b.name.split("/").pop();
 
-      const dataA = new Date(nomeA.split("-").slice(0, 3).join("-")); // Data no formato YYYY-MM-DD
-      const dataB = new Date(nomeB.split("-").slice(0, 3).join("-")); // Data no formato YYYY-MM-DD
+      const dataA = new Date(nomeA.split("-").slice(0, 3).join("-"));
+      const dataB = new Date(nomeB.split("-").slice(0, 3).join("-"));
 
       return dataA - dataB;
     });
@@ -82,24 +105,20 @@ async function processarImagemDoDia() {
       }
     }
 
-    // Atualizar a próxima imagem como imagemdodia
     const novaImagem = imagens[0];
-    const nomeImagem = novaImagem.name.split("/").pop(); // nome da imagem
+    const nomeImagem = novaImagem.name.split("/").pop();
     const novoNome = `${pasta}imagemdodia-${nomeImagem}`;
 
     console.log(`Renomeando ${novaImagem.name} para ${novoNome}`);
     const [arquivo] = await storage.file(novaImagem.name).download();
 
-    // Verifique se o arquivo é um Buffer válido
     if (!Buffer.isBuffer(arquivo)) {
       throw new Error("O arquivo não foi carregado corretamente.");
     }
 
-    // Detectar o tipo MIME da imagem com base na extensão
-    const mimeType = nomeImagem.endsWith('.gif') ? 'image/gif' : 'image/png';
-    console.log(`Tipo MIME detectado: ${mimeType}`);
+    const mimeType = 'image/png';
+    console.log(`Forçando tipo MIME como: ${mimeType}`);
 
-    // Salvar a imagem com o novo nome
     const novoArquivo = storage.file(novoNome);
     await novoArquivo.save(arquivo);
     await novoArquivo.makePublic();
@@ -107,35 +126,22 @@ async function processarImagemDoDia() {
     console.log(`Nova imagem do dia: ${novoNome}`);
     await storage.file(novaImagem.name).delete();
 
-    // Agora enviar o tweet com a imagem e o texto da plaquinha
     const nomeImagemLimpo = novoNome.split("/").pop().replace(/^imagemdodia-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}(\.\d{3}Z)?-/, '');
 
-    const textoDoTweet = `Imagem do dia: ${nomeImagemLimpo}!\nhttps://www.boteco.live\n#ImagemDoDia`;
-    console.log(`texto do tweet: ${textoDoTweet}`);
+    const textoDoTweet = `Imagem do dia!
 
-    // Carregar a imagem no Twitter
-    const mediaId = await rwClient.v1.uploadMedia(arquivo, { 
-      mimeType: mimeType, 
-      mediaCategory: 'tweet_image'  // Categoria recomendada para imagens de tweet
-    });
+${nomeImagemLimpo}
 
-    console.log(`Media ID retornado: ${mediaId}`);
 
-    if (!mediaId) {
-      throw new Error("Erro ao obter o Media ID");
-    }
+https://www.boteco.live
+#ImagemDoDia`;
+    console.log(`Texto do tweet: ${textoDoTweet}`);
 
-    // Enviar o tweet com a imagem
-    const tweetResponse = await rwClient.v2.tweet({
-      text: textoDoTweet,  // Usando 'text' ao invés de 'status'
-      media_ids: [mediaId],
-    });
-
-    console.log(`Tweet enviado com sucesso: ${JSON.stringify(tweetResponse)}`);
+    await enviarTweetComImagem(textoDoTweet, arquivo, mimeType);
 
   } catch (error) {
     console.error("Erro ao processar imagens do dia:", error.message);
-    console.error("Stack trace:", error.stack);  // Exibir a stack trace para ajudar na depuração
+    console.error("Stack trace:", error.stack);
     if (error.response) {
       console.error("Detalhes da resposta de erro:", error.response.data);
     }
@@ -144,4 +150,4 @@ async function processarImagemDoDia() {
 
 processarImagemDoDia();
 
-module.exports = { processarImagemDoDia };
+module.exports = { processarImagemDoDia, enviarTweetComImagem };
