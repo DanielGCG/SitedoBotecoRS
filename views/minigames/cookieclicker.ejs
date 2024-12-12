@@ -1,34 +1,35 @@
 <main>
     <div class="container">
         <div id="mostrador-de-cookies">Você tem 0 cookies!</div>
-        <div id="cps">0 cookie/s</div>
+        <div id="cps">0 cookies/s</div>
         <button id="cookie">
             <img src="/img/cookie.png" alt="Cookie" style="width: 105px; height: auto;">
         </button>
 
         <div class="popup" id="popup" style="display: none;">
             <p>Aumentar a chance de cookie duplo em 20%</p>
-            <button id="comprar-upgrade"></button>
+            <button id="comprar-click"></button>
             <button id="fechar-popup">Fechar</button>
         </div>
     </div>
 
     <!-- Barra lateral esquerda -->
     <div id="barra-esquerda" class="barra-lateral">
-        <h2>Upgrades de Click</h2>
-        <div id="lista-upgrades"></div> <!-- Novo contêiner para upgrades -->
+        <h2>Upgrade de Click</h2>
+        <div id="lista-click"></div>
     </div>
 
     <!-- Barra lateral direita -->
     <div id="barra-direita" class="barra-lateral">
         <h2>Upgrade de Máquina</h2>
+        <div id="lista-maquina"></div>
     </div>
 
     <!-- Indicador de chance no canto da tela -->
-    <div id="indicador-chance">Chance de cookie duplo: 0%</div>
+    <div id="indicador-chance">Multiplicador Cookie: 0%</div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 1.1.0</div>
+        <div id="versao" class="versao">Versão: 1.1.85</div>
         <button id="reset" class="reset-btn">Resetar</button>
     </div>
 </main>
@@ -53,6 +54,11 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 
+    #cookie img {
+        -webkit-user-drag: none;
+        pointer-events: none;
+    }
+
     #mostrador-de-cookies, #cps {
         font-family: Arial, sans-serif;
         font-size: 18px;
@@ -67,6 +73,7 @@
         user-select: none;
         -webkit-user-select: none;
         -webkit-touch-callout: none;
+        transition: background-color 0.3s ease;
     }
 
     #indicador-chance {
@@ -103,7 +110,13 @@
         right: 0;
     }
 
-    #lista-upgrades {
+    #lista-click {
+        display: block; /* Alterado de flex para block */
+        padding: 10px;
+        margin-top: 20px; /* Adiciona espaçamento entre o título e a lista de upgrades */
+    }
+
+    #lista-maquina {
         display: block; /* Alterado de flex para block */
         padding: 10px;
         margin-top: 20px; /* Adiciona espaçamento entre o título e a lista de upgrades */
@@ -125,7 +138,7 @@
         border: none;
         padding: 5px 10px;
         border-radius: 5px;
-        cursor: pointer;
+        cursor: url('/img/cursor-mao.png'), auto;
     }
 
     .upgrade-item button:hover {
@@ -180,7 +193,7 @@
         background-color: #c03;
     }
 
-    .popup button#comprar-upgrade {
+    .popup button#comprar-click, .popup button#comprar-maquina {
         background-color: #4CAF50;
         color: white;
         border: none;
@@ -190,7 +203,7 @@
         margin-top: 15px;
     }
 
-    .popup button#comprar-upgrade:hover {
+    .popup button#comprar-click:hover, .popup button#comprar-maquina:hover {
         background-color: #45a049;
     }
 
@@ -224,27 +237,37 @@
 </style>
 
 <script>
-    let quantidadeCookies = 0;
-    let cliques = [];
-    let chanceCookieDuplo = 0;
-    let tempoConstancia = 0;         // Tempo em que a diferença de CPS é menor que 0.33
-    const tempoJanela = 3000;        // Janela de tempo cálculo do CPS
-    const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
-    const quantParaUpgradeInicial = 10;             // Preço do primeiro upgrade
-    let quantParaUpgrade = quantParaUpgradeInicial;
-    let cpsAnterior = 0;
+    let quantidadeCookies = 0;      // Variável para quantidade atual de cookies
+    let multiplicadorCookie = 0;      // Variável para chance de cookie por click
+    let cookiesPorSegundo = 0;      // Variável para cookies por segundo
+    const precoClickInicial = 3;    // Preço inicial para upgrade de click
+    let precoClick = precoClickInicial;
+    const precoMaquinaInicial = 10; // Preço inicial para upgrade de máquina
+    let precoMaquina = precoMaquinaInicial;
+    let clickTimestamps = [];       // Armazena os timestamps dos cliques
+    const CPS_INTERVAL = 3000;      // Janela de tempo para cálculo de CPS (3 segundos)
+
+
 
     // Função para resetar os valores para o padrão inicial
     function resetarValores() {
         quantidadeCookies = 0;
-        chanceCookieDuplo = 0;
-        quantParaUpgrade = quantParaUpgradeInicial;
-        tempoConstancia = 0;
+        multiplicadorCookie = 0;
+        cookiesPorSegundo = 0;
+        precoClick = precoClickInicial;
+        precoMaquina = precoMaquinaInicial;
+
+        // Atualizar elementos na interface
         atualizarIndicadorChance();
-        localStorage.setItem("quantidadeCookies", quantidadeCookies);
-        localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
-        localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
         document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+        document.getElementById("cps").textContent = `${cookiesPorSegundo.toFixed(1)} cookie/s`;
+
+        // Limpar ofertas
+        document.getElementById("lista-click").innerHTML = '';
+        document.getElementById("lista-maquina").innerHTML = '';
+
+        // Limpar armazenamento local
+        localStorage.clear();
     }
 
     // Carregar valores do Local Storage ao iniciar
@@ -252,105 +275,161 @@
         const cookiesSalvos = localStorage.getItem("quantidadeCookies");
         if (cookiesSalvos !== null) {
             quantidadeCookies = parseInt(cookiesSalvos, 10);
-            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
         }
 
-        const chanceSalva = localStorage.getItem("chanceCookieDuplo");
+        const chanceSalva = localStorage.getItem("multiplicadorCookie");
         if (chanceSalva !== null) {
-            chanceCookieDuplo = parseInt(chanceSalva, 10);
+            multiplicadorCookie = parseInt(chanceSalva, 10);
             atualizarIndicadorChance();
         }
 
-        const upgradeSalvo = localStorage.getItem("quantParaUpgrade");
-        if (upgradeSalvo !== null) {
-            quantParaUpgrade = parseInt(upgradeSalvo, 10);
+        const upgradeClickSalvo = localStorage.getItem("precoClick");
+        if (upgradeClickSalvo !== null) {
+            precoClick = parseInt(upgradeClickSalvo, 10);
+        }
+
+        const upgradeMaquinaSalvo = localStorage.getItem("precoMaquina");
+        if (upgradeMaquinaSalvo !== null) {
+            precoMaquina = parseInt(upgradeMaquinaSalvo, 10);
+        }
+
+        const cpsSalvo = localStorage.getItem("cookiesPorSegundo");
+        if (cpsSalvo !== null) {
+            cookiesPorSegundo = parseInt(cpsSalvo, 10);
         }
     });
 
     document.getElementById("cookie").addEventListener("click", () => {
-        let multiplicador = 1;
-        let chance = chanceCookieDuplo;
+        const multiplicador = calcularMultiplicador(multiplicadorCookie);
+        quantidadeCookies += multiplicador;
 
+        // Armazena o timestamp atual
+        clickTimestamps.push(Date.now());
+
+        // Atualiza o contador e CPS
+        document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
+        localStorage.setItem("quantidadeCookies", quantidadeCookies);
+        atualizarCps();
+
+        // Verifica upgrades
+        if (quantidadeCookies >= precoClick && !document.getElementById('lista-click').innerHTML) {
+            exibirOfertaClick();
+        }
+        if (quantidadeCookies >= precoMaquina && !document.getElementById('lista-maquina').innerHTML) {
+            exibirOfertaMaquina();
+        }
+    });
+
+    function calcularMultiplicador(chance) {
+        let multiplicador = 1;
         while (chance >= 100) {
             multiplicador++;
             chance -= 100;
         }
+        return Math.random() * 100 <= chance ? multiplicador + 1 : multiplicador;
+    }
 
-        if (Math.random() * 100 <= chance) multiplicador++;
+    function calcularCpsMedia() {
+        const agora = Date.now();
 
-        quantidadeCookies += multiplicador;
-        document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-        localStorage.setItem("quantidadeCookies", quantidadeCookies);
-        atualizarCps();
+        // Filtra cliques dentro dos últimos 3 segundos
+        clickTimestamps = clickTimestamps.filter(timestamp => agora - timestamp <= CPS_INTERVAL);
 
-        // Verifica se a quantidade de cookies é suficiente para o upgrade
-        if (quantidadeCookies >= quantParaUpgrade) {
-            if (!document.getElementById('lista-upgrades').innerHTML) {
-                exibirOfertaUpgrade(); // Exibe a oferta de upgrade
-            }
-        }
-    });
+        // Retorna a média de cliques por segundo
+        return clickTimestamps.length / (CPS_INTERVAL / 1000);
+    }
+
+    // Função para adicionar cookies automáticos ao total
+    function adicionarCookiesAutomaticos() {
+        quantidadeCookies += cookiesPorSegundo * calcularMultiplicador(multiplicadorCookie);
+        document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
+        localStorage.setItem("quantidadeCookies", Math.floor(quantidadeCookies)); // Atualiza o total de cookies no localStorage
+    }
+
+    // Adiciona os cookies da máquina a cada segundo
+    setInterval(() => {
+        adicionarCookiesAutomaticos();
+    }, 1000); // A cada segundo
+
 
     function atualizarCps() {
-        const cps = quantidadeCookies / tempoJanela;
-        if (cps !== cpsAnterior) {
-            tempoConstancia = 0;
-            cpsAnterior = cps;
-        }
+        const cpsMediaClicks = calcularCpsMedia();
+        const cpsTotal = cpsMediaClicks + cookiesPorSegundo * calcularMultiplicador(multiplicadorCookie); // Soma automática + média
+        document.getElementById("cps").textContent = `${cpsTotal.toFixed(1)} cookies/s`;
     }
+
+    // Atualiza monitor de cps
+    setInterval(() => {
+        atualizarCps(); // Atualiza a exibição do CPS
+    }, 100);            // Atualiza a cada 50ms
 
     // Exibição das ofertas de upgrade
-    function exibirOfertaUpgrade() {
-        const listaUpgrades = document.getElementById('lista-upgrades');
-        const novoUpgrade = document.createElement('div');
-        novoUpgrade.classList.add('upgrade-item');
-        novoUpgrade.innerHTML = `
-            <p>Aumentar chance de cookie duplo em 20%!</p>
-            <button class="comprar-upgrade">Comprar por ${quantParaUpgrade} cookies</button>
+    function exibirOfertaClick() {
+        const listaClicks = document.getElementById('lista-click');
+        const novoClick = document.createElement('div');
+        novoClick.classList.add('upgrade-item');
+        novoClick.innerHTML = `
+            <p>Aumentar multiplicador cookie em 20%!</p>
+            <button class="comprar-click">Comprar por ${precoClick} cookies</button>
         `;
-        listaUpgrades.appendChild(novoUpgrade);
+        listaClicks.appendChild(novoClick);
     }
 
-    document.getElementById("comprar-upgrade").addEventListener("click", () => {
-        if (quantidadeCookies >= quantParaUpgrade) {
-            quantidadeCookies -= quantParaUpgrade;
-            chanceCookieDuplo += 20;
-            quantParaUpgrade *= 2; // Dobra o preço para o próximo upgrade
-            localStorage.setItem("quantidadeCookies", quantidadeCookies);
-            localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
-            atualizarIndicadorChance();
-            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-            document.getElementById('lista-upgrades').innerHTML = ''; // Remove a oferta de upgrade após compra
-        }
-    });
+    function exibirOfertaMaquina() {
+        const listaMaquina = document.getElementById('lista-maquina');
+        const novaMaquina = document.createElement('div');
+        novaMaquina.classList.add('upgrade-item');
+        novaMaquina.innerHTML = `
+            <p>Aumentar produção automática de cookies em 80%!</p>
+            <button class="comprar-maquina">Comprar por ${precoMaquina} cookies</button>
+        `;
+        listaMaquina.appendChild(novaMaquina);
+    }
 
-    document.getElementById("lista-upgrades").addEventListener("click", (e) => {
-        if (e.target && e.target.classList.contains("comprar-upgrade")) {
-            if (quantidadeCookies >= quantParaUpgrade) {
-                quantidadeCookies -= quantParaUpgrade;
-                chanceCookieDuplo += 20;
-                quantParaUpgrade *= 2; // Dobra o preço para o próximo upgrade
+    // Ao comprar upgrade de click
+    document.getElementById("lista-click").addEventListener("click", (e) => {
+        if (e.target.classList.contains("comprar-click")) {
+            if (quantidadeCookies >= precoClick) {
+                quantidadeCookies -= precoClick;
+                multiplicadorCookie += 20;
+                precoClick = atualizarPreco(precoClick);
                 localStorage.setItem("quantidadeCookies", quantidadeCookies);
-                localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
+                localStorage.setItem("multiplicadorCookie", multiplicadorCookie);
+                localStorage.setItem("precoClick", precoClick); // Salva o novo preço do upgrade
                 atualizarIndicadorChance();
-                document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-                document.getElementById('lista-upgrades').innerHTML = ''; // Remove a oferta de upgrade após compra
+                document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
+                document.getElementById('lista-click').innerHTML = ''; // Remove a oferta de upgrade após compra
             }
         }
     });
 
+    // Ao comprar upgrade de máquina
+    document.getElementById("lista-maquina").addEventListener("click", (e) => {
+        if (e.target && e.target.classList.contains("comprar-maquina")) {
+            if (quantidadeCookies >= precoMaquina) {
+                quantidadeCookies -= precoMaquina;
+                cookiesPorSegundo += cookiesPorSegundo * 0.8 || 1; // Incrementa 80% ou começa com 1 cookie/s
+                precoMaquina = atualizarPreco(precoMaquina);
+                localStorage.setItem("quantidadeCookies", quantidadeCookies); // Salva a quantidade de cookies
+                localStorage.setItem("cookiesPorSegundo", cookiesPorSegundo); // Salva o valor de CPS (cookies por segundo)
+                localStorage.setItem("precoMaquina", precoMaquina);           // Salva o novo preço do upgrade
+                document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+                document.getElementById('lista-maquina').innerHTML = ''; // Remove oferta
+            }
+        }
+    });
     function atualizarIndicadorChance() {
-        document.getElementById("indicador-chance").textContent = `Chance de cookie duplo: ${chanceCookieDuplo}%`;
+        document.getElementById("indicador-chance").textContent = `Multiplicador cookie: ${multiplicadorCookie}%`;
+    }
+
+    function atualizarPreco(upgrade) {
+        return upgrade * 2;
     }
 
     document.getElementById("reset").addEventListener("click", () => {
-        // Pergunta ao usuário se ele deseja resetar o progresso
-        const confirmarReset = confirm("Deseja mesmo resetar seu progresso?");
-        
-        // Se o usuário confirmar, chama a função para resetar os valores
-        if (confirmarReset) {
+        if (confirm("Você tem certeza que quer resetar? Todo o progresso será perdido.")) {
             resetarValores();
-        } else {
         }
     });
 
