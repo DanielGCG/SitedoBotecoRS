@@ -17,6 +17,11 @@
 
     <!-- Indicador de chance no canto da tela -->
     <div id="indicador-chance">Chance de cookie duplo: 0%</div>
+
+    <div id="versao-container">
+        <div id="versao" class="versao">Versão: 1.0.3</div>
+        <button id="reset" class="reset-btn">Resetar</button>
+    </div>
 </main>
 
 <style>
@@ -123,6 +128,34 @@
     .popup button#comprar-upgrade:hover {
         background-color: #45a049;
     }
+
+    #versao-container {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        display: flex;
+        align-items: center;
+        gap: 5px; /* Espaço entre a versão e o botão */
+    }
+
+    .versao {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        color: #333;
+    }
+
+    .reset-btn {
+        background-color: #f04;
+        color: white;
+        padding: 5px 10px; /* Tamanho pequeno */
+        font-size: 10px; /* Tamanho de texto menor */
+        border-radius: 5px;
+        cursor: url('/img/cursor-mao.png'), auto;
+    }
+
+    .reset-btn:hover {
+        background-color: #c03;
+    }
 </style>
 
 <script>
@@ -132,20 +165,25 @@
     let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
     const tempoJanela = 3000;
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
-    const quantParaUpgradeInicial = 250;
+    const quantParaUpgradeInicial = 1;
     let quantParaUpgrade = quantParaUpgradeInicial;
     let cpsAnterior = 0;
 
     // Função para resetar os valores para o padrão inicial
     function resetarValores() {
-        quantidadeCookies = 0;
-        chanceCookieDuplo = 0;
-        quantParaUpgrade = quantParaUpgradeInicial;
-        tempoConstancia = 0;
-        atualizarIndicadorChance();
-        localStorage.setItem("quantidadeCookies", quantidadeCookies);
-        localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
-        localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
+        const confirmacao = confirm("Você realmente deseja apagar todo o progresso?");
+        if (confirmacao) {
+            quantidadeCookies = 0;
+            chanceCookieDuplo = 0;
+            quantParaUpgrade = quantParaUpgradeInicial;
+            tempoConstancia = 0;
+            atualizarIndicadorChance();
+            localStorage.setItem("quantidadeCookies", quantidadeCookies);
+            localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
+            localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
+            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+            alert("Progresso resetado com sucesso!");
+        }
     }
 
     // Carregar valores do Local Storage ao iniciar
@@ -256,6 +294,8 @@
             alert("Você não tem cookies suficientes para comprar este upgrade!");
         }
     });
+
+    document.getElementById("reset").addEventListener("click", resetarValores);
 
     calcularCPS();
     atualizarIndicadorChance();
