@@ -6,17 +6,28 @@
             <img src="/img/cookie.png" alt="Cookie" style="width: 105px; height: auto;">
         </button>
 
-        <div class="popup" id="popup" style="display: none;">
+        <div class="popup" id="popup-upgrade-chance" style="display: none;">
             <p>Aumentar a chance de cookie duplo em 20%</p>
             <p id="chance-atual">Chance atual: 0%</p>
             <p id="nova-chance">Nova chance: 20%</p>
             <button id="comprar-upgrade"></button>
             <button id="fechar-popup">Fechar</button>
         </div>
+
+        <!-- Popup para upgrade do gerador automático -->
+        <div class="popup" id="popup-upgrade-automatico" style="display: none;">
+            <p>Gerador de 0.5 Cookie por segundo</p>
+            <p id="gerador-atual">Gerador atual: 0/s</p>
+            <p id="novo-gerador">Novo gerador: 0.5/s</p>
+            <button id="comprar-upgrade-automatico"></button>
+            <button id="fechar-popup-automatico">Fechar</button>
+        </div>
     </div>
 
     <!-- Indicador de chance no canto da tela -->
     <div id="indicador-chance">Chance de cookie duplo: 0%</div>
+
+    <div id="versao" class="versao">Versão: 1.0</div>
 </main>
 
 <style>
@@ -123,12 +134,27 @@
     .popup button#comprar-upgrade:hover {
         background-color: #45a049;
     }
+
+    #versao {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        padding: 5px 10px;
+        font-size: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
 </style>
 
 <script>
     let quantidadeCookies = 0;
     let cliques = [];
     let chanceCookieDuplo = 0;
+    let cookiesautomaticos = 0;
+    let geradorAutomatico = 0; // Gerador de cookies automático (em cookies por segundo)
     let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
     const tempoJanela = 3000;
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
@@ -140,6 +166,8 @@
     function resetarValores() {
         quantidadeCookies = 0;
         chanceCookieDuplo = 0;
+        cookiesautomaticos = 0;
+        geradorAutomatico = 0; // Resetar gerador automático
         quantParaUpgrade = quantParaUpgradeInicial;
         tempoConstancia = 0;
         atualizarIndicadorChance();
@@ -148,7 +176,6 @@
         localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
     }
 
-    // Carregar valores do Local Storage ao iniciar
     document.addEventListener("DOMContentLoaded", () => {
         const cookiesSalvos = localStorage.getItem("quantidadeCookies");
         if (cookiesSalvos !== null) {
@@ -165,6 +192,11 @@
         const upgradeSalvo = localStorage.getItem("quantParaUpgrade");
         if (upgradeSalvo !== null) {
             quantParaUpgrade = parseInt(upgradeSalvo, 10);
+        }
+
+        const geradorSalvo = localStorage.getItem("geradorAutomatico");
+        if (geradorSalvo !== null) {
+            geradorAutomatico = parseFloat(geradorSalvo);
         }
     });
 
@@ -191,28 +223,25 @@
         }
     });
 
+    // Função para calcular CPS
     function calcularCPS() {
         cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
         const cps = cliques.length / (tempoJanela / 1000);
         const diferencaCPS = Math.abs(cps - cpsAnterior);
 
-        // Verifica a constância de maneira mais sensível
         if (diferencaCPS < 0.33) {
             tempoConstancia += intervaloAtualizacao;
         } else {
-            tempoConstancia = 0; // Resetar tempo de constância se houver grande variação no CPS
+            tempoConstancia = 0;
         }
 
-        // Punição somente se o CPS for acima de 13 ou se a constância for muito longa (mais de 6 segundos)
-        if (cps > 13 || ((tempoConstancia >= 6000) && cps > 1)) {
-            if (tempoConstancia >= 6000) {
-                alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
-                resetarValores(); // Resetar valores ao ser punido
-            }
+        if (cps > 12.5 || ((tempoConstancia >= 5000) && cps > 1)) {
+            alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
+            resetarValores();
         }
 
         cpsAnterior = cps;
-        document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
+        document.getElementById("cps").textContent = `CPS: ${(cps + geradorAutomatico).toFixed(2)}`;
         const vermelho = Math.min(Math.round(cps * 10), 255);
         let verde = 181;
         let azul = 107;
@@ -226,29 +255,35 @@
     }
 
     function mostrarPopup() {
-        const popup = document.getElementById("popup");
+        // Popup para upgrade de chance de cookie duplo
+        const popupDuplo = document.getElementById("popup-upgrade-chance");
         document.getElementById("chance-atual").textContent = `Chance atual: ${chanceCookieDuplo}%`;
         document.getElementById("nova-chance").textContent = `Nova chance: ${chanceCookieDuplo + 20}%`;
         document.getElementById("comprar-upgrade").textContent = `${quantParaUpgrade} cookies`;
-        popup.style.display = "block";
+        popupDuplo.style.display = "block";
+
+        // Popup para upgrade do gerador automático
+        const popupGerador = document.getElementById("popup-upgrade-automatico");
+        document.getElementById("gerador-atual").textContent = `Gerador atual: ${geradorAutomatico}s`;
+        document.getElementById("novo-gerador").textContent = `Novo gerador: ${geradorAutomatico + 0.3}s`;
+        document.getElementById("comprar-upgrade-automatico").textContent = `${quantParaUpgrade} cookies`;
+        popupGerador.style.display = "block";
     }
 
-    function atualizarIndicadorChance() {
-        document.getElementById("indicador-chance").textContent = `Chance de cookie duplo: ${chanceCookieDuplo}%`;
-    }
-
+    // Fechar popup
     document.getElementById("fechar-popup").addEventListener("click", () => {
-        const popup = document.getElementById("popup");
-        popup.style.display = "none";
+        document.getElementById("popup-upgrade-chance").style.display = "none";
+        document.getElementById("popup-upgrade-automatico").style.display = "none";
     });
 
+    // Comprar upgrade de chance de cookie duplo
     document.getElementById("comprar-upgrade").addEventListener("click", () => {
         if (quantidadeCookies >= quantParaUpgrade) {
             quantidadeCookies -= quantParaUpgrade;
             chanceCookieDuplo += 20;
             quantParaUpgrade *= 2;
             document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-            document.getElementById("popup").style.display = "none";
+            document.getElementById("popup-upgrade-chance").style.display = "none";
             atualizarIndicadorChance();
 
             localStorage.setItem("quantidadeCookies", quantidadeCookies);
@@ -259,11 +294,23 @@
         }
     });
 
-    calcularCPS();
-    atualizarIndicadorChance();
-    setInterval(calcularCPS, intervaloAtualizacao);
+    // Comprar upgrade do gerador automático
+    document.getElementById("comprar-upgrade-automatico").addEventListener("click", () => {
+        if (quantidadeCookies >= quantParaUpgrade) {
+            quantidadeCookies -= quantParaUpgrade;
+            geradorAutomatico += 0.3; // Aumenta a taxa do gerador automático
+            quantParaUpgrade *= 2;
+            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+            document.getElementById("popup-upgrade-automatico").style.display = "none";
 
-    document.getElementById("cookie").addEventListener('dragstart', (event) => {
-        event.preventDefault();
+            localStorage.setItem("quantidadeCookies", quantidadeCookies);
+            localStorage.setItem("geradorAutomatico", geradorAutomatico);
+            localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
+        } else {
+            alert("Você não tem cookies suficientes para comprar este upgrade!");
+        }
     });
+
+    calcularCPS();
+    setInterval(calcularCPS, intervaloAtualizacao);
 </script>
