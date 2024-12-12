@@ -3,13 +3,11 @@
         <div id="mostrador-de-cookies">Você tem 0 cookies!</div>
         <div id="cps">0 cookies/s</div>
         <button id="cookie">
-            <img src="/img/cookie.png" alt="Cookie" style="width: 105px; height: auto;">
+            <img src="/img/cookie.png" alt="Cookie">
         </button>
 
         <div class="popup" id="popup" style="display: none;">
-            <p>Aumentar a multiplicador de cookie em 20%</p>
-            <button id="comprar-click"></button>
-            <button id="fechar-popup">Fechar</button>
+            <p>PopUp</p>
         </div>
     </div>
 
@@ -25,11 +23,14 @@
         <div id="lista-maquina"></div>
     </div>
 
-    <!-- Indicador de multiplicador no canto da tela -->
-    <div id="indicador-multiplicador">Multiplicador Cookie: 0%</div>
+    <!-- Indicador de multiplicador -->
+    <div id="indicador-multiplicador-cookies">Multiplicador Cookie: 0%</div>
+
+    <!-- Indicador de gerador automático -->
+    <div id="indicador-maquina-cookies">Máquina de cookies: 0%</div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 1.2.1</div>
+        <div id="versao" class="versao">Versão: 1.2.2</div>
         <button id="reset" class="reset-btn">Resetar</button>
     </div>
 </main>
@@ -57,6 +58,8 @@
     #cookie img {
         -webkit-user-drag: none;
         pointer-events: none;
+        width: 145px;
+        height: auto;
     }
 
     #mostrador-de-cookies, #cps {
@@ -76,7 +79,8 @@
         transition: background-color 0.3s ease;
     }
 
-    #indicador-multiplicador {
+    #indicador-multiplicador-cookies,
+    #indicador-maquina-cookies {
         position: relative;
         top: 15px;
         background-color: #f9f9f936;
@@ -86,6 +90,10 @@
         font-size: 14px;
         color: #333;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #indicador-maquina-cookies {
+        margin-top: 10px;
     }
 
     .barra-lateral {
@@ -154,15 +162,31 @@
             position: relative;
             width: 100%; /* Ajustar para largura total no layout responsivo */
             height: auto; /* Permitir altura dinâmica */
-            padding: 10px; /* Espaçamento interno */
+            padding: 20px; /* Espaçamento interno */
+            top: 80px;
+            align-items: center;
         }
 
         #barra-esquerda {
             order: 1; /* Aparece logo após os cookies */
+            align-items: center;
         }
 
         #barra-direita {
             order: 2; /* Aparece abaixo da esquerda */
+            align-items: center;
+        }
+
+        .upgrade-item {
+            align-items: center;
+            text-align: center;
+        }
+
+        #cookie img {
+            -webkit-user-drag: none;
+            pointer-events: none;
+            width: 205px;
+            height: auto;
         }
     }
 
@@ -191,20 +215,6 @@
 
     .popup button#fechar-popup:hover {
         background-color: #c03;
-    }
-
-    .popup button#comprar-click, .popup button#comprar-maquina {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: url('/img/cursor-mao.png'), auto;
-        margin-top: 15px;
-    }
-
-    .popup button#comprar-click:hover, .popup button#comprar-maquina:hover {
-        background-color: #45a049;
     }
 
     #versao-container {
@@ -288,7 +298,7 @@
 
         // Atualizar elementos na interface
         atualizarIndicadorMultiplicador();
-        document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+        document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
         document.getElementById("cps").textContent = `${cookiesPorSegundo.toFixed(1)} cookie/s`;
 
         // Limpar ofertas
@@ -325,6 +335,14 @@
         quantidadeCookies += totalCookies; // Atualiza a quantidade total de cookies
         document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
         localStorage.setItem("quantidadeCookies", Math.floor(quantidadeCookies)); // Atualiza o total de cookies no localStorage
+        
+        // Verifica upgrades automaticamente ao exibir os cookies
+        if (quantidadeCookies >= precoClick && !document.getElementById('lista-click').innerHTML) {
+            exibirOfertaClick();
+        }
+        if (quantidadeCookies >= precoMaquina && !document.getElementById('lista-maquina').innerHTML) {
+            exibirOfertaMaquina();
+        }
     }
 
     // Função para atualizar o CPS (cookies por segundo)
@@ -341,7 +359,7 @@
 
     // Função para atualizar o indicador de multiplicador
     function atualizarIndicadorMultiplicador() {
-        document.getElementById("indicador-multiplicador").textContent = `Multiplicador cookie: ${multiplicadorCookie + 100}%`;
+        document.getElementById("indicador-multiplicador-cookies").textContent = `Multiplicador cookie: ${multiplicadorCookie + 100}%`;
     }
 
     // Função para atualizar o preço dos upgrades
@@ -400,7 +418,7 @@
                 localStorage.setItem("quantidadeCookies", quantidadeCookies); // Salva a quantidade de cookies
                 localStorage.setItem("cookiesPorSegundo", cookiesPorSegundo); // Salva o valor de CPS (cookies por segundo)
                 localStorage.setItem("precoMaquina", precoMaquina);           // Salva o novo preço do upgrade
-                document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+                document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
                 document.getElementById('lista-maquina').innerHTML = ''; // Remove oferta
             }
         }
