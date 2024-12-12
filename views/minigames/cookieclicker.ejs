@@ -138,6 +138,26 @@
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
     let quantParaUpgrade = 1000;
 
+    // Carregar valores do Local Storage ao iniciar
+    document.addEventListener("DOMContentLoaded", () => {
+        const cookiesSalvos = localStorage.getItem("quantidadeCookies");
+        if (cookiesSalvos !== null) {
+            quantidadeCookies = parseInt(cookiesSalvos, 10);
+            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+        }
+
+        const chanceSalva = localStorage.getItem("chanceCookieDuplo");
+        if (chanceSalva !== null) {
+            chanceCookieDuplo = parseInt(chanceSalva, 10);
+            atualizarIndicadorChance();
+        }
+
+        const upgradeSalvo = localStorage.getItem("quantParaUpgrade");
+        if (upgradeSalvo !== null) {
+            quantParaUpgrade = parseInt(upgradeSalvo, 10);
+        }
+    });
+
     document.getElementById("cookie").addEventListener("click", () => {
         let multiplicador = 1; // Começa com 1x
         let chance = chanceCookieDuplo;
@@ -156,6 +176,9 @@
         quantidadeCookies += multiplicador;
         document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
         cliques.push(Date.now());
+
+        // Salvar no Local Storage
+        localStorage.setItem("quantidadeCookies", quantidadeCookies);
 
         // Exibe o popup ao passar a quantidade necessária para upgrade
         if (quantidadeCookies >= quantParaUpgrade) {
@@ -209,6 +232,11 @@
             document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
             document.getElementById("popup").style.display = "none";
             atualizarIndicadorChance();
+
+            // Salvar no Local Storage
+            localStorage.setItem("quantidadeCookies", quantidadeCookies);
+            localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
+            localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
         } else {
             alert("Você não tem cookies suficientes para comprar este upgrade!");
         }
@@ -224,3 +252,4 @@
         event.preventDefault();
     });
 </script>
+
