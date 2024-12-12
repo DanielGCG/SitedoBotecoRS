@@ -191,7 +191,9 @@
         cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
         const cps = cliques.length / (tempoJanela / 1000);
         if (cps > 17){
-            alert("PARE DE ROUBAR SEU BOBÃO!");
+            alert("PARE DE ROUBAR SEU BOBÃO! perdeu todo seu progesso HAHAHAH");
+            quantidadeCookies = 0;
+            chanceCookieDuplo = 0;
         }
         document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
         const vermelho = Math.min(Math.round(cps * 10), 255);
