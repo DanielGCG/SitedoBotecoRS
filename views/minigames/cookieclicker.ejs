@@ -77,9 +77,15 @@
         cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
         const cps = cliques.length / (tempoJanela / 1000);
         document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
-        const vermelho = Math.min(Math.round(cps * 15), 255);
-        const verde = Math.max(181 - vermelho * 0.2, 0); // Diminui o verde proporcionalmente ao vermelho
-        const azul = Math.max(107 - vermelho * 0.2, 0); // Diminui o azul proporcionalmente ao vermelho
+        const vermelho = Math.min(Math.round(cps * 10), 255);
+        let verde = 181;
+        let azul = 107;
+
+        if (vermelho === 255) {
+            verde = Math.max(181 - (vermelho - 255) * 30, 0);
+            azul = Math.max(107 - (vermelho - 255) * 30, 0);
+        }
+
         document.body.style.backgroundColor = `rgb(${vermelho + 128}, ${verde}, ${azul})`;
     }
 
