@@ -6,33 +6,20 @@
             <img src="/img/cookie.png" alt="Cookie" style="width: 105px; height: auto;">
         </button>
 
-        <div class="popup" id="popup-upgrade-chance" style="display: none;">
+        <div class="popup" id="popup" style="display: none;">
             <p>Aumentar a chance de cookie duplo em 20%</p>
             <p id="chance-atual">Chance atual: 0%</p>
             <p id="nova-chance">Nova chance: 20%</p>
             <button id="comprar-upgrade"></button>
             <button id="fechar-popup">Fechar</button>
         </div>
-
-        <!-- Popup para upgrade do gerador automático -->
-        <div class="popup" id="popup-upgrade-automatico" style="display: none;">
-            <p>Gerador de cookies automático</p>
-            <p id="gerador-atual">Gerador atual: 0/s</p>
-            <p id="novo-gerador">Novo gerador: 0.3/s</p>
-            <p id="preco-gerador">Preço: 100 cookies</p>
-            <button id="comprar-upgrade-automatico">Comprar Upgrade</button>
-            <button id="fechar-popup-automatico">Fechar</button>
-        </div>
     </div>
 
     <!-- Indicador de chance no canto da tela -->
     <div id="indicador-chance">Chance de cookie duplo: 0%</div>
-
-    <div id="versao" class="versao">Versão: 1.1</div>
 </main>
 
 <style>
-    /* Estrutura principal da página */
     main {
         text-align: center;
         display: flex;
@@ -40,7 +27,6 @@
         align-items: center;
     }
 
-    /* Container que agrupa os elementos */
     .container {
         display: flex;
         flex-direction: column;
@@ -52,14 +38,12 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 
-    /* Estilos para os indicadores */
     #mostrador-de-cookies, #cps {
         font-family: Arial, sans-serif;
         font-size: 18px;
         color: #333;
     }
 
-    /* Botões sem estilo de borda e com cursor customizado */
     button {
         background: none;
         border: none;
@@ -70,7 +54,6 @@
         -webkit-touch-callout: none;
     }
 
-    /* Estilos para o indicador de chance */
     #indicador-chance {
         position: relative;
         top: 15px;
@@ -83,7 +66,7 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-    /* Definição da animação bounce para o botão */
+    /* Definição da animação bounce */
     @keyframes bounce {
         0%, 20%, 50%, 80%, 100% {
             transform: translateY(0);
@@ -100,19 +83,19 @@
         animation: bounce 0.3s;
     }
 
-    /* Estilos para os popups, agora empilhados */
     .popup {
-        display: block;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         background-color: rgba(238, 119, 119, 0.219);
         border: 2px solid #333;
         border-radius: 10px;
         padding: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         text-align: center;
-        margin-bottom: 10px; /* Espaçamento entre os popups */
     }
 
-    /* Botão de fechar o popup */
     .popup button#fechar-popup {
         background-color: #f04;
         color: white;
@@ -123,12 +106,10 @@
         margin-top: 15px;
     }
 
-    /* Efeito de hover para o botão de fechar */
     .popup button#fechar-popup:hover {
         background-color: #c03;
     }
 
-    /* Botão para comprar upgrade */
     .popup button#comprar-upgrade {
         background-color: #4CAF50;
         color: white;
@@ -139,36 +120,8 @@
         margin-top: 15px;
     }
 
-    /* Efeito de hover para o botão de upgrade */
     .popup button#comprar-upgrade:hover {
         background-color: #45a049;
-    }
-
-    /* Popups específicos para upgrades */
-    .popup-upgrade-automatico {
-        top: 60%; /* Adiciona um espaçamento para o segundo popup */
-    }
-
-    .popup-upgrade-chance {
-        top: 40%; /* Deixa o primeiro popup mais alto */
-    }
-
-    /* Popups com display inicialmente oculto */
-    #popup-upgrade-chance, #popup-upgrade-automatico {
-        display: none; /* Os popups continuam ocultos por padrão */
-    }
-
-    /* Versão no rodapé */
-    #versao {
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        background-color: rgba(0, 0, 0, 0.5);
-        color: white;
-        padding: 5px 10px;
-        font-size: 10px;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 </style>
 
@@ -176,12 +129,10 @@
     let quantidadeCookies = 0;
     let cliques = [];
     let chanceCookieDuplo = 0;
-    let cookiesautomaticos = 0;
-    let geradorAutomatico = 0; // Gerador de cookies automático (em cookies por segundo)
     let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
     const tempoJanela = 3000;
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
-    const quantParaUpgradeInicial = 100;
+    const quantParaUpgradeInicial = 500;
     let quantParaUpgrade = quantParaUpgradeInicial;
     let cpsAnterior = 0;
 
@@ -189,8 +140,6 @@
     function resetarValores() {
         quantidadeCookies = 0;
         chanceCookieDuplo = 0;
-        cookiesautomaticos = 0;
-        geradorAutomatico = 0; // Resetar gerador automático
         quantParaUpgrade = quantParaUpgradeInicial;
         tempoConstancia = 0;
         atualizarIndicadorChance();
@@ -199,8 +148,8 @@
         localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
     }
 
+    // Carregar valores do Local Storage ao iniciar
     document.addEventListener("DOMContentLoaded", () => {
-        // Inicializando os valores de upgrades
         const cookiesSalvos = localStorage.getItem("quantidadeCookies");
         if (cookiesSalvos !== null) {
             quantidadeCookies = parseInt(cookiesSalvos, 10);
@@ -216,11 +165,6 @@
         const upgradeSalvo = localStorage.getItem("quantParaUpgrade");
         if (upgradeSalvo !== null) {
             quantParaUpgrade = parseInt(upgradeSalvo, 10);
-        }
-
-        const geradorSalvo = localStorage.getItem("geradorAutomatico");
-        if (geradorSalvo !== null) {
-            geradorAutomatico = parseFloat(geradorSalvo);
         }
     });
 
@@ -247,25 +191,28 @@
         }
     });
 
-    // Função para calcular CPS
     function calcularCPS() {
         cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
         const cps = cliques.length / (tempoJanela / 1000);
         const diferencaCPS = Math.abs(cps - cpsAnterior);
 
+        // Verifica a constância de maneira mais sensível
         if (diferencaCPS < 0.33) {
             tempoConstancia += intervaloAtualizacao;
         } else {
-            tempoConstancia = 0;
+            tempoConstancia = 0; // Resetar tempo de constância se houver grande variação no CPS
         }
 
-        if (cps > 12.5 || ((tempoConstancia >= 5000) && cps > 5)) {
-            resetarValores();
-            alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
+        // Punição somente se o CPS for acima de 13 ou se a constância for muito longa (mais de 6 segundos)
+        if (cps > 13 || ((tempoConstancia >= 6000) && cps > 1)) {
+            if (tempoConstancia >= 6000) {
+                alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
+                resetarValores(); // Resetar valores ao ser punido
+            }
         }
 
         cpsAnterior = cps;
-        document.getElementById("cps").textContent = `CPS: ${(cps + geradorAutomatico).toFixed(2)}`;
+        document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
         const vermelho = Math.min(Math.round(cps * 10), 255);
         let verde = 181;
         let azul = 107;
@@ -279,35 +226,29 @@
     }
 
     function mostrarPopup() {
-        // Atualiza os textos com as informações de upgrade
+        const popup = document.getElementById("popup");
         document.getElementById("chance-atual").textContent = `Chance atual: ${chanceCookieDuplo}%`;
         document.getElementById("nova-chance").textContent = `Nova chance: ${chanceCookieDuplo + 20}%`;
         document.getElementById("comprar-upgrade").textContent = `${quantParaUpgrade} cookies`;
-
-        document.getElementById("gerador-atual").textContent = `Gerador atual: ${geradorAutomatico}s`;
-        document.getElementById("novo-gerador").textContent = `Novo gerador: ${geradorAutomatico + 0.3}s`;
-        document.getElementById("preco-gerador").textContent = `Preço: ${quantParaUpgrade} cookies`;
-        document.getElementById("comprar-upgrade-automatico").textContent = `Comprar Upgrade`;
-
-        // Mostra os popups
-        document.getElementById("popup-upgrade-chance").style.display = "block";
-        document.getElementById("popup-upgrade-automatico").style.display = "block";
+        popup.style.display = "block";
     }
 
-    // Fechar popup
+    function atualizarIndicadorChance() {
+        document.getElementById("indicador-chance").textContent = `Chance de cookie duplo: ${chanceCookieDuplo}%`;
+    }
+
     document.getElementById("fechar-popup").addEventListener("click", () => {
-        document.getElementById("popup-upgrade-chance").style.display = "none";
-        document.getElementById("popup-upgrade-automatico").style.display = "none";
+        const popup = document.getElementById("popup");
+        popup.style.display = "none";
     });
-    
-    // Comprar upgrade de chance de cookie duplo
+
     document.getElementById("comprar-upgrade").addEventListener("click", () => {
         if (quantidadeCookies >= quantParaUpgrade) {
             quantidadeCookies -= quantParaUpgrade;
             chanceCookieDuplo += 20;
             quantParaUpgrade *= 2;
-
             document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+            document.getElementById("popup").style.display = "none";
             atualizarIndicadorChance();
 
             localStorage.setItem("quantidadeCookies", quantidadeCookies);
@@ -318,27 +259,11 @@
         }
     });
 
-    // Comprar upgrade do gerador automático
-    document.getElementById("comprar-upgrade-automatico").addEventListener("click", () => {
-        if (quantidadeCookies >= quantParaUpgrade) {
-            quantidadeCookies -= quantParaUpgrade;
-            geradorAutomatico += 0.3;
-            quantParaUpgrade *= 2;
-            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-
-            localStorage.setItem("quantidadeCookies", quantidadeCookies);
-            localStorage.setItem("geradorAutomatico", geradorAutomatico);
-            localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
-
-            // Atualiza o texto do preço e do gerador
-            document.getElementById("gerador-atual").textContent = `Gerador atual: ${geradorAutomatico}s`;
-            document.getElementById("novo-gerador").textContent = `Novo gerador: ${geradorAutomatico + 0.3}s`;
-            document.getElementById("preco-gerador").textContent = `Preço: ${quantParaUpgrade} cookies`;
-        } else {
-            alert("Você não tem cookies suficientes para comprar este upgrade!");
-        }
-    });
-
     calcularCPS();
+    atualizarIndicadorChance();
     setInterval(calcularCPS, intervaloAtualizacao);
+
+    document.getElementById("cookie").addEventListener('dragstart', (event) => {
+        event.preventDefault();
+    });
 </script>
