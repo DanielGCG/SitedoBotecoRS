@@ -1,0 +1,89 @@
+<main>
+    <div class="container">
+        <div id="mostrador-de-cookies">Você tem 0 cookies!</div>
+        <div id="cps">CPS: 0</div>
+        <button id="cookie">
+            <img src="/img/cookie.png" alt="Cookie" style="width: 105px; height: auto;">
+        </button>
+    </div>
+</main>
+
+<style>
+    main {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px; /* Espaçamento entre os elementos */
+
+        background-color: #f9f9f936;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    #mostrador-de-cookies, #cps {
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        color: #333;
+    }
+
+    button {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: url('/img/cursor-mao.png'), auto;
+    }
+
+    /* Definição da animação bounce */
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-30px);
+        }
+        60% {
+            transform: translateY(-15px);
+        }
+    }
+
+    /* Aplica a animação ao botão quando clicado */
+    #cookie:active {
+        animation: bounce 0.07s; /* Aumentando para 0.07 segundo */
+    }
+</style>
+
+<script>
+    let quantidadeCookies = 0;
+    let cliques = [];
+    const tempoJanela = 3000;
+    const intervaloAtualizacao = 50; // Atualiza o CPS a cada 100ms
+
+    document.getElementById("cookie").addEventListener("click", () => {
+        quantidadeCookies++;
+        document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+        cliques.push(Date.now());
+    });
+
+    // Função para calcular e atualizar o CPS
+    function calcularCPS() {
+        cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
+        const cps = cliques.length / (tempoJanela / 1000);
+        document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
+        const vermelho = Math.min(Math.round(cps * 15), 255); // Ajuste o fator 10 para controlar a sensibilidade
+        document.body.style.backgroundColor = `rgb(${vermelho + 128}, 181, 107)`;
+    }
+
+    // Chama a função de cálculo inicialmente e depois a cada intervalo
+    calcularCPS();
+    setInterval(calcularCPS, intervaloAtualizacao);
+
+    // Evento aleatórios
+</script>

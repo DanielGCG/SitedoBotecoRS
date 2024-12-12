@@ -39,6 +39,32 @@ router.get('/cutucar', (req, res) => {
     res.render('cutucar', { locals: locals });
 });
 
+/* ------ Minigames ------*/
+
+router.get('/games', (req, res) => {
+    const locals = {
+        title: "Minijogos!",
+        description: "oba minujogos!"
+    }
+    res.render('minigames', { locals: locals });
+});
+
+router.get('/minigames', (req, res) => {
+    const locals = {
+        title: "Minijogos!",
+        description: "oba minujogos!"
+    }
+    res.render('minigames', { locals: locals });
+});
+
+router.get('/minigames/cookie', (req, res) => {
+    const locals = {
+        title: "Minijogos!",
+        description: "oba minujogos!"
+    }
+    res.render('minigames/cookieclicker', { locals: locals });
+});
+
 /* ------ SOBRE ------*/
 
 router.get('/about', (req, res) => {
