@@ -46,7 +46,7 @@
     <div id="indicador-maquina-cookies">Máquina de cookies: 0 cookie/s</div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 1.2.4</div>
+        <div id="versao" class="versao">Versão: 1.2.5</div>
         <button id="reset" class="reset-btn" onclick="botaoReset()">Resetar</button>
     </div>
 </main>
@@ -69,6 +69,22 @@
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+        @keyframes clickAnimation {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    #cookie.animate {
+        animation: clickAnimation 0.1s ease-out;
     }
 
     #cookie img {
@@ -455,7 +471,7 @@
 
     // Função para atualizar o preço dos upgrades
     function atualizarPreco(upgrade) {
-        return upgrade * 2;
+        return upgrade * 3;
     }
 
     // Função para exibir a oferta de upgrade de click
@@ -523,6 +539,16 @@
 
     // Evento de clique no cookie
     document.getElementById("cookie").addEventListener("click", () => {
+        const cookieButton = document.getElementById("cookie");
+        
+        // Adiciona a classe de animação
+        cookieButton.classList.add("animate");
+
+        // Remove a classe após a animação terminar
+        setTimeout(() => {
+            cookieButton.classList.remove("animate");
+        }, 100); // O tempo deve coincidir com a duração da animação no CSS (0.1s)
+
         const multiplicador = calcularMultiplicador(multiplicadorCookie);
         quantidadeCookies += multiplicador;
 
