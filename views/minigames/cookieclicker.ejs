@@ -136,7 +136,7 @@
     let chanceCookieDuplo = 0;
     const tempoJanela = 3000;
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
-    let quantParaUpgrade = 1000;
+    let quantParaUpgrade = 500;
 
     // Carregar valores do Local Storage ao iniciar
     document.addEventListener("DOMContentLoaded", () => {
@@ -190,6 +190,9 @@
     function calcularCPS() {
         cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
         const cps = cliques.length / (tempoJanela / 1000);
+        if (cps > 17){
+            alert("PARE DE ROUBAR SEU BOBÃO!");
+        }
         document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
         const vermelho = Math.min(Math.round(cps * 10), 255);
         let verde = 181;
@@ -228,7 +231,7 @@
         if (quantidadeCookies >= quantParaUpgrade) {
             quantidadeCookies -= quantParaUpgrade;
             chanceCookieDuplo += 20;
-            quantParaUpgrade *= 5;
+            quantParaUpgrade *= 2;
             document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
             document.getElementById("popup").style.display = "none";
             atualizarIndicadorChance();
