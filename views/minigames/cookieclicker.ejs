@@ -132,7 +132,7 @@
     let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
     const tempoJanela = 3000;
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
-    const quantParaUpgradeInicial = 500;
+    const quantParaUpgradeInicial = 250;
     let quantParaUpgrade = quantParaUpgradeInicial;
     let cpsAnterior = 0;
 
@@ -204,11 +204,9 @@
         }
 
         // Punição somente se o CPS for acima de 13 ou se a constância for muito longa (mais de 6 segundos)
-        if (cps > 13 || ((tempoConstancia >= 6000) && cps > 1)) {
-            if (tempoConstancia >= 6000) {
-                alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
-                resetarValores(); // Resetar valores ao ser punido
-            }
+        if (cps > 12 || ((tempoConstancia >= 5000) && cps > 1)) {
+            alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
+            resetarValores(); // Resetar valores ao ser punido
         }
 
         cpsAnterior = cps;
