@@ -59,8 +59,8 @@ router.get('/minigames', (req, res) => {
 
 router.get('/minigames/cookie', (req, res) => {
     const locals = {
-        title: "Minijogos!",
-        description: "oba minijogos!"
+        title: "cookie!",
+        description: "aperte muitos cookies!"
     }
     res.render('minigames/cookieclicker', { locals: locals });
 });
