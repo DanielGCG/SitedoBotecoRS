@@ -196,14 +196,15 @@
         const cps = cliques.length / (tempoJanela / 1000);
         const diferencaCPS = Math.abs(cps - cpsAnterior);
 
+        // Verifica a constância de maneira mais sensível
         if (diferencaCPS < 0.33) {
             tempoConstancia += intervaloAtualizacao;
         } else {
-            tempoConstancia = 0;
+            tempoConstancia = 0; // Resetar tempo de constância se houver grande variação no CPS
         }
 
-        // Se a constância for maior que 6 segundos ou o CPS for alto, punir o jogador
-        if ((cps >= 12 && cps >= 1) || tempoConstancia >= 6000) {
+        // Punição somente se o CPS for acima de 13 ou se a constância for muito longa (mais de 6 segundos)
+        if (cps > 13 || ((tempoConstancia >= 6000) && cps > 1)) {
             if (tempoConstancia >= 6000) {
                 alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
                 resetarValores(); // Resetar valores ao ser punido
