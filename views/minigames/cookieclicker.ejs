@@ -171,18 +171,16 @@
 
     // Função para resetar os valores para o padrão inicial
     function resetarValores() {
-        if (confirmacao) {
-            quantidadeCookies = 0;
-            chanceCookieDuplo = 0;
-            quantParaUpgrade = quantParaUpgradeInicial;
-            tempoConstancia = 0;
-            atualizarIndicadorChance();
-            localStorage.setItem("quantidadeCookies", quantidadeCookies);
-            localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
-            localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
-            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-            alert("Progresso resetado com sucesso!");
-        }
+        quantidadeCookies = 0;
+        chanceCookieDuplo = 0;
+        quantParaUpgrade = quantParaUpgradeInicial;
+        tempoConstancia = 0;
+        atualizarIndicadorChance();
+        localStorage.setItem("quantidadeCookies", quantidadeCookies);
+        localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
+        localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
+        document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+        alert("Progresso resetado com sucesso!");
     }
 
     // Carregar valores do Local Storage ao iniciar
