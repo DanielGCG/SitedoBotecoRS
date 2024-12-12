@@ -1,25 +1,34 @@
 <main>
     <div class="container">
         <div id="mostrador-de-cookies">Você tem 0 cookies!</div>
-        <div id="cps">CPS: 0</div>
+        <div id="cps">0 cookie/s</div>
         <button id="cookie">
             <img src="/img/cookie.png" alt="Cookie" style="width: 105px; height: auto;">
         </button>
 
         <div class="popup" id="popup" style="display: none;">
             <p>Aumentar a chance de cookie duplo em 20%</p>
-            <p id="chance-atual">Chance atual: 0%</p>
-            <p id="nova-chance">Nova chance: 20%</p>
             <button id="comprar-upgrade"></button>
             <button id="fechar-popup">Fechar</button>
         </div>
+    </div>
+
+    <!-- Barra lateral esquerda -->
+    <div id="barra-esquerda" class="barra-lateral">
+        <h2>Upgrades de Click</h2>
+        <div id="lista-upgrades"></div> <!-- Novo contêiner para upgrades -->
+    </div>
+
+    <!-- Barra lateral direita -->
+    <div id="barra-direita" class="barra-lateral">
+        <h2>Upgrade de Máquina</h2>
     </div>
 
     <!-- Indicador de chance no canto da tela -->
     <div id="indicador-chance">Chance de cookie duplo: 0%</div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 1.0.4</div>
+        <div id="versao" class="versao">Versão: 1.1.0</div>
         <button id="reset" class="reset-btn">Resetar</button>
     </div>
 </main>
@@ -30,6 +39,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        position: relative;
     }
 
     .container {
@@ -71,21 +81,76 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-    /* Definição da animação bounce */
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% {
-            transform: translateY(0);
-        }
-        40% {
-            transform: translateY(-30px);
-        }
-        60% {
-            transform: translateY(-15px);
-        }
+    .barra-lateral {
+        position: fixed; /* Mantém as barras fixas nas laterais da tela */
+        top: auto; /* Coloca as barras no topo da tela */
+        width: 200px; /* Define a largura fixa */
+        height: 85vh; /* Faz com que as barras cubram toda a altura da tela */
+        background-color: rgba(0, 0, 0, 0.1); /* Cor de fundo para visibilidade */
+        display: flex; /* Torna a barra flexível para alinhar o conteúdo */
+        flex-direction: column; /* Empilha os itens verticalmente */
+        align-items: flex-start; /* Alinha o conteúdo no topo */
+        justify-content: center; /* Centraliza o conteúdo horizontalmente */
+        padding-top: 10px; /* Adiciona um pequeno espaçamento no topo */
+        pointer-events: auto; /* Permite interatividade */
     }
 
-    #cookie:active {
-        animation: bounce 0.3s;
+    #barra-esquerda {
+        left: 0;
+    }
+
+    #barra-direita {
+        right: 0;
+    }
+
+    #lista-upgrades {
+        display: block; /* Alterado de flex para block */
+        padding: 10px;
+        margin-top: 20px; /* Adiciona espaçamento entre o título e a lista de upgrades */
+    }
+
+    .upgrade-item {
+        background-color: rgba(238, 119, 119, 0.219);
+        border: 2px solid #333;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: left;
+        display: block; /* Alterado para empilhar verticalmente os itens */
+        margin-bottom: 10px; /* Adiciona espaçamento entre os itens de upgrade */
+    }
+
+    .upgrade-item button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .upgrade-item button:hover {
+        background-color: #45a049;
+    }
+
+    @media (max-width: 768px) {
+        main {
+            flex-direction: column;
+        }
+
+        .barra-lateral {
+            position: relative;
+            width: 100%; /* Ajustar para largura total no layout responsivo */
+            height: auto; /* Permitir altura dinâmica */
+            padding: 10px; /* Espaçamento interno */
+        }
+
+        #barra-esquerda {
+            order: 1; /* Aparece logo após os cookies */
+        }
+
+        #barra-direita {
+            order: 2; /* Aparece abaixo da esquerda */
+        }
     }
 
     .popup {
@@ -162,10 +227,10 @@
     let quantidadeCookies = 0;
     let cliques = [];
     let chanceCookieDuplo = 0;
-    let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
-    const tempoJanela = 3000;
+    let tempoConstancia = 0;         // Tempo em que a diferença de CPS é menor que 0.33
+    const tempoJanela = 3000;        // Janela de tempo cálculo do CPS
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
-    const quantParaUpgradeInicial = 250;
+    const quantParaUpgradeInicial = 10;             // Preço do primeiro upgrade
     let quantParaUpgrade = quantParaUpgradeInicial;
     let cpsAnterior = 0;
 
@@ -211,93 +276,85 @@
             chance -= 100;
         }
 
-        if (Math.random() < chance / 100) {
-            multiplicador++;
-        }
+        if (Math.random() * 100 <= chance) multiplicador++;
 
         quantidadeCookies += multiplicador;
         document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-        cliques.push(Date.now());
         localStorage.setItem("quantidadeCookies", quantidadeCookies);
+        atualizarCps();
 
+        // Verifica se a quantidade de cookies é suficiente para o upgrade
         if (quantidadeCookies >= quantParaUpgrade) {
-            mostrarPopup();
+            if (!document.getElementById('lista-upgrades').innerHTML) {
+                exibirOfertaUpgrade(); // Exibe a oferta de upgrade
+            }
         }
     });
 
-    function calcularCPS() {
-        cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
-        const cps = cliques.length / (tempoJanela / 1000);
-        const diferencaCPS = Math.abs(cps - cpsAnterior);
-
-        // Verifica a constância de maneira mais sensível
-        if (diferencaCPS < 0.33) {
-            tempoConstancia += intervaloAtualizacao;
-        } else {
-            tempoConstancia = 0; // Resetar tempo de constância se houver grande variação no CPS
+    function atualizarCps() {
+        const cps = quantidadeCookies / tempoJanela;
+        if (cps !== cpsAnterior) {
+            tempoConstancia = 0;
+            cpsAnterior = cps;
         }
-
-        // Punição somente se o CPS for acima de 13 ou se a constância for muito longa (mais de 6 segundos)
-        if (cps > 12 || ((tempoConstancia >= 5000) && cps > 1)) {
-            alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
-            resetarValores(); // Resetar valores ao ser punido
-        }
-
-        cpsAnterior = cps;
-        document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
-        const vermelho = Math.min(Math.round(cps * 10), 255);
-        let verde = 181;
-        let azul = 107;
-
-        if (vermelho === 255) {
-            verde = Math.max(181 - (vermelho - 255) * 30, 0);
-            azul = Math.max(107 - (vermelho - 255) * 30, 0);
-        }
-
-        document.body.style.backgroundColor = `rgb(${vermelho + 128}, ${verde}, ${azul})`;
     }
 
-    function mostrarPopup() {
-        const popup = document.getElementById("popup");
-        document.getElementById("chance-atual").textContent = `Chance atual: ${chanceCookieDuplo}%`;
-        document.getElementById("nova-chance").textContent = `Nova chance: ${chanceCookieDuplo + 20}%`;
-        document.getElementById("comprar-upgrade").textContent = `${quantParaUpgrade} cookies`;
-        popup.style.display = "block";
+    // Exibição das ofertas de upgrade
+    function exibirOfertaUpgrade() {
+        const listaUpgrades = document.getElementById('lista-upgrades');
+        const novoUpgrade = document.createElement('div');
+        novoUpgrade.classList.add('upgrade-item');
+        novoUpgrade.innerHTML = `
+            <p>Aumentar chance de cookie duplo em 20%!</p>
+            <button class="comprar-upgrade">Comprar por ${quantParaUpgrade} cookies</button>
+        `;
+        listaUpgrades.appendChild(novoUpgrade);
     }
-
-    function atualizarIndicadorChance() {
-        document.getElementById("indicador-chance").textContent = `Chance de cookie duplo: ${chanceCookieDuplo}%`;
-    }
-
-    document.getElementById("fechar-popup").addEventListener("click", () => {
-        const popup = document.getElementById("popup");
-        popup.style.display = "none";
-    });
 
     document.getElementById("comprar-upgrade").addEventListener("click", () => {
         if (quantidadeCookies >= quantParaUpgrade) {
             quantidadeCookies -= quantParaUpgrade;
             chanceCookieDuplo += 20;
-            quantParaUpgrade *= 2;
-            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-            document.getElementById("popup").style.display = "none";
-            atualizarIndicadorChance();
-
+            quantParaUpgrade *= 2; // Dobra o preço para o próximo upgrade
             localStorage.setItem("quantidadeCookies", quantidadeCookies);
             localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
-            localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
-        } else {
-            alert("Você não tem cookies suficientes para comprar este upgrade!");
+            atualizarIndicadorChance();
+            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+            document.getElementById('lista-upgrades').innerHTML = ''; // Remove a oferta de upgrade após compra
         }
     });
 
-    document.getElementById("reset").addEventListener("click", resetarValores);
+    document.getElementById("lista-upgrades").addEventListener("click", (e) => {
+        if (e.target && e.target.classList.contains("comprar-upgrade")) {
+            if (quantidadeCookies >= quantParaUpgrade) {
+                quantidadeCookies -= quantParaUpgrade;
+                chanceCookieDuplo += 20;
+                quantParaUpgrade *= 2; // Dobra o preço para o próximo upgrade
+                localStorage.setItem("quantidadeCookies", quantidadeCookies);
+                localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
+                atualizarIndicadorChance();
+                document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+                document.getElementById('lista-upgrades').innerHTML = ''; // Remove a oferta de upgrade após compra
+            }
+        }
+    });
 
-    calcularCPS();
-    atualizarIndicadorChance();
-    setInterval(calcularCPS, intervaloAtualizacao);
+    function atualizarIndicadorChance() {
+        document.getElementById("indicador-chance").textContent = `Chance de cookie duplo: ${chanceCookieDuplo}%`;
+    }
 
-    document.getElementById("cookie").addEventListener('dragstart', (event) => {
-        event.preventDefault();
+    document.getElementById("reset").addEventListener("click", () => {
+        // Pergunta ao usuário se ele deseja resetar o progresso
+        const confirmarReset = confirm("Deseja mesmo resetar seu progresso?");
+        
+        // Se o usuário confirmar, chama a função para resetar os valores
+        if (confirmarReset) {
+            resetarValores();
+        } else {
+        }
+    });
+
+    document.getElementById("fechar-popup").addEventListener("click", () => {
+        document.getElementById("popup").style.display = 'none';
     });
 </script>
