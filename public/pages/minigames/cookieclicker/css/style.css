@@ -1,0 +1,282 @@
+main {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background-color: #f9f9f936;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+    @keyframes clickAnimation {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+#cookie.animate {
+    animation: clickAnimation 0.1s ease-out;
+}
+
+#cookie img {
+    -webkit-user-drag: none;
+    pointer-events: none;
+    width: 145px;
+    height: auto;
+}
+
+#mostrador-de-cookies, #cps {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    color: #333;
+}
+
+button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: url('/img/cursor-mao.png'), auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    transition: background-color 0.3s ease;
+}
+
+#indicador-multiplicador-cookies,
+#indicador-maquina-cookies {
+    position: relative;
+    top: 15px;
+    background-color: #f9f9f936;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#indicador-maquina-cookies {
+    margin-top: 10px;
+}
+
+.barra-lateral {
+    position: fixed; /* Mantém as barras fixas nas laterais da tela */
+    top: auto; /* Coloca as barras no topo da tela */
+    width: 200px; /* Define a largura fixa */
+    height: 85vh; /* Faz com que as barras cubram toda a altura da tela */
+    background-color: rgba(0, 0, 0, 0.1); /* Cor de fundo para visibilidade */
+    display: flex; /* Torna a barra flexível para alinhar o conteúdo */
+    flex-direction: column; /* Empilha os itens verticalmente */
+    align-items: flex-start; /* Alinha o conteúdo no topo */
+    justify-content: center; /* Centraliza o conteúdo horizontalmente */
+    padding-top: 10px; /* Adiciona um pequeno espaçamento no topo */
+    pointer-events: auto; /* Permite interatividade */
+}
+
+#barra-esquerda {
+    left: 0;
+}
+
+#barra-direita {
+    right: 0;
+}
+
+#lista-click {
+    display: block; /* Alterado de flex para block */
+    padding: 10px;
+    margin-top: 20px; /* Adiciona espaçamento entre o título e a lista de upgrades */
+}
+
+#lista-maquina {
+    display: block; /* Alterado de flex para block */
+    padding: 10px;
+    margin-top: 20px; /* Adiciona espaçamento entre o título e a lista de upgrades */
+}
+
+.upgrade-item {
+    background-color: rgba(238, 119, 119, 0.219);
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: left;
+    display: block; /* Alterado para empilhar verticalmente os itens */
+    margin-bottom: 10px; /* Adiciona espaçamento entre os itens de upgrade */
+}
+
+.upgrade-item button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: url('/img/cursor-mao.png'), auto;
+}
+
+.upgrade-item button:hover {
+    background-color: #45a049;
+}
+
+@media (max-width: 768px) {
+    main {
+        flex-direction: column;
+    }
+
+    .barra-lateral {
+        position: relative;
+        width: 100%; /* Ajustar para largura total no layout responsivo */
+        height: auto; /* Permitir altura dinâmica */
+        padding: 20px; /* Espaçamento interno */
+        top: 80px;
+        align-items: center;
+    }
+
+    #barra-esquerda {
+        order: 1; /* Aparece logo após os cookies */
+        align-items: center;
+    }
+
+    #barra-direita {
+        order: 2; /* Aparece abaixo da esquerda */
+        align-items: center;
+    }
+
+    .upgrade-item {
+        align-items: center;
+        text-align: center;
+    }
+
+    #cookie img {
+        -webkit-user-drag: none;
+        pointer-events: none;
+        width: 205px;
+        height: auto;
+    }
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.288); /* Fundo semi-transparente */
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px); /* Aplica o efeito de desfoque */
+    overflow: hidden; /* Garante que nada saia da tela */
+}
+
+#popup-reset{
+    display: none;    /* Inicialmente oculto */
+}
+
+#popup-anticheating{
+    display: none;    /* Inicialmente oculto */
+}
+
+/* Estilo para o conteúdo do popup */
+.popup-conteudo {
+    background-color: rgba(255, 255, 255, 0.212);
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Garante que os itens sejam centralizados verticalmente */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    width: 80%; /* Ajuste de largura */
+    max-width: 800px; /* Limite máximo de largura */
+    max-height: 90vh; /* Limite máximo de altura */
+    overflow: auto; /* Se o conteúdo exceder, exibe barras de rolagem */
+}
+
+.popup-conteudo img {
+    justify-content: center;
+    max-width: 100%; /* Limita a largura da imagem */
+    max-height: 60vh; /* Limita a altura da imagem */
+    object-fit: contain; /* Garante que a imagem mantenha a proporção correta */
+    border-radius: 8px;
+}
+
+.popup-conteudo .acoes {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center; /* Centraliza os botões */
+}
+
+.popup-conteudo .acoes .deletar {
+    padding: 10px 20px;
+    background-color: #ff4c4c; /* Vermelho */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.popup-conteudo .acoes .deletar:hover {
+    background-color: #ff2a2a; /* Tom mais intenso de vermelho */
+    cursor: url('/img/cursor-mao.png'), auto;
+}
+
+/* Estilo para o botão de fechar */
+.popup-conteudo .acoes .branco {
+    padding: 10px 20px;
+    background-color: white; /* Branco */
+    color: #333; /* Cor do texto */
+    border: 1px solid #ccc; /* Borda clara */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.popup-conteudo .acoes .branco:hover {
+    background-color: #f1f1f1; /* Tom mais claro no hover */
+    cursor: url('/img/cursor-mao.png'), auto;
+}
+
+#versao-container {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Espaço entre a versão e o botão */
+}
+
+.versao {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #333;
+}
+
+.reset-btn {
+    background-color: #f04;
+    color: white;
+    padding: 5px 10px; /* Tamanho pequeno */
+    font-size: 10px; /* Tamanho de texto menor */
+    border-radius: 5px;
+    cursor: url('/img/cursor-mao.png'), auto;
+}
+
+.reset-btn:hover {
+    background-color: #c03;
+}
