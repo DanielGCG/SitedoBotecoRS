@@ -16,10 +16,11 @@
 
         <!-- Popup para upgrade do gerador automático -->
         <div class="popup" id="popup-upgrade-automatico" style="display: none;">
-            <p>Gerador de 0.5 Cookie por segundo</p>
+            <p>Gerador de cookies automático</p>
             <p id="gerador-atual">Gerador atual: 0/s</p>
-            <p id="novo-gerador">Novo gerador: 0.5/s</p>
-            <button id="comprar-upgrade-automatico"></button>
+            <p id="novo-gerador">Novo gerador: 0.3/s</p>
+            <p id="preco-gerador">Preço: 100 cookies</p>
+            <button id="comprar-upgrade-automatico">Comprar Upgrade</button>
             <button id="fechar-popup-automatico">Fechar</button>
         </div>
     </div>
@@ -27,10 +28,11 @@
     <!-- Indicador de chance no canto da tela -->
     <div id="indicador-chance">Chance de cookie duplo: 0%</div>
 
-    <div id="versao" class="versao">Versão: 1.0</div>
+    <div id="versao" class="versao">Versão: 1.1</div>
 </main>
 
 <style>
+    /* Estrutura principal da página */
     main {
         text-align: center;
         display: flex;
@@ -38,6 +40,7 @@
         align-items: center;
     }
 
+    /* Container que agrupa os elementos */
     .container {
         display: flex;
         flex-direction: column;
@@ -49,12 +52,14 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
 
+    /* Estilos para os indicadores */
     #mostrador-de-cookies, #cps {
         font-family: Arial, sans-serif;
         font-size: 18px;
         color: #333;
     }
 
+    /* Botões sem estilo de borda e com cursor customizado */
     button {
         background: none;
         border: none;
@@ -65,6 +70,7 @@
         -webkit-touch-callout: none;
     }
 
+    /* Estilos para o indicador de chance */
     #indicador-chance {
         position: relative;
         top: 15px;
@@ -77,7 +83,7 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-    /* Definição da animação bounce */
+    /* Definição da animação bounce para o botão */
     @keyframes bounce {
         0%, 20%, 50%, 80%, 100% {
             transform: translateY(0);
@@ -94,19 +100,19 @@
         animation: bounce 0.3s;
     }
 
+    /* Estilos para os popups, agora empilhados */
     .popup {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        display: block;
         background-color: rgba(238, 119, 119, 0.219);
         border: 2px solid #333;
         border-radius: 10px;
         padding: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         text-align: center;
+        margin-bottom: 10px; /* Espaçamento entre os popups */
     }
 
+    /* Botão de fechar o popup */
     .popup button#fechar-popup {
         background-color: #f04;
         color: white;
@@ -117,10 +123,12 @@
         margin-top: 15px;
     }
 
+    /* Efeito de hover para o botão de fechar */
     .popup button#fechar-popup:hover {
         background-color: #c03;
     }
 
+    /* Botão para comprar upgrade */
     .popup button#comprar-upgrade {
         background-color: #4CAF50;
         color: white;
@@ -131,10 +139,26 @@
         margin-top: 15px;
     }
 
+    /* Efeito de hover para o botão de upgrade */
     .popup button#comprar-upgrade:hover {
         background-color: #45a049;
     }
 
+    /* Popups específicos para upgrades */
+    .popup-upgrade-automatico {
+        top: 60%; /* Adiciona um espaçamento para o segundo popup */
+    }
+
+    .popup-upgrade-chance {
+        top: 40%; /* Deixa o primeiro popup mais alto */
+    }
+
+    /* Popups com display inicialmente oculto */
+    #popup-upgrade-chance, #popup-upgrade-automatico {
+        display: none; /* Os popups continuam ocultos por padrão */
+    }
+
+    /* Versão no rodapé */
     #versao {
         position: fixed;
         bottom: 10px;
@@ -146,7 +170,6 @@
         border-radius: 5px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
-
 </style>
 
 <script>
@@ -158,7 +181,7 @@
     let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
     const tempoJanela = 3000;
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
-    const quantParaUpgradeInicial = 500;
+    const quantParaUpgradeInicial = 100;
     let quantParaUpgrade = quantParaUpgradeInicial;
     let cpsAnterior = 0;
 
@@ -177,6 +200,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+        // Inicializando os valores de upgrades
         const cookiesSalvos = localStorage.getItem("quantidadeCookies");
         if (cookiesSalvos !== null) {
             quantidadeCookies = parseInt(cookiesSalvos, 10);
@@ -255,19 +279,19 @@
     }
 
     function mostrarPopup() {
-        // Popup para upgrade de chance de cookie duplo
-        const popupDuplo = document.getElementById("popup-upgrade-chance");
+        // Atualiza os textos com as informações de upgrade
         document.getElementById("chance-atual").textContent = `Chance atual: ${chanceCookieDuplo}%`;
         document.getElementById("nova-chance").textContent = `Nova chance: ${chanceCookieDuplo + 20}%`;
         document.getElementById("comprar-upgrade").textContent = `${quantParaUpgrade} cookies`;
-        popupDuplo.style.display = "block";
 
-        // Popup para upgrade do gerador automático
-        const popupGerador = document.getElementById("popup-upgrade-automatico");
         document.getElementById("gerador-atual").textContent = `Gerador atual: ${geradorAutomatico}s`;
         document.getElementById("novo-gerador").textContent = `Novo gerador: ${geradorAutomatico + 0.3}s`;
-        document.getElementById("comprar-upgrade-automatico").textContent = `${quantParaUpgrade} cookies`;
-        popupGerador.style.display = "block";
+        document.getElementById("preco-gerador").textContent = `Preço: ${quantParaUpgrade} cookies`;
+        document.getElementById("comprar-upgrade-automatico").textContent = `Comprar Upgrade`;
+
+        // Mostra os popups
+        document.getElementById("popup-upgrade-chance").style.display = "block";
+        document.getElementById("popup-upgrade-automatico").style.display = "block";
     }
 
     // Fechar popup
@@ -275,15 +299,15 @@
         document.getElementById("popup-upgrade-chance").style.display = "none";
         document.getElementById("popup-upgrade-automatico").style.display = "none";
     });
-
+    
     // Comprar upgrade de chance de cookie duplo
     document.getElementById("comprar-upgrade").addEventListener("click", () => {
         if (quantidadeCookies >= quantParaUpgrade) {
             quantidadeCookies -= quantParaUpgrade;
             chanceCookieDuplo += 20;
             quantParaUpgrade *= 2;
+
             document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-            document.getElementById("popup-upgrade-chance").style.display = "none";
             atualizarIndicadorChance();
 
             localStorage.setItem("quantidadeCookies", quantidadeCookies);
@@ -298,14 +322,18 @@
     document.getElementById("comprar-upgrade-automatico").addEventListener("click", () => {
         if (quantidadeCookies >= quantParaUpgrade) {
             quantidadeCookies -= quantParaUpgrade;
-            geradorAutomatico += 0.3; // Aumenta a taxa do gerador automático
+            geradorAutomatico += 0.3;
             quantParaUpgrade *= 2;
             document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
-            document.getElementById("popup-upgrade-automatico").style.display = "none";
 
             localStorage.setItem("quantidadeCookies", quantidadeCookies);
             localStorage.setItem("geradorAutomatico", geradorAutomatico);
             localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
+
+            // Atualiza o texto do preço e do gerador
+            document.getElementById("gerador-atual").textContent = `Gerador atual: ${geradorAutomatico}s`;
+            document.getElementById("novo-gerador").textContent = `Novo gerador: ${geradorAutomatico + 0.3}s`;
+            document.getElementById("preco-gerador").textContent = `Preço: ${quantParaUpgrade} cookies`;
         } else {
             alert("Você não tem cookies suficientes para comprar este upgrade!");
         }
