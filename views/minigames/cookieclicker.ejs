@@ -235,9 +235,9 @@
             tempoConstancia = 0;
         }
 
-        if (cps > 12.5 || ((tempoConstancia >= 5000) && cps > 1)) {
-            alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
+        if (cps > 12.5 || ((tempoConstancia >= 5000) && cps > 5)) {
             resetarValores();
+            alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
         }
 
         cpsAnterior = cps;
