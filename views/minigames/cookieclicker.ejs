@@ -469,9 +469,14 @@
         document.getElementById("indicador-maquina-cookies").textContent = `Máquina de cookies: ${cookiesPorSegundo} cookies/s`;
     }
 
-    // Função para atualizar o preço dos upgrades
-    function atualizarPreco(upgrade) {
+    // Função para atualizar o preço do upgrade de click
+    function atualizarPrecoClick(upgrade) {
         return upgrade * 3;
+    }
+
+    // Função para atualizar o preço do upgrade de maquina
+    function atualizarPrecoMaquina(upgrade) {
+        return upgrade * 5;
     }
 
     // Função para exibir a oferta de upgrade de click
@@ -504,7 +509,7 @@
             if (quantidadeCookies >= precoClick) {
                 quantidadeCookies -= precoClick;
                 multiplicadorCookie += 20;
-                precoClick = atualizarPreco(precoClick);
+                precoClick = atualizarPrecoClick(precoClick);
                 localStorage.setItem("quantidadeCookies", quantidadeCookies);
                 localStorage.setItem("multiplicadorCookie", multiplicadorCookie);
                 localStorage.setItem("precoClick", precoClick);             // Salva o novo preço do upgrade
@@ -526,7 +531,7 @@
                 else{
                     cookiesPorSegundo += cookiesPorSegundo * 0.3; // Incrementa 30% ou começa com 1 cookie/s
                 }
-                precoMaquina = atualizarPreco(precoMaquina);
+                precoMaquina = atualizarPrecoMaquina(precoMaquina);
                 localStorage.setItem("quantidadeCookies", quantidadeCookies); // Salva a quantidade de cookies
                 localStorage.setItem("cookiesPorSegundo", cookiesPorSegundo); // Salva o valor de CPS (cookies por segundo)
                 localStorage.setItem("precoMaquina", precoMaquina);           // Salva o novo preço do upgrade
