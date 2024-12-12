@@ -5,7 +5,18 @@
         <button id="cookie">
             <img src="/img/cookie.png" alt="Cookie" style="width: 105px; height: auto;">
         </button>
+
+        <div class="popup" id="popup" style="display: none;">
+            <p>Aumentar a chance de cookie duplo em 20%</p>
+            <p id="chance-atual">Chance atual: 0%</p>
+            <p id="nova-chance">Nova chance: 20%</p>
+            <button id="comprar-upgrade"></button>
+            <button id="fechar-popup">Fechar</button>
+        </div>
     </div>
+
+    <!-- Indicador de chance no canto da tela -->
+    <div id="indicador-chance">Chance de cookie duplo: 0%</div>
 </main>
 
 <style>
@@ -21,7 +32,6 @@
         flex-direction: column;
         align-items: center;
         gap: 20px; /* Espaçamento entre os elementos */
-
         background-color: #f9f9f936;
         padding: 20px;
         border-radius: 10px;
@@ -44,6 +54,19 @@
         -webkit-touch-callout: none;
     }
 
+    /* Indicador de chance no canto da tela */
+    #indicador-chance {
+        position: relative;
+        top: 15px;
+        background-color: #f9f9f936;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #333;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
     /* Definição da animação bounce */
     @keyframes bounce {
         0%, 20%, 50%, 80%, 100% {
@@ -59,20 +82,85 @@
 
     /* Aplica a animação ao botão quando clicado */
     #cookie:active {
-        animation: bounce 0.07s; /* Aumentando para 0.07 segundo */
+        animation: bounce 0.3s;
+    }
+
+    /* Estilos do popup */
+    .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(238, 119, 119, 0.219);
+        border: 2px solid #333;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+
+    /* Estilos do botão "Fechar" (vermelho) */
+    .popup button#fechar-popup {
+        background-color: #f04; /* Vermelho */
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: url('/img/cursor-mao.png'), auto;
+        margin-top: 15px; /* Move o botão mais para baixo */
+    }
+
+    .popup button#fechar-popup:hover {
+        background-color: #c03; /* Vermelho mais escuro */
+    }
+
+    /* Estilos do botão "Comprar Upgrade" (verde) */
+    .popup button#comprar-upgrade {
+        background-color: #4CAF50; /* Verde */
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: url('/img/cursor-mao.png'), auto;
+        margin-top: 15px; /* Move o botão mais para baixo */
+    }
+
+    .popup button#comprar-upgrade:hover {
+        background-color: #45a049; /* Verde mais escuro */
     }
 </style>
 
 <script>
     let quantidadeCookies = 0;
     let cliques = [];
+    let chanceCookieDuplo = 0;
     const tempoJanela = 3000;
-    const intervaloAtualizacao = 50; // Atualiza o CPS a cada 100ms
+    const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
+    let quantParaUpgrade = 1000;
 
     document.getElementById("cookie").addEventListener("click", () => {
-        quantidadeCookies++;
+        let multiplicador = 1; // Começa com 1x
+        let chance = chanceCookieDuplo;
+
+        // Escalonamento de chance
+        while (chance >= 100) {
+            multiplicador++;
+            chance -= 100;
+        }
+
+        // Chance de multiplicadores adicionais
+        if (Math.random() < chance / 100) {
+            multiplicador++;
+        }
+
+        quantidadeCookies += multiplicador;
         document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
         cliques.push(Date.now());
+
+        // Exibe o popup ao passar a quantidade necessária para upgrade
+        if (quantidadeCookies >= quantParaUpgrade) {
+            mostrarPopup();
+        }
     });
 
     // Função para calcular e atualizar o CPS
@@ -92,19 +180,47 @@
         document.body.style.backgroundColor = `rgb(${vermelho + 128}, ${verde}, ${azul})`;
     }
 
-    // Chama a função de cálculo inicialmente e depois a cada intervalo
-    calcularCPS();
-    setInterval(calcularCPS, intervaloAtualizacao);
+    // Função para exibir o popup
+    function mostrarPopup() {
+        const popup = document.getElementById("popup");
+        document.getElementById("chance-atual").textContent = `Chance atual: ${chanceCookieDuplo}%`;
+        document.getElementById("nova-chance").textContent = `Nova chance: ${chanceCookieDuplo + 20}%`;
+        document.getElementById("comprar-upgrade").textContent = `${quantParaUpgrade} cookies`;
+        popup.style.display = "block";
+    }
 
+    // Atualizar indicador de chance
+    function atualizarIndicadorChance() {
+        document.getElementById("indicador-chance").textContent = `Chance de cookie duplo: ${chanceCookieDuplo}%`;
+    }
 
-    // Evitar que o cookie seja arrastável
-    document.getElementById("cookie").addEventListener('mousedown', (event) => {
-        event.preventDefault();
+    // Fecha o popup ao clicar no botão "Fechar"
+    document.getElementById("fechar-popup").addEventListener("click", () => {
+        const popup = document.getElementById("popup");
+        popup.style.display = "none";
     });
 
+    // Comprar o upgrade e aumentar a chance de cookie duplo
+    document.getElementById("comprar-upgrade").addEventListener("click", () => {
+        if (quantidadeCookies >= quantParaUpgrade) {
+            quantidadeCookies -= quantParaUpgrade;
+            chanceCookieDuplo += 20;
+            quantParaUpgrade *= 5;
+            document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
+            document.getElementById("popup").style.display = "none";
+            atualizarIndicadorChance();
+        } else {
+            alert("Você não tem cookies suficientes para comprar este upgrade!");
+        }
+    });
+
+    // Chama a função de cálculo inicialmente e depois a cada intervalo
+    calcularCPS();
+    atualizarIndicadorChance();
+    setInterval(calcularCPS, intervaloAtualizacao);
+
+    // Evitar que o cookie seja arrastável
     document.getElementById("cookie").addEventListener('dragstart', (event) => {
         event.preventDefault();
     });
-
-    // Evento aleatórios
 </script>
