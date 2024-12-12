@@ -6,9 +6,25 @@
             <img src="/img/cookie.png" alt="Cookie">
         </button>
 
-        <div class="popup" id="popup" style="display: none;">
-            <p>PopUp</p>
+        <div id="popup-reset" class="popup">
+            <div id="popup-conteudo" class="popup-conteudo">
+                <h3>Deseja mesmo deletar todo seu progresso?</h3>
+                <div class="acoes">
+                    <button class="deletar" onclick="resetarValores(), fecharPopupReset()">Deletar</button>
+                    <button class="branco" onclick="fecharPopupReset()">Fechar</button>
+                </div>
+            </div>
         </div>
+
+        <div id="popup-anticheating" class="popup">
+            <div id="popup-conteudo" class="popup-conteudo">
+                <h3>PARE IMEDIATAMENTE VOCÊ ESTÁ TRAPACENANDO!!!</h3>
+                <div class="acoes">
+                    <button class="branco" onclick="fecharPopupAnticheating()">Fechar</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Barra lateral esquerda -->
@@ -24,14 +40,14 @@
     </div>
 
     <!-- Indicador de multiplicador -->
-    <div id="indicador-multiplicador-cookies">Multiplicador Cookie: 0%</div>
+    <div id="indicador-multiplicador-cookies">Multiplicador Cookie: 100%</div>
 
     <!-- Indicador de gerador automático -->
-    <div id="indicador-maquina-cookies">Máquina de cookies: 0%</div>
+    <div id="indicador-maquina-cookies">Máquina de cookies: 0 cookie/s</div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 1.2.2</div>
-        <button id="reset" class="reset-btn">Resetar</button>
+        <div id="versao" class="versao">Versão: 1.2.4</div>
+        <button id="reset" class="reset-btn" onclick="botaoReset()">Resetar</button>
     </div>
 </main>
 
@@ -192,29 +208,87 @@
 
     .popup {
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(238, 119, 119, 0.219);
-        border: 2px solid #333;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        text-align: center;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.288); /* Fundo semi-transparente */
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(8px); /* Aplica o efeito de desfoque */
+        overflow: hidden; /* Garante que nada saia da tela */
     }
 
-    .popup button#fechar-popup {
-        background-color: #f04;
+    #popup-reset{
+        display: none;    /* Inicialmente oculto */
+    }
+
+    #popup-anticheating{
+        display: none;    /* Inicialmente oculto */
+    }
+
+    /* Estilo para o conteúdo do popup */
+    .popup-conteudo {
+        background-color: rgba(255, 255, 255, 0.212);
+        padding: 20px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Garante que os itens sejam centralizados verticalmente */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        width: 80%; /* Ajuste de largura */
+        max-width: 800px; /* Limite máximo de largura */
+        max-height: 90vh; /* Limite máximo de altura */
+        overflow: auto; /* Se o conteúdo exceder, exibe barras de rolagem */
+    }
+
+    .popup-conteudo img {
+        justify-content: center;
+        max-width: 100%; /* Limita a largura da imagem */
+        max-height: 60vh; /* Limita a altura da imagem */
+        object-fit: contain; /* Garante que a imagem mantenha a proporção correta */
+        border-radius: 8px;
+    }
+
+    .popup-conteudo .acoes {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        justify-content: center; /* Centraliza os botões */
+    }
+
+    .popup-conteudo .acoes .deletar {
+        padding: 10px 20px;
+        background-color: #ff4c4c; /* Vermelho */
         color: white;
         border: none;
-        padding: 10px 20px;
         border-radius: 5px;
-        cursor: url('/img/cursor-mao.png'), auto;
-        margin-top: 15px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
-    .popup button#fechar-popup:hover {
-        background-color: #c03;
+    .popup-conteudo .acoes .deletar:hover {
+        background-color: #ff2a2a; /* Tom mais intenso de vermelho */
+        cursor: url('/img/cursor-mao.png'), auto;
+    }
+
+    /* Estilo para o botão de fechar */
+    .popup-conteudo .acoes .branco {
+        padding: 10px 20px;
+        background-color: white; /* Branco */
+        color: #333; /* Cor do texto */
+        border: 1px solid #ccc; /* Borda clara */
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .popup-conteudo .acoes .branco:hover {
+        background-color: #f1f1f1; /* Tom mais claro no hover */
+        cursor: url('/img/cursor-mao.png'), auto;
     }
 
     #versao-container {
@@ -250,10 +324,11 @@
     // Variáveis globais
     let quantidadeCookies = 0;      // Variável para quantidade atual de cookies
     let multiplicadorCookie = 0;      // Variável para multiplicador de cookie por click
-    let cookiesPorSegundo = 0;      // Variável para cookies por segundo
+    const cookiesPorSegundoInicial = 0;  // Valor inicial para cookies por segundo
+    let cookiesPorSegundo = cookiesPorSegundoInicial;
     const precoClickInicial = 25;    // Preço inicial para upgrade de click
     let precoClick = precoClickInicial;
-    const precoMaquinaInicial = 50; // Preço inicial para upgrade de máquina
+    const precoMaquinaInicial = 60; // Preço inicial para upgrade de máquina
     let precoMaquina = precoMaquinaInicial;
     let clickTimestamps = [];       // Armazena os timestamps dos cliques
     const CPS_INTERVAL = 3000;      // Janela de tempo para cálculo de CPS (3 segundos)
@@ -282,9 +357,11 @@
             precoMaquina = parseInt(upgradeMaquinaSalvo, 10);
         }
 
+        // Corrigir a atribuição de cookiesPorSegundo
         const cpsSalvo = localStorage.getItem("cookiesPorSegundo");
         if (cpsSalvo !== null) {
-            cookiesPorSegundo = parseInt(cpsSalvo, 10);
+            cookiesPorSegundo = parseFloat(cpsSalvo);  // Assegurando que é um número de ponto flutuante
+            atualizarIndicadorMaquina();
         }
     });
 
@@ -292,12 +369,13 @@
     function resetarValores() {
         quantidadeCookies = 0;
         multiplicadorCookie = 0;
-        cookiesPorSegundo = 0;
+        cookiesPorSegundo = cookiesPorSegundoInicial;
         precoClick = precoClickInicial;
         precoMaquina = precoMaquinaInicial;
 
         // Atualizar elementos na interface
         atualizarIndicadorMultiplicador();
+        atualizarIndicadorMaquina();
         document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
         document.getElementById("cps").textContent = `${cookiesPorSegundo.toFixed(1)} cookie/s`;
 
@@ -345,9 +423,17 @@
         }
     }
 
+    // Função de anti-cheating
+    function antiCheating(cpsMedio){
+        if (cpsMedio >= 11){
+            document.getElementById("popup-anticheating").style.display = "flex";
+        }
+    }
+
     // Função para atualizar o CPS (cookies por segundo)
     function atualizarCps() {
         const cpsMediaClicks = calcularCpsMedia();
+        antiCheating(cpsMediaClicks);
         const cpsTotal = cpsMediaClicks + cookiesPorSegundo * calcularMultiplicador(multiplicadorCookie); // Soma automática + média
         document.getElementById("cps").textContent = `${cpsTotal.toFixed(1)} cookies/s`;
     }
@@ -360,6 +446,11 @@
     // Função para atualizar o indicador de multiplicador
     function atualizarIndicadorMultiplicador() {
         document.getElementById("indicador-multiplicador-cookies").textContent = `Multiplicador cookie: ${multiplicadorCookie + 100}%`;
+    }
+
+    // Função para atualizar o indicador de cookies por segundo
+    function atualizarIndicadorMaquina() {
+        document.getElementById("indicador-maquina-cookies").textContent = `Máquina de cookies: ${cookiesPorSegundo} cookies/s`;
     }
 
     // Função para atualizar o preço dos upgrades
@@ -400,10 +491,10 @@
                 precoClick = atualizarPreco(precoClick);
                 localStorage.setItem("quantidadeCookies", quantidadeCookies);
                 localStorage.setItem("multiplicadorCookie", multiplicadorCookie);
-                localStorage.setItem("precoClick", precoClick); // Salva o novo preço do upgrade
+                localStorage.setItem("precoClick", precoClick);             // Salva o novo preço do upgrade
                 atualizarIndicadorMultiplicador();
                 document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
-                document.getElementById('lista-click').innerHTML = ''; // Remove a oferta de upgrade após compra
+                document.getElementById('lista-click').innerHTML = '';      // Remove a oferta de upgrade após compra
             }
         }
     });
@@ -413,11 +504,17 @@
         if (e.target && e.target.classList.contains("comprar-maquina")) {
             if (quantidadeCookies >= precoMaquina) {
                 quantidadeCookies -= precoMaquina;
-                cookiesPorSegundo += cookiesPorSegundo * 0.3 || 1; // Incrementa 30% ou começa com 1 cookie/s
+                if (cookiesPorSegundo === 0){
+                    cookiesPorSegundo = 1;
+                }
+                else{
+                    cookiesPorSegundo += cookiesPorSegundo * 0.3; // Incrementa 30% ou começa com 1 cookie/s
+                }
                 precoMaquina = atualizarPreco(precoMaquina);
                 localStorage.setItem("quantidadeCookies", quantidadeCookies); // Salva a quantidade de cookies
                 localStorage.setItem("cookiesPorSegundo", cookiesPorSegundo); // Salva o valor de CPS (cookies por segundo)
                 localStorage.setItem("precoMaquina", precoMaquina);           // Salva o novo preço do upgrade
+                atualizarIndicadorMaquina();
                 document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
                 document.getElementById('lista-maquina').innerHTML = ''; // Remove oferta
             }
@@ -446,17 +543,17 @@
         }
     });
 
-    // Função para resetar os valores
-    document.getElementById("reset").addEventListener("click", () => {
-        if (confirm("Você tem certeza que quer resetar? Todo o progresso será perdido.")) {
-            resetarValores();
-        }
-    });
+    function botaoReset(){
+        document.getElementById("popup-reset").style.display = "flex";
+    }
 
-    // Fechar popup
-    document.getElementById("fechar-popup").addEventListener("click", () => {
-        document.getElementById("popup").style.display = 'none';
-    });
+    function fecharPopupReset(){
+        document.getElementById("popup-reset").style.display = 'none';
+    }
+
+    function fecharPopupAnticheating(){
+        document.getElementById("popup-anticheating").style.display = 'none';
+    }
 
     // Adiciona os cookies da máquina a cada segundo
     setInterval(() => {
