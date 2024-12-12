@@ -31,7 +31,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 20px; /* Espaçamento entre os elementos */
+        gap: 20px;
         background-color: #f9f9f936;
         padding: 20px;
         border-radius: 10px;
@@ -54,7 +54,6 @@
         -webkit-touch-callout: none;
     }
 
-    /* Indicador de chance no canto da tela */
     #indicador-chance {
         position: relative;
         top: 15px;
@@ -80,12 +79,10 @@
         }
     }
 
-    /* Aplica a animação ao botão quando clicado */
     #cookie:active {
         animation: bounce 0.3s;
     }
 
-    /* Estilos do popup */
     .popup {
         position: fixed;
         top: 50%;
@@ -99,34 +96,32 @@
         text-align: center;
     }
 
-    /* Estilos do botão "Fechar" (vermelho) */
     .popup button#fechar-popup {
-        background-color: #f04; /* Vermelho */
+        background-color: #f04;
         color: white;
         border: none;
         padding: 10px 20px;
         border-radius: 5px;
         cursor: url('/img/cursor-mao.png'), auto;
-        margin-top: 15px; /* Move o botão mais para baixo */
+        margin-top: 15px;
     }
 
     .popup button#fechar-popup:hover {
-        background-color: #c03; /* Vermelho mais escuro */
+        background-color: #c03;
     }
 
-    /* Estilos do botão "Comprar Upgrade" (verde) */
     .popup button#comprar-upgrade {
-        background-color: #4CAF50; /* Verde */
+        background-color: #4CAF50;
         color: white;
         border: none;
         padding: 10px 20px;
         border-radius: 5px;
         cursor: url('/img/cursor-mao.png'), auto;
-        margin-top: 15px; /* Move o botão mais para baixo */
+        margin-top: 15px;
     }
 
     .popup button#comprar-upgrade:hover {
-        background-color: #45a049; /* Verde mais escuro */
+        background-color: #45a049;
     }
 </style>
 
@@ -134,12 +129,24 @@
     let quantidadeCookies = 0;
     let cliques = [];
     let chanceCookieDuplo = 0;
+    let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
     const tempoJanela = 3000;
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
-    let quantParaUpgrade = 500;
-
+    const quantParaUpgradeInicial = 500;
+    let quantParaUpgrade = quantParaUpgradeInicial;
     let cpsAnterior = 0;
-    let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
+
+    // Função para resetar os valores para o padrão inicial
+    function resetarValores() {
+        quantidadeCookies = 0;
+        chanceCookieDuplo = 0;
+        quantParaUpgrade = quantParaUpgradeInicial;
+        tempoConstancia = 0;
+        atualizarIndicadorChance();
+        localStorage.setItem("quantidadeCookies", quantidadeCookies);
+        localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
+        localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
+    }
 
     // Carregar valores do Local Storage ao iniciar
     document.addEventListener("DOMContentLoaded", () => {
@@ -162,16 +169,14 @@
     });
 
     document.getElementById("cookie").addEventListener("click", () => {
-        let multiplicador = 1; // Começa com 1x
+        let multiplicador = 1;
         let chance = chanceCookieDuplo;
 
-        // Escalonamento de chance
         while (chance >= 100) {
             multiplicador++;
             chance -= 100;
         }
 
-        // Chance de multiplicadores adicionais
         if (Math.random() < chance / 100) {
             multiplicador++;
         }
@@ -179,45 +184,33 @@
         quantidadeCookies += multiplicador;
         document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies} cookies!`;
         cliques.push(Date.now());
-
-        // Salvar no Local Storage
         localStorage.setItem("quantidadeCookies", quantidadeCookies);
 
-        // Exibe o popup ao passar a quantidade necessária para upgrade
         if (quantidadeCookies >= quantParaUpgrade) {
             mostrarPopup();
         }
     });
 
-    // Função para calcular e atualizar o CPS
     function calcularCPS() {
         cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
         const cps = cliques.length / (tempoJanela / 1000);
         const diferencaCPS = Math.abs(cps - cpsAnterior);
 
-        // Verifica a constância do CPS
         if (diferencaCPS < 0.33) {
-            tempoConstancia += intervaloAtualizacao; // Aumenta o tempo de constância
+            tempoConstancia += intervaloAtualizacao;
         } else {
-            tempoConstancia = 0; // Resetar tempo se a diferença for maior que 0.33
+            tempoConstancia = 0;
         }
 
-        // Se a constância for maior que 6 segundos e o CPS for alto, ou CPS >= 15, punir o usuário
-        if (tempoConstancia >= 6000 || cps >= 15) {
-            // Punir o usuário se a constância for alta durante os 6 segundos
+        // Se a constância for maior que 6 segundos ou o CPS for alto, punir o jogador
+        if (cps >= 15 || tempoConstancia >= 6000) {
             if (tempoConstancia >= 6000) {
                 alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
-                quantidadeCookies = 0;
-                chanceCookieDuplo = 0;
-                atualizarIndicadorChance();
-                localStorage.setItem("quantidadeCookies", quantidadeCookies);
-                localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
-                tempoConstancia = 0; // Resetar tempo de constância
+                resetarValores(); // Resetar valores ao ser punido
             }
         }
 
-        cpsAnterior = cps; // Atualiza o valor anterior do CPS
-
+        cpsAnterior = cps;
         document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
         const vermelho = Math.min(Math.round(cps * 10), 255);
         let verde = 181;
@@ -231,7 +224,6 @@
         document.body.style.backgroundColor = `rgb(${vermelho + 128}, ${verde}, ${azul})`;
     }
 
-    // Função para exibir o popup
     function mostrarPopup() {
         const popup = document.getElementById("popup");
         document.getElementById("chance-atual").textContent = `Chance atual: ${chanceCookieDuplo}%`;
@@ -240,18 +232,15 @@
         popup.style.display = "block";
     }
 
-    // Atualizar indicador de chance
     function atualizarIndicadorChance() {
         document.getElementById("indicador-chance").textContent = `Chance de cookie duplo: ${chanceCookieDuplo}%`;
     }
 
-    // Fecha o popup ao clicar no botão "Fechar"
     document.getElementById("fechar-popup").addEventListener("click", () => {
         const popup = document.getElementById("popup");
         popup.style.display = "none";
     });
 
-    // Comprar o upgrade e aumentar a chance de cookie duplo
     document.getElementById("comprar-upgrade").addEventListener("click", () => {
         if (quantidadeCookies >= quantParaUpgrade) {
             quantidadeCookies -= quantParaUpgrade;
@@ -261,7 +250,6 @@
             document.getElementById("popup").style.display = "none";
             atualizarIndicadorChance();
 
-            // Salvar no Local Storage
             localStorage.setItem("quantidadeCookies", quantidadeCookies);
             localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
             localStorage.setItem("quantParaUpgrade", quantParaUpgrade);
@@ -270,14 +258,11 @@
         }
     });
 
-    // Chama a função de cálculo inicialmente e depois a cada intervalo
     calcularCPS();
     atualizarIndicadorChance();
     setInterval(calcularCPS, intervaloAtualizacao);
 
-    // Evitar que o cookie seja arrastável
     document.getElementById("cookie").addEventListener('dragstart', (event) => {
         event.preventDefault();
     });
 </script>
-
