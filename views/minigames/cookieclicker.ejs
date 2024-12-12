@@ -138,6 +138,9 @@
     const intervaloAtualizacao = 50; // Atualiza o CPS a cada 50ms
     let quantParaUpgrade = 500;
 
+    let cpsAnterior = 0;
+    let tempoConstancia = 0; // Tempo em que a diferença de CPS é menor que 0.33
+
     // Carregar valores do Local Storage ao iniciar
     document.addEventListener("DOMContentLoaded", () => {
         const cookiesSalvos = localStorage.getItem("quantidadeCookies");
@@ -190,11 +193,28 @@
     function calcularCPS() {
         cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
         const cps = cliques.length / (tempoJanela / 1000);
-        if (cps > 17){
-            alert("PARE DE ROUBAR SEU BOBÃO! perdeu todo seu progesso HAHAHAH");
+        const diferencaCPS = Math.abs(cps - cpsAnterior);
+
+        // Verifica a constância do CPS
+        if (diferencaCPS < 0.33) {
+            tempoConstancia += intervaloAtualizacao;
+        } else {
+            tempoConstancia = 0; // Resetar tempo se a diferença for maior que 0.33
+        }
+
+        // Se a constância for maior que 5 segundos, punir o usuário
+        if (tempoConstancia >= 5000 && cps > 10) {
+            alert("PARE DE ROUBAR SEU BOBÃO!\nperdeu todo seu progresso HAHAHAH");
             quantidadeCookies = 0;
             chanceCookieDuplo = 0;
+            atualizarIndicadorChance();
+            localStorage.setItem("quantidadeCookies", quantidadeCookies);
+            localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
+            tempoConstancia = 0; // Resetar tempo de constância
         }
+
+        cpsAnterior = cps; // Atualiza o valor anterior do CPS
+
         document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
         const vermelho = Math.min(Math.round(cps * 10), 255);
         let verde = 181;
