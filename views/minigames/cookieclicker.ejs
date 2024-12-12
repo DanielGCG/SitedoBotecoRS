@@ -77,8 +77,10 @@
         cliques = cliques.filter(timestamp => Date.now() - timestamp <= tempoJanela);
         const cps = cliques.length / (tempoJanela / 1000);
         document.getElementById("cps").textContent = `CPS: ${cps.toFixed(2)}`;
-        const vermelho = Math.min(Math.round(cps * 15), 255); // Ajuste o fator 10 para controlar a sensibilidade
-        document.body.style.backgroundColor = `rgb(${vermelho + 128}, 181, 107)`;
+        const vermelho = Math.min(Math.round(cps * 15), 255);
+        const verde = Math.max(181 - vermelho * 0.2, 0); // Diminui o verde proporcionalmente ao vermelho
+        const azul = Math.max(107 - vermelho * 0.2, 0); // Diminui o azul proporcionalmente ao vermelho
+        document.body.style.backgroundColor = `rgb(${vermelho + 128}, ${verde}, ${azul})`;
     }
 
     // Chama a função de cálculo inicialmente e depois a cada intervalo

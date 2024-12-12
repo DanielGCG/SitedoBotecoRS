@@ -52,7 +52,7 @@ router.get('/games', (req, res) => {
 router.get('/minigames', (req, res) => {
     const locals = {
         title: "Minijogos!",
-        description: "oba minujogos!"
+        description: "oba minijogos!"
     }
     res.render('minigames', { locals: locals });
 });
@@ -60,7 +60,7 @@ router.get('/minigames', (req, res) => {
 router.get('/minigames/cookie', (req, res) => {
     const locals = {
         title: "Minijogos!",
-        description: "oba minujogos!"
+        description: "oba minijogos!"
     }
     res.render('minigames/cookieclicker', { locals: locals });
 });
