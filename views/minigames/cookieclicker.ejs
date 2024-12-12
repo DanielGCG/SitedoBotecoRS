@@ -197,20 +197,23 @@
 
         // Verifica a constância do CPS
         if (diferencaCPS < 0.33) {
-            tempoConstancia += intervaloAtualizacao;
+            tempoConstancia += intervaloAtualizacao; // Aumenta o tempo de constância
         } else {
             tempoConstancia = 0; // Resetar tempo se a diferença for maior que 0.33
         }
 
-        // Se a constância for maior que 5 segundos, punir o usuário
-        if (tempoConstancia >= 5000 && cps > 10) {
-            alert("PARE DE ROUBAR SEU BOBÃO!\nperdeu todo seu progresso HAHAHAH");
-            quantidadeCookies = 0;
-            chanceCookieDuplo = 0;
-            atualizarIndicadorChance();
-            localStorage.setItem("quantidadeCookies", quantidadeCookies);
-            localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
-            tempoConstancia = 0; // Resetar tempo de constância
+        // Se a constância for maior que 6 segundos e o CPS for alto, ou CPS >= 15, punir o usuário
+        if (tempoConstancia >= 6000 || cps >= 15) {
+            // Punir o usuário se a constância for alta durante os 6 segundos
+            if (tempoConstancia >= 6000) {
+                alert("PARE DE ROUBAR SEU BOBÃO!\nPerdeu todo seu progresso HAHAHAH");
+                quantidadeCookies = 0;
+                chanceCookieDuplo = 0;
+                atualizarIndicadorChance();
+                localStorage.setItem("quantidadeCookies", quantidadeCookies);
+                localStorage.setItem("chanceCookieDuplo", chanceCookieDuplo);
+                tempoConstancia = 0; // Resetar tempo de constância
+            }
         }
 
         cpsAnterior = cps; // Atualiza o valor anterior do CPS
