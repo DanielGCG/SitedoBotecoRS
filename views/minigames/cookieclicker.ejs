@@ -39,6 +39,9 @@
         border: none;
         padding: 0;
         cursor: url('/img/cursor-mao.png'), auto;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
     }
 
     /* Definição da animação bounce */
@@ -92,6 +95,16 @@
     // Chama a função de cálculo inicialmente e depois a cada intervalo
     calcularCPS();
     setInterval(calcularCPS, intervaloAtualizacao);
+
+
+    // Evitar que o cookie seja arrastável
+    document.getElementById("cookie").addEventListener('mousedown', (event) => {
+        event.preventDefault();
+    });
+
+    document.getElementById("cookie").addEventListener('dragstart', (event) => {
+        event.preventDefault();
+    });
 
     // Evento aleatórios
 </script>
