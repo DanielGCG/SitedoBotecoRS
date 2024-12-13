@@ -31,7 +31,7 @@ O site está disponível online no link:
 ## 👨‍🏭 A melhorar
 
 - Segurânça de chaves de API
-- Melhorar organização dos arquivos
+- Melhorar organização dos diretórios
 - Modularizar de forma mais escalonável o html / JavaScript / css
 
 ---
