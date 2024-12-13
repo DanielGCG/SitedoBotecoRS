@@ -1,6 +1,7 @@
 /* Criando variáveis de cores/estilo personalizadas*/
 :root {
     --cor-fundo: #80b56b;
+    --cor-fundo-caixa-texto: #f9f9f936;
     --cor-marrom: #9c693a;
     --cor-verde-escuro: #4a693e;
     --cor-marrom-escuro: #6d4a29;

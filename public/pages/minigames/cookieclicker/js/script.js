@@ -2,10 +2,11 @@
 let quantidadeTotalCookies = 0;
 let quantidadeCookies = 0;          // Variável para quantidade atual de cookies
 let multiplicadorCookie = 0;        // Variável para multiplicador de cookie por click
+let ultimosCps = [];                // Armazenar os últimos valores de CPS calculados
 
 const cookiesPorSegundoInicial = 0; // Valor inicial para cookies por segundo
 const precoClickInicial = 25;       // Preço inicial para upgrade de click
-const precoMaquinaInicial = 60;     // Preço inicial para upgrade de máquina
+const precoMaquinaInicial = 55;     // Preço inicial para upgrade de máquina
 const CPS_INTERVAL = 3000;          // Janela de tempo para cálculo de CPS (3 segundos)
 
 let cookiesPorSegundo = cookiesPorSegundoInicial;
@@ -114,9 +115,36 @@ function adicionarCookiesAutomaticos() {
 }
 
 // Função de anti-cheating
-function antiCheating(cpsMedio){
-    if (cpsMedio >= 11){
+function antiCheating(cpsMedio) {
+    const agora = Date.now();
+
+    // Ignora análise se o CPS médio é 1 ou menor (usuário AFK ou inativo)
+    if (cpsMedio <= 1) return;
+
+    // Outra condição de anticheat: CPS médio muito alto
+    if (cpsMedio >= 11) {
         document.getElementById("popup-anticheating").style.display = "flex";
+        return
+    }
+
+    // Adiciona o CPS atual ao array e mantém o histórico apenas dos últimos 5 segundos
+    ultimosCps.push({ timestamp: agora, cps: cpsMedio });
+    ultimosCps = ultimosCps.filter(entry => agora - entry.timestamp <= 5000);
+
+    // Verifica a constância dos valores de CPS (analisamos apenas se há múltiplos registros)
+    if (ultimosCps.length > 5000) {
+        const variacoes = ultimosCps.slice(1).map((entry, index) => 
+            Math.abs(entry.cps - ultimosCps[index].cps)
+        );
+
+        // Condição: todas as variações entre registros sucessivos são menores ou iguais a 0.5
+        const todasVariacoesBaixas = variacoes.every(variacao => variacao <= 0.5);
+
+        // Ativa o anticheat se as variações forem consistentemente pequenas
+        if (todasVariacoesBaixas) {
+            document.getElementById("popup-anticheating").style.display = "flex";
+            return;
+        }
     }
 }
 
@@ -150,7 +178,7 @@ function atualizarPrecoClick(upgrade) {
 
 // Função para atualizar o preço do upgrade de maquina
 function atualizarPrecoMaquina(upgrade) {
-    return upgrade * 5;
+    return upgrade * 4;
 }
 
 // Função para exibir a oferta de upgrade de click
