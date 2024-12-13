@@ -5,7 +5,8 @@ Bem-vindo ao repositório do Site do Boteco! 🌟
 Este é um site desenvolvido em HTML e hospedado no Heroku, com integração ao Firebase. Aqui você pode encontrar todas as informações sobre o projeto.
 
 Não estranhe caso econtre alguns erros ou bugs, ainda estou aprendendo!
-Tudo oque fiz até agora aprendi por conta própria em vídeos no YouTube, usando outros repositórios como referências e até mesmo ao chatgpt, principalmente com a questão de desing, que ainda sofro com o css.
+Tudo oque fiz até agora aprendi por conta própria em vídeos no YouTube, usando outros repositórios como referência e até mesmo ao chatgpt,
+principalmente com a questão de desing, que ainda sofro com o css.
 
 ---
 
@@ -20,8 +21,9 @@ O site está disponível online no seguinte link:
 
 - Imagem do dia (todo dia o bot procura uma imagem para dispor na tela inicial do site e no bot do Twitter
 - Uma galeria de imagens que podem ser enviadas, editadas e removidas por qualquer usuário
+- Sistema de Match cinematográfico com Algebra Linear (distância entre vetores)
 - Uso de API do twitter para envio de mensagens com BOT
-- Minigames (Atualmente um jogo de cookie clicking)
+- Minigames (Atualmente cookie clicking)
 
 ---
 
