@@ -45,11 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
         atualizarIndicadorMaquina();
     }
 
-    // Cookie para cada nivel
+    // Total absoluto de cookies
     const quantidadeTotalCookiesSalvo = localStorage.getItem("cookiesPorSegundo");
     if (cpsSalvo !== null) {
         quantidadeTotalCookies = parseFloat(quantidadeTotalCookiesSalvo);
-        atualizarIndicadorMaquina();
+    }
+
+    if (quantidadeTotalCookies >= precoClick && !document.getElementById('lista-click').innerHTML) {
+        exibirOfertaClick();
+    }
+    if (quantidadeTotalCookies >= precoMaquina && !document.getElementById('lista-maquina').innerHTML) {
+        exibirOfertaMaquina();
     }
 });
 
@@ -199,7 +205,7 @@ function exibirOfertaMaquina() {
     const novaMaquina = document.createElement('div');
     novaMaquina.classList.add('upgrade-item');
     novaMaquina.innerHTML = `
-        <p>Aumentar produção automática de cookies em 30%!</p>
+        <p>Aumentar máquina de cookies em 30%!</p>
         <button class="comprar-maquina">Comprar por ${precoMaquina} cookies</button>
     `;
     listaMaquina.appendChild(novaMaquina);

@@ -100,12 +100,14 @@ button {
     display: block; /* Alterado de flex para block */
     padding: 10px;
     margin-top: 20px; /* Adiciona espaçamento entre o título e a lista de upgrades */
+    text-align: center;
 }
 
 #lista-maquina {
     display: block; /* Alterado de flex para block */
     padding: 10px;
     margin-top: 20px; /* Adiciona espaçamento entre o título e a lista de upgrades */
+    text-align: center;
 }
 
 .upgrade-item {
