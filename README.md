@@ -23,7 +23,16 @@ O site está disponível online no link:
 - Uma galeria de imagens que podem ser enviadas, editadas e removidas por qualquer usuário
 - Sistema de Match cinematográfico com Algebra Linear (distância entre vetores)
 - Uso de API do twitter para envio de mensagens com BOT
-- Minigames (Atualmente cookie clicking)
+- Minigames:
+  - Cookie Cliker
+
+---
+
+## 👨‍🏭 A melhorar
+
+- Segurânça de chaves de API
+- Melhorar organização dos arquivos
+- Modularizar de forma mais escalonável o html / JavaScript / css
 
 ---
 
