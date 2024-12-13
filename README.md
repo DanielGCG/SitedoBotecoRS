@@ -41,7 +41,7 @@ O site está disponível online no link:
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Backend**: Node.js e Flask
 - **Serviços**:
-  - Firebase (Storage e Firestore)
+  - Firebase (Storage)
   - Heroku (Hospedagem)
   - API do Twitter
 
