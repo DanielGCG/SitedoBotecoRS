@@ -4,6 +4,9 @@ Bem-vindo ao repositório do Site do Boteco! 🌟
 
 Este é um site desenvolvido em HTML e hospedado no Heroku, com integração ao Firebase. Aqui você pode encontrar todas as informações sobre o projeto.
 
+Não estranhe caso econtre alguns erros ou bugs, ainda estou aprendendo!
+Tudo oque fiz até agora aprendi por conta própria em vídeos no YouTube, usando outros repositórios como referências e até mesmo ao chatgpt, principalmente com a questão de desing, que ainda sofro com o css.
+
 ---
 
 ## 🌐 Demonstração
