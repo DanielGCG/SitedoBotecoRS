@@ -37,7 +37,7 @@ O site está disponível online no seguinte link:
 
 Agradeço as sugestões de funções dadas pelos meus amigos.
 Agradecimento também a [Ana Caroline](https://github.com/acarolls) que participou na modelagem
-da página Filme da Galera, para O trabalho final de Algebra Linear.
+da página Filme da Galera, para o trabalho final de Algebra Linear.
 
 ---
 
