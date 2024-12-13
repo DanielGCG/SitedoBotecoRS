@@ -9,16 +9,16 @@ Este é um site desenvolvido em HTML e hospedado no Heroku, com integração ao 
 ## 🌐 Demonstração
 
 O site está disponível online no seguinte link:
-[Meu Site]([https//:](https://www.boteco.live))
+[Boteco do R$]([https//:](https://www.boteco.live))
 
 ---
 
 ## 📋 Funcionalidades
 
-- 
-- 
-- 
-- 
+- Imagem do dia (todo dia o bot procura uma imagem para dispor na tela inicial do site e no bot do Twitter
+- Uma galeria de imagens que podem ser enviadas, editadas e removidas por qualquer usuário
+- Uso de API do twitter para envio de mensagens com BOT
+- Minigames (Atualmente um jogo de cookie clicking)
 
 ---
 
