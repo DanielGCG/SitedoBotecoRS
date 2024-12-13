@@ -9,7 +9,7 @@ Este é um site desenvolvido em HTML e hospedado no Heroku, com integração ao 
 ## 🌐 Demonstração
 
 O site está disponível online no seguinte link:
-[Boteco do R$]([https//:](https://www.boteco.live))
+[Boteco do R$](https://www.boteco.live)
 
 ---
 
