@@ -155,69 +155,6 @@ button {
     display: none;    /* Inicialmente oculto */
 }
 
-/* Estilo para o conteúdo do popup */
-.popup-conteudo {
-    background-color: rgba(255, 255, 255, 0.212);
-    padding: 20px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; /* Garante que os itens sejam centralizados verticalmente */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    position: relative;
-    width: 80%; /* Ajuste de largura */
-    max-width: 800px; /* Limite máximo de largura */
-    max-height: 90vh; /* Limite máximo de altura */
-    overflow: auto; /* Se o conteúdo exceder, exibe barras de rolagem */
-}
-
-.popup-conteudo img {
-    justify-content: center;
-    max-width: 100%; /* Limita a largura da imagem */
-    max-height: 60vh; /* Limita a altura da imagem */
-    object-fit: contain; /* Garante que a imagem mantenha a proporção correta */
-    border-radius: 8px;
-}
-
-.popup-conteudo .acoes {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-    justify-content: center; /* Centraliza os botões */
-}
-
-.popup-conteudo .acoes .deletar {
-    padding: 10px 20px;
-    background-color: #ff4c4c; /* Vermelho */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.popup-conteudo .acoes .deletar:hover {
-    background-color: #ff2a2a; /* Tom mais intenso de vermelho */
-    cursor: url('/img/cursor-mao.png'), auto;
-}
-
-/* Estilo para o botão de fechar */
-.popup-conteudo .acoes .branco {
-    padding: 10px 20px;
-    background-color: white; /* Branco */
-    color: #333; /* Cor do texto */
-    border: 1px solid #ccc; /* Borda clara */
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.popup-conteudo .acoes .branco:hover {
-    background-color: #f1f1f1; /* Tom mais claro no hover */
-    cursor: url('/img/cursor-mao.png'), auto;
-}
-
 #versao-container {
     position: fixed;
     bottom: 10px;

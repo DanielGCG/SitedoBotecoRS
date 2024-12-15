@@ -30,7 +30,7 @@ router.get('/lista', (req, res) => {
 });
 
 /* ------ Cutucar ------*/
-/*
+
 router.get('/cutucar', (req, res) => {
     const locals = {
         title: "Cutucar",
@@ -38,7 +38,7 @@ router.get('/cutucar', (req, res) => {
     }
     res.render('cutucar', { locals: locals });
 });
-*/
+
 /* ------ Minigames ------*/
 
 router.get('/games', (req, res) => {

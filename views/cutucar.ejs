@@ -22,10 +22,15 @@
     <div class="post-twitter"></div>
 
     <!-- Popup para exibir a imagem com fundo desfocado e botões -->
-    <div id="popup" class="popup" style="display: none;">
+    <div id="popup-senha" class="popup">
         <div id="popup-conteudo" class="popup-conteudo">
             <div class="acoes">
-                
+                <form id="passwordForm">
+                    <h2>Verificar Senha</h2>
+                    <input type="password" id="password" placeholder="Digite a senha" />
+                    <button onclick="checkPassword()">Verificar</button>
+                    <p class="message" id="message"></p>
+                </form>
             </div>
         </div>
     </div>
@@ -34,6 +39,11 @@
 <style>
     main {
         text-align: center;
+    }
+
+    #popup-senha {
+        display: flex;
+        align-items: center;
     }
 
     .caixa-texto {
@@ -133,8 +143,11 @@
     }
 </style>
 
+<link rel="stylesheet" href="/css/popup.css">
 
 <script>
+    const predefinedPassword = "vereador123";
+    let validacaoUsuario;
     const suggestionsList = [
         '@ammyndoiim',
         '@botdoboteco',
@@ -168,6 +181,41 @@
         '@whoisnenes',
         '@yuzzu_94'
     ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        validacaoUsuario = localStorage.getItem("validacaoUsuario");
+        if (validacaoUsuario !== null) {
+            validacaoUsuario = JSON.parse(validacaoUsuario); // Converte para booleano ou outro tipo armazenado.
+        } else {
+            validacaoUsuario = false; // Valor padrão se não existir no localStorage.
+        }
+
+        console.log("Validação do Usuário:", validacaoUsuario);
+
+        if (validacaoUsuario === true){
+            document.getElementById("popup-senha").style.display = "none";
+        }
+    });
+
+    
+    function checkPassword() {
+        console.log("verificando senha...");
+        if (validacaoUsuario !== true){
+            const inputPassword = document.getElementById("password").value;
+            const messageElement = document.getElementById("message");
+
+            if (inputPassword === predefinedPassword) {
+                messageElement.textContent = "Senha correta!";
+                messageElement.style.color = "green";
+                document.getElementById("popup-senha").style.display = "none";
+                localStorage.setItem("validacaoUsuario", validacaoUsuario = true);
+            } else {
+                messageElement.textContent = "Senha incorreta!";
+                messageElement.style.color = "red";
+                return checkPassword();
+            }
+        }
+    }
 
     const mentionInput = document.getElementById('mention');
     const suggestionsDiv = document.getElementById('suggestions');
@@ -214,6 +262,11 @@
 
     // Lógica para envio de tweet
     document.getElementById('tweetButton').addEventListener('click', () => {
+        if (validacaoUsuario !== true){
+            alert("Usuário sem permissão para envio de tweet");
+            return false;
+        }
+
         const mention = mentionInput.value.trim();
         const messageText = document.getElementById('messageText').value.trim();
 
