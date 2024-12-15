@@ -196,7 +196,7 @@ function exibirOfertaClick() {
     novoClick.classList.add('upgrade-item');
     novoClick.innerHTML = `
         <p>Aumentar multiplicador cookie em 20%!</p>
-        <button class="comprar-click">Comprar por ${precoClick} cookies</button>
+        <button class="comprar-click">Comprar por ${precoClick.toFixed(2)} cookies</button>
     `;
     listaClicks.appendChild(novoClick);
 }
@@ -208,7 +208,7 @@ function exibirOfertaMaquina() {
     novaMaquina.classList.add('upgrade-item');
     novaMaquina.innerHTML = `
         <p>Aumentar máquina de cookies em 30%!</p>
-        <button class="comprar-maquina">Comprar por ${precoMaquina} cookies</button>
+        <button class="comprar-maquina">Comprar por ${precoClick.toFixed(2)} cookies</button>
     `;
     listaMaquina.appendChild(novaMaquina);
 }
