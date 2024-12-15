@@ -128,7 +128,7 @@ function antiCheating(cpsMedio) {
     if (cpsMedio <= 1) return;
 
     // Outra condição de anticheat: CPS médio muito alto
-    if (cpsMedio >= 11) {
+    if (cpsMedio >= 13) {
         document.getElementById("popup-anticheating").style.display = "flex";
         return
     }
