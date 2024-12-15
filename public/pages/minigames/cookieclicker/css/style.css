@@ -36,7 +36,7 @@ main {
 #cookie img {
     -webkit-user-drag: none;
     pointer-events: none;
-    width: 145px;
+    width: 175px;
     height: auto;
 }
 
