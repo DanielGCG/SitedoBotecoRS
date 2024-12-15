@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Total absoluto de cookies
-    const quantidadeTotalCookiesSalvo = localStorage.getItem("cookiesPorSegundo");
+    const quantidadeTotalCookiesSalvo = localStorage.getItem("quantidadeTotalCookies");
     if (cpsSalvo !== null) {
         quantidadeTotalCookies = parseFloat(quantidadeTotalCookiesSalvo);
     }
@@ -93,6 +93,9 @@ function calcularCpsMedia() {
 
     // Filtra cliques dentro dos últimos 3 segundos
     clickTimestamps = clickTimestamps.filter(timestamp => agora - timestamp <= CPS_INTERVAL);
+    if (clickTimestamps.length > 1000) {
+        clickTimestamps.splice(0, clickTimestamps.length - 1000);
+    }    
 
     // Retorna a média de cliques por segundo
     return clickTimestamps.length / (CPS_INTERVAL / 1000);
@@ -100,11 +103,8 @@ function calcularCpsMedia() {
 
 // Função para adicionar cookies automáticos ao total atual
 function adicionarCookiesAutomaticos() {
-    let totalCookies = 0;
-    // Somatório de cookiesPorSegundo vezes o multiplicador calculado
-    for (let i = 0; i < cookiesPorSegundo; i++) {
-        totalCookies += calcularMultiplicador(multiplicadorCookie);
-    }
+    let totalCookies = cookiesPorSegundo * calcularMultiplicador(multiplicadorCookie);
+
     quantidadeCookies += totalCookies; // Atualiza a quantidade atual de cookies
     quantidadeTotalCookies += totalCookies;     // Atualiza a quantidade absoluta total de cookies
     document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
@@ -118,6 +118,8 @@ function adicionarCookiesAutomaticos() {
     if (!document.getElementById('lista-maquina').innerHTML) {
         exibirOfertaMaquina();
     }
+
+    exibirAnimacaoCookies(totalCookies);
 }
 
 // Função de anti-cheating
@@ -138,7 +140,7 @@ function antiCheating(cpsMedio) {
     ultimosCps = ultimosCps.filter(entry => agora - entry.timestamp <= 5000);
 
     // Verifica a constância dos valores de CPS (analisamos apenas se há múltiplos registros)
-    if (ultimosCps.length > 5000) {
+    if (ultimosCps.length > 500) {
         const variacoes = ultimosCps.slice(1).map((entry, index) => 
             Math.abs(entry.cps - ultimosCps[index].cps)
         );
@@ -209,6 +211,34 @@ function exibirOfertaMaquina() {
         <button class="comprar-maquina">Comprar por ${precoMaquina} cookies</button>
     `;
     listaMaquina.appendChild(novaMaquina);
+}
+
+// Função para exibir uma quantidade de imagens animadas
+function exibirAnimacaoCookies(quantidade) {
+    const container = document.getElementById("container-animacao"); // Container onde as animações serão exibidas
+
+    if(quantidade > 10){
+        quantidade = 10;
+    }
+
+    for (let i = 0; i < quantidade; i++) {
+        const img = document.createElement("img");
+        img.src = "/pages/minigames/cookieclicker/img/cookie_pequeno.png"; // Caminho para a imagem do cookie
+        img.classList.add("animacao-cookie"); // Classe para aplicar estilos e animação
+
+        // Posicionamento inicial aleatório horizontal
+        const posicaoHorizontal = Math.random() * 90 + 5; // Entre 5% e 95% da largura
+        const posicaoVertical = Math.random() * 20 + -5; // Entre -5% e 15% da largura
+        img.style.left = `${posicaoHorizontal}%`;
+        img.style.bottom = `${posicaoVertical}%`;
+
+        container.appendChild(img);
+
+        // Remove a imagem após a animação terminar
+        img.addEventListener("animationend", () => {
+            img.remove();
+        });
+    }
 }
 
 // Função de compra de upgrade de click
