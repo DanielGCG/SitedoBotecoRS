@@ -51,10 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
         quantidadeTotalCookies = parseFloat(quantidadeTotalCookiesSalvo);
     }
 
-    if (quantidadeTotalCookies >= precoClick && !document.getElementById('lista-click').innerHTML) {
+    if (!document.getElementById('lista-click').innerHTML) {
         exibirOfertaClick();
     }
-    if (quantidadeTotalCookies >= precoMaquina && !document.getElementById('lista-maquina').innerHTML) {
+    if (!document.getElementById('lista-maquina').innerHTML) {
         exibirOfertaMaquina();
     }
 });
@@ -112,10 +112,10 @@ function adicionarCookiesAutomaticos() {
     localStorage.setItem("quantidadeTotalCookies", quantidadeTotalCookies);
 
     // Verifica upgrades automaticamente ao exibir os cookies
-    if (quantidadeTotalCookies >= precoClick && !document.getElementById('lista-click').innerHTML) {
+    if (!document.getElementById('lista-click').innerHTML) {
         exibirOfertaClick();
     }
-    if (quantidadeTotalCookies >= precoMaquina && !document.getElementById('lista-maquina').innerHTML) {
+    if (!document.getElementById('lista-maquina').innerHTML) {
         exibirOfertaMaquina();
     }
 }
@@ -278,10 +278,10 @@ document.getElementById("cookie").addEventListener("click", () => {
     atualizarCps();
 
     // Verifica upgrades
-    if (quantidadeTotalCookies >= precoClick && !document.getElementById('lista-click').innerHTML) {
+    if (!document.getElementById('lista-click').innerHTML) {
         exibirOfertaClick();
     }
-    if (quantidadeTotalCookies >= precoMaquina && !document.getElementById('lista-maquina').innerHTML) {
+    if (!document.getElementById('lista-maquina').innerHTML) {
         exibirOfertaMaquina();
     }
 });

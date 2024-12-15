@@ -133,43 +133,6 @@ button {
     background-color: #45a049;
 }
 
-@media (max-width: 768px) {
-    main {
-        flex-direction: column;
-    }
-
-    .barra-lateral {
-        position: relative;
-        width: 100%; /* Ajustar para largura total no layout responsivo */
-        height: auto; /* Permitir altura dinâmica */
-        padding: 20px; /* Espaçamento interno */
-        top: 80px;
-        align-items: center;
-    }
-
-    #barra-esquerda {
-        order: 1; /* Aparece logo após os cookies */
-        align-items: center;
-    }
-
-    #barra-direita {
-        order: 2; /* Aparece abaixo da esquerda */
-        align-items: center;
-    }
-
-    .upgrade-item {
-        align-items: center;
-        text-align: center;
-    }
-
-    #cookie img {
-        -webkit-user-drag: none;
-        pointer-events: none;
-        width: 205px;
-        height: auto;
-    }
-}
-
 .popup {
     position: fixed;
     top: 0;
@@ -281,4 +244,57 @@ button {
 
 .reset-btn:hover {
     background-color: #c03;
+}
+
+
+@media (max-width: 768px) {
+    main {
+        min-height: 100vh; /* Garante que o conteúdo principal ocupe a altura total da tela */
+        display: flex;
+        flex-direction: column; /* Empilha os itens verticalmente */
+        justify-content: space-between; /* Adiciona espaço entre o conteúdo e o botão de reset */
+    }
+
+    .barra-lateral {
+        position: static; /* As barras laterais ficam no fluxo normal */
+        width: 100%; /* Ajusta a largura para o mobile */
+        height: auto; /* Permite altura dinâmica */
+        margin-bottom: 10px; /* Espaçamento entre a barra e o botão */
+    }
+
+    #barra-esquerda {
+        order: 1; /* Aparece logo após os cookies */
+        align-items: center;
+    }
+
+    #barra-direita {
+        order: 2; /* Aparece abaixo da esquerda */
+        align-items: center;
+    }
+
+    .upgrade-item {
+        align-items: center;
+        text-align: center;
+    }
+
+    #cookie img {
+        -webkit-user-drag: none;
+        pointer-events: none;
+        width: 205px;
+        height: auto;
+    }
+
+    #versao-container {
+        position: relative; /* Remove o posicionamento fixo */
+        bottom: auto; /* Permite que ele se posicione naturalmente */
+        margin-top: 20px; /* Adiciona espaçamento extra acima */
+        margin-bottom: 10px; /* Ajusta o espaço no final */
+        width: 100%; /* Ocupa toda a largura no mobile */
+        display: flex;
+        justify-content: center; /* Centraliza o botão */
+    }
+
+    html, body {
+        touch-action: manipulation;
+    }
 }
