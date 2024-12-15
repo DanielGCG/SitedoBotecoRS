@@ -56,6 +56,19 @@ app.post('/tweet', async (req, res) => {
   }
 });
 
+// Verificar Senha Cutucar
+app.post('/verify-senha-cutucar', (req, res) => {
+  const { senha } = req.body;
+  const predefinedPassword = process.env.PREDEFINEDPASSWORD;
+
+  if (senha === predefinedPassword) {
+      res.json({ success: true, message: 'Senha correta!' });
+  } else {
+      res.json({ success: false, message: 'Senha incorreta!' });
+  }
+});
+
+
 // Rota principal
 app.use('/', require('./server/routes/main'));
 

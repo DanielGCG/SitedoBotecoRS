@@ -28,7 +28,7 @@
                 <form id="passwordForm">
                     <h2>Autenticação de Usuário</h2>
                     <input type="password" id="password" placeholder="Digite a senha" />
-                    <button onclick="checkPassword()">Verificar</button>
+                    <button onclick="event.preventDefault(), checkPassword()">Verificar</button>
                     <p class="message" id="message"></p>
                 </form>
             </div>
@@ -146,8 +146,6 @@
 <link rel="stylesheet" href="/css/popup.css">
 
 <script>
-    const predefinedPassword = "vereador123";
-    let validacaoUsuario;
     const suggestionsList = [
         '@ammyndoiim',
         '@botdoboteco',
@@ -197,25 +195,26 @@
         }
     });
 
-    
-    function checkPassword() {
-        console.log("verificando senha...");
-        if (validacaoUsuario !== true){
-            const inputPassword = document.getElementById("password").value;
-            const messageElement = document.getElementById("message");
+    async function checkPassword() {
+        const senha = document.getElementById("password").value; // Obter senha do input
+        const response = await fetch('/verify-senha-cutucar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ senha }) // Enviar senha como JSON
+        });
 
-            if (inputPassword === predefinedPassword) {
-                messageElement.textContent = "Senha correta!";
-                messageElement.style.color = "green";
-                document.getElementById("popup-senha").style.display = "none";
-                localStorage.setItem("validacaoUsuario", validacaoUsuario = true);
-            } else {
-                messageElement.textContent = "Senha incorreta!";
-                messageElement.style.color = "red";
-                return checkPassword();
-            }
+        const data = await response.json(); // Converter a resposta para JSON
+
+        if (data.success) {
+            validacaoUsuario = true;
+            localStorage.setItem("validacaoUsuario", validacaoUsuario = true);
+            document.getElementById("popup-senha").style.display = "none";
+        } else {
+            console.log("Senha incorreta");
         }
-    }
+}
 
     const mentionInput = document.getElementById('mention');
     const suggestionsDiv = document.getElementById('suggestions');
