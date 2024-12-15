@@ -181,12 +181,12 @@ function atualizarIndicadorMaquina() {
 
 // Função para atualizar o preço do upgrade de click
 function atualizarPrecoClick(upgrade) {
-    return upgrade * 3;
+    return upgrade = upgrade * 1.75;
 }
 
 // Função para atualizar o preço do upgrade de maquina
 function atualizarPrecoMaquina(upgrade) {
-    return upgrade * 4;
+    return upgrade * upgrade * 2.2;
 }
 
 // Função para exibir a oferta de upgrade de click
