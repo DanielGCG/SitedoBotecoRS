@@ -17,8 +17,8 @@ let obrasLocais = [];
 
 
 // Carrega imagens locais e Firebase
-async function carregarImagensFirebase() {
-    const galeriaRef = ref(storage, 'galeria/pets');
+async function carregarImagensFirebase(endereco) {
+    const galeriaRef = ref(storage, `galeria/${endereco}`);
     const result = await listAll(galeriaRef);
 
     obrasLocais = await Promise.all(result.items.map(async itemRef => {
@@ -82,7 +82,7 @@ async function uploadFile() {
     }
 
     const imageName = `${nomeObra}.png`;
-    const imagePath = `galeria/pets/${imageName}`;
+    const imagePath = `galeria/${endereco}/${imageName}`;
     const imageRef = ref(storage, imagePath);
 
     try {
@@ -139,7 +139,7 @@ function fecharConfirmacao() {
 async function removerObraNoFirebase(nomeObra) {
     try {
         // Referência ao arquivo no Firebase
-        const obraRef = ref(storage, `galeria/pets/${nomeObra}.png`);
+        const obraRef = ref(storage, `galeria/${endereco}/${nomeObra}.png`);
         
         // Deletar a obra
         await deleteObject(obraRef);
@@ -182,7 +182,7 @@ function abrirPopupComImagem(url, nome) {
 
     // Estrutura do popup com campo para editar o nome inicialmente escondido
     popupConteudo.innerHTML = `
-        <img id="imagem-popup" src="${url}" alt="">
+        <img id="imagem-popup" src="${url}" alt="Imagem da obra">
         <div class="acoes">
             <button class="deletar" onclick="removerObra('${nome}')">Deletar</button>
             <button class="branco" id="editarNomeBtn">Editar</button>
@@ -234,8 +234,8 @@ async function editarNomeObra(nomeAtual, url) {
         const blob = await response.blob();
 
         // Referências para o arquivo novo e o antigo no Firebase Storage
-        const novaImagemRef = ref(storage, `galeria/pets/${novoNome}.png`);
-        const imagemAntigaRef = ref(storage, `galeria/pets/${nomeAtual}.png`);
+        const novaImagemRef = ref(storage, `galeria/${endereco}/${novoNome}.png`);
+        const imagemAntigaRef = ref(storage, `galeria/${endereco}/${nomeAtual}.png`);
 
         // Faz o upload da imagem com o novo nome
         await uploadBytes(novaImagemRef, blob);
@@ -297,7 +297,7 @@ window.removerObra = removerObra;
 window.abrirPopupComImagem = abrirPopupComImagem; // Corrigido para abrir o popup com imagem
 window.fecharPopup = fecharPopup;
 window.abrirPopup = abrirPopup;
-window.onload = carregarImagensFirebase;
+window.onload = carregarImagensFirebase(endereco);
 window.editarNomeObra = editarNomeObra;
 window.confirmarRemocao = confirmarRemocao;
 window.fecharConfirmacao = fecharConfirmacao;
