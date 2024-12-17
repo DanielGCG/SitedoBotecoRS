@@ -88,7 +88,7 @@
         transform: translateX(-50%);
         width: 70%; /* Tamanho proporcional */
         height: 75px; /* Altura ajustada para a plaquinha */
-        background-image: url('/img/plaquinha.png');
+        background-image: url('/pages/galeria/geral/img/plaquinha.png');
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
@@ -334,14 +334,14 @@ async function exibirMatch(nomeUsuario) {
             filmesBons.forEach(filme => {
                 const img = document.createElement('div');
                 img.classList.add('imagem');
-                img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">⭐Bomzão!⭐</div>`;
+                img.innerHTML = `<img src="/pages/filmedagalera/imgfilmes/${filme.indice}.png" alt=""><div class="plaquinha">⭐Bomzão!⭐</div>`;
                 galeria.appendChild(img);
             });
 
             filmesRuins.forEach(filme => {
                 const img = document.createElement('div');
                 img.classList.add('imagem');
-                img.innerHTML = `<img src="/img/recomendacao/${filme.indice}.png" alt=""><div class="plaquinha">💩Ruinzinho💩</div>`;
+                img.innerHTML = `<img src="/pages/filmedagalera/imgfilmes/${filme.indice}.png" alt=""><div class="plaquinha">💩Ruinzinho💩</div>`;
                 galeria.appendChild(img);
             });
 

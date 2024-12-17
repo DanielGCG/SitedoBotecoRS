@@ -8,7 +8,7 @@ router.get('', (req, res) => {
         title: "Site do Boteco do R$",
         description: "Oficial hein! :D"
     }
-    res.render('index', { locals: locals });
+    res.render('pages/inicial/index', { locals: locals });
 });
 
 router.get('/sugerir', (req, res) => {
@@ -16,7 +16,7 @@ router.get('/sugerir', (req, res) => {
         title: "Sugerir Imagem do Dia",
         description: "deixe a sua imagem na fila!"
     }
-    res.render('sugerir', { locals: locals });
+    res.render('pages/inicial/sugerir', { locals: locals });
 });
 
 /* ------ WATCHLIST ------*/
@@ -26,7 +26,7 @@ router.get('/lista', (req, res) => {
         title: "Lista de Filmes/Séries",
         description: "Oficial hein! :D"
     }
-    res.render('lista', { locals: locals });
+    res.render('pages/lista', { locals: locals });
 });
 
 /* ------ Cutucar ------*/
@@ -36,7 +36,7 @@ router.get('/cutucar', (req, res) => {
         title: "Cutucar",
         description: "Cuidado!"
     }
-    res.render('cutucar', { locals: locals });
+    res.render('pages/cutucar', { locals: locals });
 });
 
 /* ------ Minigames ------*/
@@ -46,7 +46,7 @@ router.get('/games', (req, res) => {
         title: "Minijogos!",
         description: "oba minujogos!"
     }
-    res.render('minigames', { locals: locals });
+    res.render('pages/minigames/minigames', { locals: locals });
 });
 
 router.get('/minigames', (req, res) => {
@@ -54,7 +54,7 @@ router.get('/minigames', (req, res) => {
         title: "Minijogos!",
         description: "oba minijogos!"
     }
-    res.render('minigames', { locals: locals });
+    res.render('pages/minigames/minigames', { locals: locals });
 });
 
 router.get('/minigames/cookie', (req, res) => {
@@ -62,7 +62,7 @@ router.get('/minigames/cookie', (req, res) => {
         title: "cookie!",
         description: "aperte muitos cookies!"
     }
-    res.render('minigames/cookieclicker', { locals: locals });
+    res.render('pages/minigames/cookieclicker', { locals: locals });
 });
 
 /* ------ SOBRE ------*/
@@ -72,7 +72,7 @@ router.get('/about', (req, res) => {
         title: "Sobre",
         description: "Oficial hein! :D"
     }
-    res.render('about', { locals: locals });
+    res.render('pages/about', { locals: locals });
 });
 
 /* ------ GALERIA ------*/
@@ -82,7 +82,7 @@ router.get('/galeria', (req, res) => {
         title: "Hall da Galeria",
         description: "Aqui tem bastante arte!"
     }
-    res.render('galeria', { locals: locals });
+    res.render('pages/galeria/galeria', { locals: locals });
 });
 
 router.get('/galeria/jogador', (req, res) => {
@@ -90,7 +90,7 @@ router.get('/galeria/jogador', (req, res) => {
         title: "JogadorStickman!!!",
         description: "furro?!"
     }
-    res.render('galeria/jogador', { locals: locals });
+    res.render('pages/galeria/jogador', { locals: locals });
 });
 
 router.get('/galeria/pets', (req, res) => {
@@ -98,7 +98,7 @@ router.get('/galeria/pets', (req, res) => {
         title: "Pets do Boteco",
         description: "Muitos mini-queridos."
     }
-    res.render('galeria/pets', { locals: locals });
+    res.render('pages/galeria/pets', { locals: locals });
 });
 
 router.get('/galeria/destaques', (req, res) => {
@@ -106,7 +106,7 @@ router.get('/galeria/destaques', (req, res) => {
         title: "Destaques do Boteco",
         description: "Só coisa boa"
     }
-    res.render('galeria/destaques', { locals: locals });
+    res.render('pages/galeria/destaques', { locals: locals });
 });
 
 router.get('/galeria/shitpost', (req, res) => {
@@ -114,7 +114,7 @@ router.get('/galeria/shitpost', (req, res) => {
         title: "Muito cocôpost",
         description: "Cuidado."
     }
-    res.render('galeria/shitpost', { locals: locals });
+    res.render('pages/galeria/shitpost', { locals: locals });
 });
 
 /* ------ EASTER EGGS ------*/
@@ -124,7 +124,7 @@ router.get('/velas', (req, res) => {
         title: "Velas",
         description: "VelasVelasVelasVelasVelasVelasVelas"
     }
-    res.render('eastereggs/velas', { locals: locals });
+    res.render('pages/eastereggs/velas', { locals: locals });
 });
 
 router.get('/carolls', (req, res) => {
@@ -132,7 +132,7 @@ router.get('/carolls', (req, res) => {
         title: "carolls",
         description: "carollscarollscarollscarolls"
     }
-    res.render('eastereggs/carolls', { locals: locals });
+    res.render('pages/eastereggs/carolls', { locals: locals });
 });
 
 router.get('/notificacoes', (req, res) => {
@@ -140,7 +140,7 @@ router.get('/notificacoes', (req, res) => {
         title: "Match!",
         description: "Veja quem é muito você!"
     }
-    res.render('notificacoes', { locals: locals });
+    res.render('pages/experimentais/notificacoes', { locals: locals });
 });
 
 /* ------ TESTE ------*/
@@ -150,7 +150,7 @@ router.get('/teste', (req, res) => {
         title: "teste",
         description: "testetesteteste"
     }
-    res.render('teste', { locals: locals });
+    res.render('pages/experimentais/teste', { locals: locals });
 });
 
 /* ------ Página de TRABALHO DE ALA ------*/
@@ -161,7 +161,7 @@ router.get('/filmedagalera', (req, res) => {
         title: "Filme da Galera",
         description: "Trabalho de ALA"
     }
-    res.render('filmedagalera/filmedagalera', { locals: locals });
+    res.render('pages/filmedagalera/filmedagalera', { locals: locals });
 });
 
 // Rota para página de o questionário das recomendações
@@ -170,7 +170,7 @@ router.get('/filmedagalera/questionario', (req, res) => {
         title: "Questionário",
         description: "Responda com sinceridade!"
     }
-    res.render('filmedagalera/questionario', { locals: locals });
+    res.render('pages/filmedagalera/questionario', { locals: locals });
 });
 
 // Rota para página de o match das recomendações
@@ -179,7 +179,7 @@ router.get('/filmedagalera/match', (req, res) => {
         title: "Match!",
         description: "Veja quem é muito você!"
     }
-    res.render('filmedagalera/match', { locals: locals });
+    res.render('pages/filmedagalera/match', { locals: locals });
 });
 
 /* ------ NÃO ENCONTRADO ------*/
