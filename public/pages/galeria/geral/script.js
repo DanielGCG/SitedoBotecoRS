@@ -55,14 +55,19 @@ function fecharConfirmacao() {
 async function removerObraNoFirebase(nomeObra) {
     try {
         const response = await fetch(`/galeriaDelete/${endereco}/${nomeObra}`, {
-            method: 'DELETE',
+            method: 'POST', // Alinhe o método com o backend
         });
 
+        // Certifique-se de consumir o body apenas uma vez
         const result = await response.json();
 
         if (result.success) {
             console.log(result.message);
             exibirMensagem('Obra removida com sucesso!', 'success');
+
+            // Remove a obra do vetor obrasLocais
+            obrasLocais = obrasLocais.filter(obra => obra.nome !== nomeObra);
+            carregarObras();  // Atualiza a galeria sem a obra deletada
         } else {
             console.error('Erro:', result.message);
             exibirMensagem('Erro ao remover a obra. Tente novamente.', 'error');
@@ -121,6 +126,9 @@ async function uploadFile() {
 
         if (data.success) {
             exibirMensagem('Arquivo enviado com sucesso!', 'success');
+            // Adiciona a nova obra ao vetor de obrasLocais
+            obrasLocais.push({ nome: nomeObra, url: `/path/to/image/${nomeArquivo}` });
+            carregarObras();  // Atualiza a galeria com a nova obra
         } else {
             exibirMensagem(data.message || 'Erro desconhecido.', 'error');
         }
@@ -199,6 +207,12 @@ async function editarNomeObra(nomeAtual, url) {
         await uploadBytes(novaImagemRef, blob);
         await deleteObject(imagemAntigaRef);
 
+        // Atualiza o nome no vetor obrasLocais
+        obrasLocais = obrasLocais.map(obra => 
+            obra.nome === nomeAtual ? { nome: novoNome, url } : obra
+        );
+        carregarObras();  // Atualiza a galeria com o nome da obra alterado
+
         obrasLocais = obrasLocais.map(obra => obra.nome === nomeAtual ? { nome: novoNome, url } : obra);
         carregarObras();
 
@@ -245,6 +259,7 @@ document.addEventListener('DOMContentLoaded', () => carregarObrasFirebase(endere
 window.uploadFile = uploadFile;
 window.abrirConfirmacaoDelecao = abrirConfirmacaoDelecao;
 window.abrirPopupComImagem = abrirPopupComImagem;
+window.editarNomeObra = editarNomeObra;
 window.removerObraNoFirebase = removerObraNoFirebase;
 window.fecharPopup = fecharPopup;
 window.carregarObras = carregarObras;

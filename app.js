@@ -143,7 +143,7 @@ app.post('/galeriaDelete/:endereco/:nome', upload.single('imagem'), async (req, 
 
   try {
     // Referência ao arquivo no Firebase Storage
-    const fileRef = ref(storage, `galeria/${endereco}/${nome}.png`);
+    const fileRef = ref(storageFirebase, `galeria/${endereco}/${nome}.png`);
 
     // Deleta o arquivo
     await deleteObject(fileRef);
@@ -151,8 +151,7 @@ app.post('/galeriaDelete/:endereco/:nome', upload.single('imagem'), async (req, 
     // Responde com sucesso
     res.status(200).json({ success: true, message: 'Arquivo deletado com sucesso!' });
   } catch (error) {
-    console.error('Erro ao deletar a imagem:', error);
-
+    
     // Trata o erro e responde ao cliente
     res.status(500).json({ success: false, message: 'Erro ao deletar a imagem. Tente novamente.' });
   }
