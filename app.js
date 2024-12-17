@@ -3,14 +3,19 @@ require('dotenv').config();
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const cors = require('cors');
-const { TwitterApi } = require('twitter-api-v2'); // Importar a biblioteca do Twitter
+const multer = require('multer'); // Importar multer para fazer upload de arquivos
+const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
-const { getStorage, ref, listAll, getDownloadURL } = require('firebase/storage');
+const { getStorage, ref, listAll, getDownloadURL, uploadBytes } = require('firebase/storage');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configurar CORS se necessário (caso o frontend esteja em outro domínio)
+// Configuração do multer para fazer upload de imagens
+const storage = multer.memoryStorage(); // Armazenar os arquivos na memória
+const upload = multer({ storage });
+
+// Configuração CORS
 app.use(cors());
 
 // Middleware para entender o corpo da requisição como JSON
@@ -40,7 +45,7 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
-// Configuração Firebase API
+// Configuração do Firebase API
 const firebaseConfig = {
   apiKey: process.env.FB_APIKEY,
   authDomain: process.env.FB_AUTHDOMAIN,
@@ -51,10 +56,7 @@ const firebaseConfig = {
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
-const storage = getStorage(firebaseApp);
-
-
-const rwClient = twitterClient.readWrite;
+const storageFirebase = getStorage(firebaseApp);
 
 // Rota para postar no Twitter
 app.post('/tweet', async (req, res) => {
@@ -65,7 +67,7 @@ app.post('/tweet', async (req, res) => {
   }
 
   try {
-    const tweet = await rwClient.v2.tweet(text); // Envia o tweet com o texto
+    const tweet = await twitterClient.v2.tweet(text); // Envia o tweet com o texto
     res.json({ success: true, message: 'Tweet enviado com sucesso!' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erro ao postar o tweet: ' + error.message });
@@ -78,82 +80,66 @@ app.post('/verify-senha-cutucar', (req, res) => {
   const predefinedPassword = process.env.PREDEFINEDPASSWORD;
 
   if (senha === predefinedPassword) {
-      res.json({ success: true, message: 'Senha correta!' });
+    res.json({ success: true, message: 'Senha correta!' });
   } else {
-      res.json({ success: false, message: 'Senha incorreta!' });
+    res.json({ success: false, message: 'Senha incorreta!' });
   }
 });
 
 // Rota para obter a lista de imagens
 app.get('/galeriaDownload/:endereco', async (req, res) => {
-  const endereco = req.params.endereco; // Obtém o parâmetro 'endereco' da URL
+  const endereco = req.params.endereco;
 
   try {
-      // Usando o 'endereco' para definir o caminho da galeria no Firebase Storage
-      const galeriaRef = ref(storage, `galeria/${endereco}`);
-      const result = await listAll(galeriaRef);
+    const galeriaRef = ref(storageFirebase, `galeria/${endereco}`);
+    const result = await listAll(galeriaRef);
 
-      const obras = await Promise.all(
-          result.items.map(async (itemRef) => {
-              const url = await getDownloadURL(itemRef);
-              const nome = itemRef.name.split('.').slice(0, -1).join('.'); // Remove a extensão
-              return { nome, url };
-          })
-      );
+    const obras = await Promise.all(
+      result.items.map(async (itemRef) => {
+        const url = await getDownloadURL(itemRef);
+        const nome = itemRef.name.split('.').slice(0, -1).join('.'); // Remove a extensão
+        return { nome, url };
+      })
+    );
 
-      res.json({ success: true, obras });
+    res.json({ success: true, obras });
   } catch (error) {
-      console.error('Erro ao carregar obras:', error);
-      res.status(500).json({ success: false, message: 'Erro ao carregar obras.' });
+    console.error('Erro ao carregar obras:', error);
+    res.status(500).json({ success: false, message: 'Erro ao carregar obras.' });
   }
 });
 
 // Rota para upload de imagens para o Firebase Storage
-app.post('/galeriaUpload/:endereco', (req, res) => {
+app.post('/galeriaUpload/:endereco/:nome', upload.single('imagem'), async (req, res) => {
   const endereco = req.params.endereco;
-  const bb = busboy({ headers: req.headers });
+  const nome = req.params.nome;
+  const imagem = req.file; // Aqui, `imagem` será o arquivo enviado pelo frontend via FormData
 
-  bb.on('file', async (fieldname, file, filename, encoding, mimetype) => {
-    // Definir o caminho para o arquivo local temporário
-    const tempFilePath = path.join(__dirname, 'uploads', filename);
+  if (!imagem) {
+    return res.status(400).json({ success: false, message: 'Nenhum arquivo de imagem enviado.' });
+  }
 
-    // Criar um stream de gravação para salvar o arquivo temporariamente
-    const writeStream = fs.createWriteStream(tempFilePath);
+  try {
+    const galeriaRef = ref(storageFirebase, `galeria/${endereco}/${nome}`);
+    
+    // Fazendo o upload do arquivo para o Firebase Storage
+    const snapshot = await uploadBytes(galeriaRef, imagem.buffer);
 
-    // Pipe o arquivo recebido para o arquivo temporário
-    file.pipe(writeStream);
+    // Obtém a URL de download do arquivo enviado
+    const downloadURL = await getDownloadURL(snapshot.ref);
 
-    writeStream.on('close', async () => {
-      try {
-        // Definir o caminho do arquivo no Firebase Storage
-        const fileUploadPath = `galeria/${endereco}/${filename}`;
-
-        // Enviar o arquivo para o Firebase Storage
-        await bucket.upload(tempFilePath, {
-          destination: fileUploadPath,
-          metadata: {
-            contentType: mimetype,
-          },
-        });
-
-        // Apagar o arquivo local temporário após o upload
-        fs.unlinkSync(tempFilePath);
-
-        res.json({ success: true, message: 'Arquivo enviado com sucesso!' });
-      } catch (error) {
-        console.error('Erro ao enviar arquivo para o Firebase:', error);
-        res.status(500).json({ success: false, message: 'Erro ao enviar o arquivo para o Firebase.' });
-      }
-    });
-  });
-
-  // Finaliza o processamento do multipart
-  req.pipe(bb);
+    // Envia a resposta com a URL do arquivo enviado
+    res.json({ success: true, message: 'Arquivo enviado com sucesso!', downloadURL });
+  } catch (error) {
+    console.error('Erro ao fazer upload para o Firebase:', error);
+    res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
+  }
 });
 
 // Rota principal
 app.use('/', require('./server/routes/main'));
 
+// Inicia o servidor
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });

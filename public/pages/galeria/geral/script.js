@@ -22,22 +22,18 @@ async function carregarObras() {
     const galeria = document.getElementById('galeria');
     galeria.innerHTML = '';
 
-    // Adiciona as obras (imagens ou filmes) à galeria
     obrasLocais.forEach(obra => {
         adicionarItemLista(obra.url, obra.nome);
     });
 
-    // Cria o botão de adicionar obra
     const adicionarQuadro = document.createElement('div');
     adicionarQuadro.className = 'imagem adicionar-quadro';
     adicionarQuadro.innerHTML = `<span>+</span>`;
-    adicionarQuadro.onclick = abrirPopup; // Abre o popup de adicionar obra
+    adicionarQuadro.onclick = abrirPopup;
 
-    // Adiciona o botão de adicionar obra ao final da galeria
     galeria.appendChild(adicionarQuadro);
 }
 
-// Adiciona item à lista de imagens
 function adicionarItemLista(url, nome) {
     const galeria = document.getElementById('galeria');
     const divObra = document.createElement('div');
@@ -48,15 +44,14 @@ function adicionarItemLista(url, nome) {
         <div class="plaquinha">${nome}</div>
     `;
     
-    // Adiciona a imagem ou filme antes do quadro de "+"
     galeria.insertBefore(divObra, galeria.lastChild);
 }
 
-// Upload de arquivo para Firebase
 async function uploadFile() {
     const fileInput = document.getElementById('fileInput');
     const nomeObraInput = document.getElementById('nomeObra');
     const nomeObra = nomeObraInput.value.trim();
+    const nomeArquivo = nomeObra + ".png";
 
     if (fileInput.files.length === 0) {
         exibirMensagem('Por favor, selecione um arquivo!', 'error');
@@ -65,23 +60,29 @@ async function uploadFile() {
 
     const file = fileInput.files[0];
     if (!file.type.startsWith('image/')) {
+        fecharPopup();
+        alert("Por favor, selecione um arquivo de imagem válido!");
         exibirMensagem('Por favor, selecione um arquivo de imagem válido!', 'error');
         return;
     }
 
-    const imageName = `${nomeObra}.png`;
-    const imagePath = `galeria/${endereco}/${imageName}`;
-    const imageRef = ref(storage, imagePath);
-
     try {
-        const snapshot = await uploadBytes(imageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        
-        exibirMensagem('Arquivo enviado com sucesso!', 'success');
+        const formData = new FormData();
+        formData.append('imagem', file);
 
-        obrasLocais.push({ nome: nomeObra, url: downloadURL });
-        adicionarItemLista(downloadURL, nomeObra);
-        
+        const response = await fetch(`/galeriaUpload/${endereco}/${nomeArquivo}`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            exibirMensagem('Arquivo enviado com sucesso!', 'success');
+        } else {
+            exibirMensagem(data.message || 'Erro desconhecido.', 'error');
+        }
+
         fecharPopup();
         fileInput.value = '';
         nomeObraInput.value = '';
@@ -91,53 +92,34 @@ async function uploadFile() {
     }
 }
 
-// Função para abrir o popup de confirmação de exclusão
+
 function abrirConfirmacaoDelecao(nomeObra) {
     const popupConfirmacao = document.getElementById('popup-confirmacao');
     const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
-
-    // Armazenar o nome da obra que será deletada
     confirmarDelecaoBtn.setAttribute('data-nome-obra', nomeObra);
-    
-    // Exibe o popup de confirmação
     popupConfirmacao.style.display = 'flex';
 }
 
-// Função para confirmar a remoção da obra
 async function confirmarRemocao() {
     const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
     const nomeObra = confirmarDelecaoBtn.getAttribute('data-nome-obra');
     
-    // Deletar a obra no Firebase
     await removerObraNoFirebase(nomeObra);
-
-    // Fechar o popup de confirmação
     fecharConfirmacao();
-
     fecharPopup();
 }
 
-// Função para fechar o popup de confirmação sem excluir
 function fecharConfirmacao() {
     const popupConfirmacao = document.getElementById('popup-confirmacao');
     popupConfirmacao.style.display = 'none';
 }
 
-// Função para remover a obra no Firebase
 async function removerObraNoFirebase(nomeObra) {
     try {
-        // Referência ao arquivo no Firebase
         const obraRef = ref(storage, `galeria/${endereco}/${nomeObra}.png`);
-        
-        // Deletar a obra
         await deleteObject(obraRef);
-
-        // Remover a obra localmente
         obrasLocais = obrasLocais.filter(obra => obra.nome !== nomeObra);
-
-        // Atualizar a galeria
-        carregarImagens();
-        
+        carregarObras();
         exibirMensagem('Obra removida com sucesso!', 'success');
     } catch (error) {
         console.error('Erro ao remover a obra:', error);
@@ -145,13 +127,10 @@ async function removerObraNoFirebase(nomeObra) {
     }
 }
 
-// Modificar a função de deletar obra para abrir o popup de confirmação
 function removerObra(nomeObra) {
-    // Chama o popup de confirmação diretamente aqui
     abrirConfirmacaoDelecao(nomeObra);
 }
 
-// Exibe mensagem de sucesso/erro
 function exibirMensagem(mensagem, tipo) {
     const mensagemDiv = document.getElementById('mensagem');
     mensagemDiv.textContent = mensagem;
@@ -163,12 +142,10 @@ function exibirMensagem(mensagem, tipo) {
     }, 5000);
 }
 
-// Função para abrir o popup com a imagem
 function abrirPopupComImagem(url, nome) {
     const popup = document.getElementById('popup');
     const popupConteudo = document.getElementById('popup-conteudo');
 
-    // Estrutura do popup com campo para editar o nome inicialmente escondido
     popupConteudo.innerHTML = `
         <img id="imagem-popup" src="${url}" alt="Imagem da obra">
         <div class="acoes">
@@ -183,61 +160,45 @@ function abrirPopupComImagem(url, nome) {
         <div id="nome-imagem" style="margin-top: 10px;">${nome}</div>
     `;
 
-    // Exibe o popup
     popup.style.display = 'flex';
-
-    // Ação do botão de editar nome
     const editarNomeBtn = document.getElementById('editarNomeBtn');
     const campoEditar = document.getElementById('campo-editar');
     const nomeImagem = document.getElementById('nome-imagem');
 
-    // Quando o botão de editar for clicado, alterna a visibilidade do campo de input e o texto do botão
     editarNomeBtn.addEventListener('click', () => {
         if (campoEditar.style.display === 'none') {
-            campoEditar.style.display = 'block';  // Exibe o campo de input
-            nomeImagem.style.display = 'none';    // Esconde o nome da obra
-            editarNomeBtn.textContent = 'Cancelar'; // Muda o texto do botão para "Cancelar"
+            campoEditar.style.display = 'block';
+            nomeImagem.style.display = 'none';
+            editarNomeBtn.textContent = 'Cancelar';
         } else {
-            campoEditar.style.display = 'none';   // Esconde o campo de input
-            nomeImagem.style.display = 'block';   // Exibe o nome da obra
-            editarNomeBtn.textContent = 'Editar'; // Muda o texto do botão de volta para "Editar"
+            campoEditar.style.display = 'none';
+            nomeImagem.style.display = 'block';
+            editarNomeBtn.textContent = 'Editar';
         }
     });
 }
 
-// Função para editar o nome da obra
 async function editarNomeObra(nomeAtual, url) {
     const novoNomeInput = document.getElementById('novoNome');
     const novoNome = novoNomeInput.value.trim();
 
-    // Verifica se o novo nome é diferente do atual
     if (!novoNome || novoNome === nomeAtual) {
         exibirMensagem('Insira um novo nome para a imagem.', 'error');
         return;
     }
 
     try {
-        // Baixa o arquivo atual
         const response = await fetch(url);
         const blob = await response.blob();
-
-        // Referências para o arquivo novo e o antigo no Firebase Storage
         const novaImagemRef = ref(storage, `galeria/${endereco}/${novoNome}.png`);
         const imagemAntigaRef = ref(storage, `galeria/${endereco}/${nomeAtual}.png`);
 
-        // Faz o upload da imagem com o novo nome
         await uploadBytes(novaImagemRef, blob);
-
-        // Remove a imagem antiga
         await deleteObject(imagemAntigaRef);
 
-        // Atualiza localmente: renomeia a obra no array de obrasLocais
         obrasLocais = obrasLocais.map(obra => obra.nome === nomeAtual ? { nome: novoNome, url } : obra);
+        carregarObras();
 
-        // Recarrega as imagens após a atualização
-        carregarImagens();
-
-        // Exibe mensagem de sucesso
         exibirMensagem('Nome da obra atualizado com sucesso!', 'success');
         fecharPopup();
     } catch (error) {
@@ -246,19 +207,17 @@ async function editarNomeObra(nomeAtual, url) {
     }
 }
 
-// Função de abrir popup para o formulário de upload
 function abrirPopup() {
     const popup = document.getElementById('popup');
     const popupConteudo = document.getElementById('popup-conteudo');
     const imagemPopup = document.getElementById('imagem-popup');
     const nomeImagem = document.getElementById('nome-imagem');
-    
-    // Defina o conteúdo do popup para o formulário de envio de nova obra
+
     popupConteudo.innerHTML = `
-        <h2>Enviar novo Pet</h2>
+        <h2>Enviar obra</h2>
         <form id="formUpload" style="margin-top: 10px;">
             <label for="nomeObra">Nome da Obra:</label>
-            <input type="text" id="nomeObra" placeholder="Nome do Pet" required>
+            <input type="text" id="nomeObra" placeholder="nome da obra" required>
             <br><br>
             <label for="fileInput">Escolha uma imagem:</label>
             <input type="file" id="fileInput" accept="image/*" required>
@@ -268,27 +227,22 @@ function abrirPopup() {
         </form>
     `;
 
-    // Exibe o popup
     popup.style.display = 'flex';
     popupConteudo.style.display = 'block';
 }
 
-// Para a função de fechar o popup
 function fecharPopup() {
     const popup = document.getElementById('popup');
     popup.style.display = 'none';
 }
-
 
 document.addEventListener('DOMContentLoaded', () => carregarObrasFirebase(endereco));
 
 // Tornar as funções globais
 window.uploadFile = uploadFile;
 window.removerObra = removerObra;
-window.abrirPopupComImagem = abrirPopupComImagem; // Corrigido para abrir o popup com imagem
+window.abrirPopupComImagem = abrirPopupComImagem;
 window.fecharPopup = fecharPopup;
-window.abrirPopup = abrirPopup;
-window.editarNomeObra = editarNomeObra;
+window.carregarObras = carregarObras;
 window.confirmarRemocao = confirmarRemocao;
 window.fecharConfirmacao = fecharConfirmacao;
-window.abrirConfirmacaoDelecao = abrirConfirmacaoDelecao;
