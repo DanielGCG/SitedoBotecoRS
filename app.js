@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const cors = require('cors');
-const multer = require('multer'); // Importar multer para fazer upload de arquivos
+const multer = require('multer');
 const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, listAll, getDownloadURL, uploadBytes } = require('firebase/storage');
