@@ -36,114 +36,8 @@
     </div>
 </main>
 
-<style>
-    main {
-        text-align: center;
-    }
-
-    #popup-senha {
-        display: flex;
-        align-items: center;
-    }
-
-    .caixa-texto {
-        margin: 20px auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .entrada-texto {
-        margin-top: 10px; /* Espaçamento superior para o botão */
-        width: 80%; /* Largura ajustável */
-        max-width: 400px; /* Limita a largura máxima */
-        padding: 12px 20px; /* Espaçamento interno */
-        font-size: 16px; /* Tamanho da fonte */
-        border: 1px solid #ccc; /* Cor da borda */
-        border-radius: 8px; /* Bordas arredondadas */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-        outline: none; /* Remove o outline padrão */
-        transition: all 0.3s ease; /* Animação suave */
-        opacity: 70%;
-        margin-bottom: 20px; /* Adiciona espaçamento abaixo do input */
-        cursor: url('/img/cursor-texto.png'), auto;
-    }
-
-    .entrada-texto-grande {
-        margin-top: 10px; /* Espaçamento superior */
-        width: 80%; /* Largura ajustável */
-        max-width: 400px; /* Limita a largura máxima */
-        height: 200px; /* Aumenta a altura vertical */
-        padding: 12px 20px; /* Espaçamento interno */
-        font-size: 16px; /* Tamanho da fonte */
-        border: 1px solid #ccc; /* Cor da borda */
-        border-radius: 8px; /* Bordas arredondadas */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-        outline: none; /* Remove o outline padrão */
-        transition: all 0.3s ease; /* Animação suave */
-        opacity: 70%;
-        margin-bottom: 20px; /* Espaçamento abaixo */
-        cursor: url('/img/cursor-texto.png'), auto;
-        resize: vertical; /* Permite redimensionar somente verticalmente */
-    }
-
-    .entrada-texto:focus {
-        border-color: #4caf50; /* Cor da borda ao focar */
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); /* Sombra mais destacada */
-        opacity: 100%;
-        cursor: url('/img/cursor-texto.png'), auto;
-    }
-
-    .entrada-texto-grande:focus {
-        border-color: #4caf50; /* Cor da borda ao focar */
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); /* Sombra mais destacada */
-        opacity: 100%;
-        cursor: url('/img/cursor-texto.png'), auto;
-    }
-
-    #tweetButton {
-        display: inline-block; /* Necessário para comportar margens como um botão */
-        padding: 10px 20px;
-        background-color: white; /* Branco */
-        color: #333; /* Cor do texto */
-        border: 1px solid #ccc; /* Borda clara */
-        border-radius: 5px;
-        text-decoration: none; /* Remove o sublinhado padrão dos links */
-        transition: background-color 0.3s ease;
-    }
-
-    #tweetButton:hover {
-        background-color: #f1f1f1; /* Tom mais claro no hover */
-        cursor: url('/img/cursor-mao.png'), auto;
-    }
-
-    /* Estilo da aba de sugestões */
-    #suggestions {
-        display: none; /* Inicialmente oculto */
-        width: 80%;
-        max-width: 400px;
-        background-color: white;
-        text-align: left;
-        max-height: 150px;
-        overflow-y: auto;
-        margin-bottom: 10px; /* Espaçamento entre sugestões e próximo campo */
-        font-size: 13px;
-        border: 1px solid #ccc; /* Cor da borda */
-        border-radius: 8px; /* Bordas arredondadas */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-    }
-
-    #suggestions div {
-        padding: 8px;
-    }
-
-    #suggestions div:hover {
-        background-color: #f0f0f0;
-        cursor: url('/img/cursor-mao.png'), auto;
-    }
-</style>
-
-<link rel="stylesheet" href="/css/popup.css">
+<link rel="stylesheet" href="/popup.css">
+<link rel="stylesheet" href="/pages/cutucar/style.css">
 
 <script>
     const suggestionsList = [
@@ -210,7 +104,7 @@
         } else {
             console.log("Senha incorreta");
         }
-}
+    }
 
     const mentionInput = document.getElementById('mention');
     const suggestionsDiv = document.getElementById('suggestions');

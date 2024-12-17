@@ -1,67 +1,55 @@
-import { getStorage, ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-
-// Configuração do Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
-    authDomain: "boteco-6fcfa.firebaseapp.com",
-    projectId: "boteco-6fcfa",
-    storageBucket: "boteco-6fcfa.appspot.com",
-    messagingSenderId: "531032694476",
-    appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
-};
-
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
 let obrasLocais = [];
 
+// Carrega imagens
+async function carregarObrasFirebase(endereco) {
+    try {
+        const response = await fetch(`/galeriaDownload/${endereco}`);
+        const data = await response.json();
 
-// Carrega imagens locais e Firebase
-async function carregarImagensFirebase(endereco) {
-    const galeriaRef = ref(storage, `galeria/${endereco}`);
-    const result = await listAll(galeriaRef);
+        if (!data.success) {
+            console.error('Erro ao carregar obras:', data.message);
+            return;
+        }
 
-    obrasLocais = await Promise.all(result.items.map(async itemRef => {
-        const url = await getDownloadURL(itemRef);
-        const nome = itemRef.name.split('.png')[0];
-        return { nome, url };
-    }));
-
-    carregarImagens();
+        obrasLocais = data.obras;
+        carregarObras();
+    } catch (error) {
+        console.error('Erro ao buscar obras do backend:', error);
+    }
 }
 
-async function carregarImagens() {
+async function carregarObras() {
     const galeria = document.getElementById('galeria');
     galeria.innerHTML = '';
 
-    // Adiciona as imagens à galeria
-    obrasLocais.forEach(imagem => {
-        adicionarItemLista(imagem.url, imagem.nome);
+    // Adiciona as obras (imagens ou filmes) à galeria
+    obrasLocais.forEach(obra => {
+        adicionarItemLista(obra.url, obra.nome);
     });
 
-    // Cria o botão de adicionar imagem
+    // Cria o botão de adicionar obra
     const adicionarQuadro = document.createElement('div');
     adicionarQuadro.className = 'imagem adicionar-quadro';
     adicionarQuadro.innerHTML = `<span>+</span>`;
-    adicionarQuadro.onclick = abrirPopup; // Abre o popup de adicionar imagem
+    adicionarQuadro.onclick = abrirPopup; // Abre o popup de adicionar obra
 
-    // Adiciona o botão de adicionar imagem ao final da galeria
+    // Adiciona o botão de adicionar obra ao final da galeria
     galeria.appendChild(adicionarQuadro);
 }
 
 // Adiciona item à lista de imagens
 function adicionarItemLista(url, nome) {
     const galeria = document.getElementById('galeria');
-    const divImagem = document.createElement('div');
-    divImagem.className = 'imagem';
+    const divObra = document.createElement('div');
+    divObra.className = 'imagem';
     
-    divImagem.innerHTML = `
+    divObra.innerHTML = `
         <img src="${url}" alt="" onclick="abrirPopupComImagem('${url}', '${nome}')">
         <div class="plaquinha">${nome}</div>
     `;
     
-    // Adiciona a imagem antes do quadro de "+"
-    galeria.insertBefore(divImagem, galeria.lastChild);
+    // Adiciona a imagem ou filme antes do quadro de "+"
+    galeria.insertBefore(divObra, galeria.lastChild);
 }
 
 // Upload de arquivo para Firebase
@@ -291,13 +279,15 @@ function fecharPopup() {
     popup.style.display = 'none';
 }
 
+
+document.addEventListener('DOMContentLoaded', () => carregarObrasFirebase(endereco));
+
 // Tornar as funções globais
 window.uploadFile = uploadFile;
 window.removerObra = removerObra;
 window.abrirPopupComImagem = abrirPopupComImagem; // Corrigido para abrir o popup com imagem
 window.fecharPopup = fecharPopup;
 window.abrirPopup = abrirPopup;
-window.onload = carregarImagensFirebase(endereco);
 window.editarNomeObra = editarNomeObra;
 window.confirmarRemocao = confirmarRemocao;
 window.fecharConfirmacao = fecharConfirmacao;

@@ -4,6 +4,8 @@ const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const cors = require('cors');
 const { TwitterApi } = require('twitter-api-v2'); // Importar a biblioteca do Twitter
+const { initializeApp } = require('firebase/app');
+const { getStorage, ref, listAll, getDownloadURL } = require('firebase/storage');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +40,20 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
+// Configuração Firebase API
+const firebaseConfig = {
+  apiKey: process.env.FB_APIKEY,
+  authDomain: process.env.FB_AUTHDOMAIN,
+  projectId: process.env.FB_PROJECTID,
+  storageBucket: process.env.FB_STORAGEBUCKET,
+  messagingSenderId: process.env.FB_MESSAGINGSENDERID,
+  appId: process.env.FB_APPID
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const storage = getStorage(firebaseApp);
+
+
 const rwClient = twitterClient.readWrite;
 
 // Rota para postar no Twitter
@@ -68,6 +84,72 @@ app.post('/verify-senha-cutucar', (req, res) => {
   }
 });
 
+// Rota para obter a lista de imagens
+app.get('/galeriaDownload/:endereco', async (req, res) => {
+  const endereco = req.params.endereco; // Obtém o parâmetro 'endereco' da URL
+
+  try {
+      // Usando o 'endereco' para definir o caminho da galeria no Firebase Storage
+      const galeriaRef = ref(storage, `galeria/${endereco}`);
+      const result = await listAll(galeriaRef);
+
+      const obras = await Promise.all(
+          result.items.map(async (itemRef) => {
+              const url = await getDownloadURL(itemRef);
+              const nome = itemRef.name.split('.').slice(0, -1).join('.'); // Remove a extensão
+              return { nome, url };
+          })
+      );
+
+      res.json({ success: true, obras });
+  } catch (error) {
+      console.error('Erro ao carregar obras:', error);
+      res.status(500).json({ success: false, message: 'Erro ao carregar obras.' });
+  }
+});
+
+// Rota para upload de imagens para o Firebase Storage
+app.post('/galeriaUpload/:endereco', (req, res) => {
+  const endereco = req.params.endereco;
+  const bb = busboy({ headers: req.headers });
+
+  bb.on('file', async (fieldname, file, filename, encoding, mimetype) => {
+    // Definir o caminho para o arquivo local temporário
+    const tempFilePath = path.join(__dirname, 'uploads', filename);
+
+    // Criar um stream de gravação para salvar o arquivo temporariamente
+    const writeStream = fs.createWriteStream(tempFilePath);
+
+    // Pipe o arquivo recebido para o arquivo temporário
+    file.pipe(writeStream);
+
+    writeStream.on('close', async () => {
+      try {
+        // Definir o caminho do arquivo no Firebase Storage
+        const fileUploadPath = `galeria/${endereco}/${filename}`;
+
+        // Enviar o arquivo para o Firebase Storage
+        await bucket.upload(tempFilePath, {
+          destination: fileUploadPath,
+          metadata: {
+            contentType: mimetype,
+          },
+        });
+
+        // Apagar o arquivo local temporário após o upload
+        fs.unlinkSync(tempFilePath);
+
+        res.json({ success: true, message: 'Arquivo enviado com sucesso!' });
+      } catch (error) {
+        console.error('Erro ao enviar arquivo para o Firebase:', error);
+        res.status(500).json({ success: false, message: 'Erro ao enviar o arquivo para o Firebase.' });
+      }
+    });
+  });
+
+  // Finaliza o processamento do multipart
+  req.pipe(bb);
+});
 
 // Rota principal
 app.use('/', require('./server/routes/main'));

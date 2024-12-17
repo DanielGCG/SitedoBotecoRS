@@ -186,7 +186,7 @@ function atualizarPrecoClick(upgrade) {
 
 // Função para atualizar o preço do upgrade de maquina
 function atualizarPrecoMaquina(upgrade) {
-    return upgrade * upgrade * 2.2;
+    return upgrade = upgrade * 2;
 }
 
 // Função para exibir a oferta de upgrade de click
@@ -208,7 +208,7 @@ function exibirOfertaMaquina() {
     novaMaquina.classList.add('upgrade-item');
     novaMaquina.innerHTML = `
         <p>Aumentar máquina de cookies em 30%!</p>
-        <button class="comprar-maquina">Comprar por ${precoClick.toFixed(2)} cookies</button>
+        <button class="comprar-maquina">Comprar por ${precoMaquina.toFixed(2)} cookies</button>
     `;
     listaMaquina.appendChild(novaMaquina);
 }
