@@ -6,7 +6,7 @@
 }
 
 .imagem {
-    background-image: url('/img/moldura.png');
+    background-image: url('/pages/galeria/geral/img/moldura.png');
     background-size: cover;
     background-position: center;
     border-radius: 0px;
@@ -34,7 +34,7 @@
     transform: translateX(-50%);
     width: 70%; /* Tamanho proporcional */
     height: 75px; /* Altura ajustada para a plaquinha */
-    background-image: url('/img/plaquinha.png');
+    background-image: url('/pages/galeria/geral/img/plaquinha.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

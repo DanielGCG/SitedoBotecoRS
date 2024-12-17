@@ -10,7 +10,7 @@ main {
 }
 
 .imagem {
-    background-image: url('/img/moldura.png'); /* Imagem de fundo para a moldura */
+    background-image: url('/pages/galeria/geral/img/moldura.png'); /* Imagem de fundo para a moldura */
     background-size: cover;
     background-position: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Efeito de sombra */
@@ -60,6 +60,6 @@ main {
     .plaquinha {
         width: 80%; /* Ajusta a largura da plaquinha em dispositivos móveis */
         font-size: 12px; /* Reduz o tamanho da fonte para a plaquinha */
-        height: 45px; /* Altura ajustada para a plaquinha */
+        height: 85px; /* Altura ajustada para a plaquinha */
     }
 }

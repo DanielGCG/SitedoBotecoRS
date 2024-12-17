@@ -77,7 +77,7 @@ app.post('/tweet', async (req, res) => {
 // Verificar Senha Cutucar
 app.post('/verify-senha-cutucar', (req, res) => {
   const { senha } = req.body;
-  const predefinedPassword = process.env.PREDEFINEDPASSWORD;
+  const predefinedPassword = process.env.SENHACUTUCAR;
 
   if (senha === predefinedPassword) {
     res.json({ success: true, message: 'Senha correta!' });
