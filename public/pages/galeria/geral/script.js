@@ -18,6 +18,61 @@ async function carregarObrasFirebase(endereco) {
     }
 }
 
+function adicionarItemLista(url, nome) {
+    const galeria = document.getElementById('galeria');
+    const divObra = document.createElement('div');
+    divObra.className = 'imagem';
+    
+    divObra.innerHTML = `
+        <img src="${url}" alt="" onclick="abrirPopupComImagem('${url}', '${nome}')">
+        <div class="plaquinha">${nome}</div>
+    `;
+    
+    galeria.insertBefore(divObra, galeria.lastChild);
+}
+
+function abrirConfirmacaoDelecao(nomeObra) {
+    const popupConfirmacao = document.getElementById('popup-confirmacao');
+    const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
+    confirmarDelecaoBtn.setAttribute('data-nome-obra', nomeObra);
+    popupConfirmacao.style.display = 'flex';
+}
+
+async function confirmarRemocao() {
+    const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
+    const nomeObra = confirmarDelecaoBtn.getAttribute('data-nome-obra');
+    
+    await removerObraNoFirebase(nomeObra);
+    fecharConfirmacao();
+    fecharPopup();
+}
+
+function fecharConfirmacao() {
+    const popupConfirmacao = document.getElementById('popup-confirmacao');
+    popupConfirmacao.style.display = 'none';
+}
+
+async function removerObraNoFirebase(nomeObra) {
+    try {
+        const response = await fetch(`/galeriaDelete/${endereco}/${nomeObra}`, {
+            method: 'DELETE',
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            console.log(result.message);
+            exibirMensagem('Obra removida com sucesso!', 'success');
+        } else {
+            console.error('Erro:', result.message);
+            exibirMensagem('Erro ao remover a obra. Tente novamente.', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao remover a obra no backend:', error);
+        exibirMensagem('Erro ao conectar com o servidor.', 'error');
+    }
+}
+
 async function carregarObras() {
     const galeria = document.getElementById('galeria');
     galeria.innerHTML = '';
@@ -32,19 +87,6 @@ async function carregarObras() {
     adicionarQuadro.onclick = abrirPopup;
 
     galeria.appendChild(adicionarQuadro);
-}
-
-function adicionarItemLista(url, nome) {
-    const galeria = document.getElementById('galeria');
-    const divObra = document.createElement('div');
-    divObra.className = 'imagem';
-    
-    divObra.innerHTML = `
-        <img src="${url}" alt="" onclick="abrirPopupComImagem('${url}', '${nome}')">
-        <div class="plaquinha">${nome}</div>
-    `;
-    
-    galeria.insertBefore(divObra, galeria.lastChild);
 }
 
 async function uploadFile() {
@@ -92,45 +134,6 @@ async function uploadFile() {
     }
 }
 
-
-function abrirConfirmacaoDelecao(nomeObra) {
-    const popupConfirmacao = document.getElementById('popup-confirmacao');
-    const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
-    confirmarDelecaoBtn.setAttribute('data-nome-obra', nomeObra);
-    popupConfirmacao.style.display = 'flex';
-}
-
-async function confirmarRemocao() {
-    const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
-    const nomeObra = confirmarDelecaoBtn.getAttribute('data-nome-obra');
-    
-    await removerObraNoFirebase(nomeObra);
-    fecharConfirmacao();
-    fecharPopup();
-}
-
-function fecharConfirmacao() {
-    const popupConfirmacao = document.getElementById('popup-confirmacao');
-    popupConfirmacao.style.display = 'none';
-}
-
-async function removerObraNoFirebase(nomeObra) {
-    try {
-        const obraRef = ref(storage, `galeria/${endereco}/${nomeObra}.png`);
-        await deleteObject(obraRef);
-        obrasLocais = obrasLocais.filter(obra => obra.nome !== nomeObra);
-        carregarObras();
-        exibirMensagem('Obra removida com sucesso!', 'success');
-    } catch (error) {
-        console.error('Erro ao remover a obra:', error);
-        exibirMensagem('Erro ao remover a obra. Tente novamente.', 'error');
-    }
-}
-
-function removerObra(nomeObra) {
-    abrirConfirmacaoDelecao(nomeObra);
-}
-
 function exibirMensagem(mensagem, tipo) {
     const mensagemDiv = document.getElementById('mensagem');
     mensagemDiv.textContent = mensagem;
@@ -149,7 +152,7 @@ function abrirPopupComImagem(url, nome) {
     popupConteudo.innerHTML = `
         <img id="imagem-popup" src="${url}" alt="Imagem da obra">
         <div class="acoes">
-            <button class="deletar" onclick="removerObra('${nome}')">Deletar</button>
+            <button class="deletar" onclick="abrirConfirmacaoDelecao('${nome}')">Deletar</button>
             <button class="branco" id="editarNomeBtn">Editar</button>
             <button class="branco" onclick="fecharPopup()">Fechar</button>
         </div>
@@ -240,8 +243,9 @@ document.addEventListener('DOMContentLoaded', () => carregarObrasFirebase(endere
 
 // Tornar as funções globais
 window.uploadFile = uploadFile;
-window.removerObra = removerObra;
+window.abrirConfirmacaoDelecao = abrirConfirmacaoDelecao;
 window.abrirPopupComImagem = abrirPopupComImagem;
+window.removerObraNoFirebase = removerObraNoFirebase;
 window.fecharPopup = fecharPopup;
 window.carregarObras = carregarObras;
 window.confirmarRemocao = confirmarRemocao;

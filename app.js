@@ -6,7 +6,7 @@ const cors = require('cors');
 const multer = require('multer');
 const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
-const { getStorage, ref, listAll, getDownloadURL, uploadBytes } = require('firebase/storage');
+const { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject } = require('firebase/storage');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -133,6 +133,28 @@ app.post('/galeriaUpload/:endereco/:nome', upload.single('imagem'), async (req, 
   } catch (error) {
     console.error('Erro ao fazer upload para o Firebase:', error);
     res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
+  }
+});
+
+// Rota deleção de imagens do Firebase Storage
+app.post('/galeriaDelete/:endereco/:nome', upload.single('imagem'), async (req, res) => {
+  const endereco = req.params.endereco;
+  const nome = req.params.nome;
+
+  try {
+    // Referência ao arquivo no Firebase Storage
+    const fileRef = ref(storage, `galeria/${endereco}/${nome}.png`);
+
+    // Deleta o arquivo
+    await deleteObject(fileRef);
+
+    // Responde com sucesso
+    res.status(200).json({ success: true, message: 'Arquivo deletado com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao deletar a imagem:', error);
+
+    // Trata o erro e responde ao cliente
+    res.status(500).json({ success: false, message: 'Erro ao deletar a imagem. Tente novamente.' });
   }
 });
 
