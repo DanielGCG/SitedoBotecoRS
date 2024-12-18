@@ -67,8 +67,8 @@ router.get('/minigames/cookie', (req, res) => {
 
 router.get('/minigames/setinha', (req, res) => {
     const locals = {
-        title: "cookie!",
-        description: "aperte muitos cookies!"
+        title: "setinhas!",
+        description: "tá rápido ne rapaz"
     }
     res.render('pages/minigames/setinha', { locals: locals });
 });
