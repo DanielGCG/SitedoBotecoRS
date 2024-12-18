@@ -155,21 +155,6 @@ button {
     display: none;    /* Inicialmente oculto */
 }
 
-#versao-container {
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Espaço entre a versão e o botão */
-}
-
-.versao {
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    color: #333;
-}
-
 .reset-btn {
     background-color: #f04;
     color: white;

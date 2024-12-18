@@ -65,6 +65,14 @@ router.get('/minigames/cookie', (req, res) => {
     res.render('pages/minigames/cookieclicker', { locals: locals });
 });
 
+router.get('/minigames/setinha', (req, res) => {
+    const locals = {
+        title: "cookie!",
+        description: "aperte muitos cookies!"
+    }
+    res.render('pages/minigames/setinha', { locals: locals });
+});
+
 /* ------ SOBRE ------*/
 
 router.get('/about', (req, res) => {
