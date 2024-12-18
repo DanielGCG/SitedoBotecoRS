@@ -217,8 +217,8 @@ function exibirOfertaMaquina() {
 function exibirAnimacaoCookies(quantidade) {
     const container = document.getElementById("container-animacao"); // Container onde as animações serão exibidas
 
-    if(quantidade > 10){
-        quantidade = 10;
+    if(quantidade > 20){
+        quantidade = 15 + (quantidade)*0.25;
     }
 
     for (let i = 0; i < quantidade; i++) {
