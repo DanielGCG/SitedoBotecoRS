@@ -100,11 +100,21 @@
         <div id="linha-inferior"></div>
     </div>
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 0.3.0</div>
+        <div id="versao" class="versao">Versão: 0.3.1</div>
     </div>
+    <form id="musicForm">
+        <label for="musica">Selecione uma música:</label>
+        <select name="musica" id="musica">
+            <option value="BringMeToLife">Bring Me To Life - Evanescence</option>
+            <option value="360">360 - CharlieXCX</option>
+            <option value="Crawling">Crawling - Linkin Park</option>
+        </select>
+        <label for="custom">Custom:</label>
+        <input name="custom" type="file" id="audioFile" accept="audio/*">
+        <br><br>
+        <button type="button" onclick="handleMusicSelection()">Selecionar Música</button>
+    </form>
 
-    <input type="file" id="audioFile" accept="audio/*">
-    
     <script>
         const elementoJogo = document.getElementById('jogo');
         const elementoPontuacao = document.getElementById('pontuacao');
@@ -146,54 +156,77 @@
             }
         }
 
-        audioFileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                fileReader.onload = () => {
-                    audioElement.src = fileReader.result;
-                    const track = audioContext.createMediaElementSource(audioElement);
-                    const analyser = audioContext.createAnalyser();
-
-                    track.connect(analyser);
-                    analyser.connect(audioContext.destination);
-
-                    analyser.fftSize = 512;
-                    const bufferLength = analyser.frequencyBinCount;
-                    const dataArray = new Uint8Array(bufferLength);
-
-                    audioElement.play();
-
-                    function analyzeFrequencyRanges() {
-                        analyser.getByteFrequencyData(dataArray);
-
-                        // Define ranges for instruments
-                        const ranges = [
-                        dataArray.slice(5, 6),    // Bateria (Grave) [20 Hz - 150 Hz]
-                        dataArray.slice(6, 35),   // Guitarra (Médio-Grave) [80 Hz - 500 Hz]
-                        dataArray.slice(35, 43),  // Piano (Médio-Agudo) [100 Hz - 800 Hz]
-                        dataArray.slice(43, 250)  // Batida Aguda (Agudo) [1 kHz - 5 kHz]
-                        ];
-
-                        // Map ranges to actions
-                        ranges.forEach((range, index) => {
-                            const average = range.reduce((a, b) => a + b, 0) / range.length;
-                            const thresholds = [180, 160, 140, 120]; // Customize thresholds per instrument
-
-                            if (average > thresholds[index]) {
-                                // Armazena as setas a serem criadas em vez de criar diretamente
-                                bufferizarSeta(index);
-                            }
-                        });
-
-                        requestAnimationFrame(analyzeFrequencyRanges);
-                    }
-
-                    analyzeFrequencyRanges();
-                };
-
-                fileReader.readAsDataURL(file);
+        function handleMusicSelection() {
+            const musicaSelect = document.getElementById('musica');
+            const selectedMusic = musicaSelect.value;
+            const customFile = document.getElementById('audioFile').files[0];
+            
+            if (customFile) {
+                // Caso o usuário tenha selecionado um arquivo personalizado
+                const audioURL = URL.createObjectURL(customFile);
+                audioElement.src = audioURL;
+            } else {
+                // Caso tenha selecionado uma música da lista
+                switch (selectedMusic) {
+                    case 'BringMeToLife':
+                        audioElement.src = "/pages/minigames/setinha/musicas/BringMe.mp3";
+                        break;
+                    case '360':
+                        audioElement.src = "/pages/minigames/setinha/musicas/360.mp3";
+                        break;
+                    case 'Crawling':
+                        audioElement.src = "/pages/minigames/setinha/musicas/Crawling.mp3";
+                        break;
+                    default:
+                        alert("Música não encontrada!");
+                        break;
+                }
             }
-        });
+            
+            // Iniciar o jogo com o audioElement, não com o audioURL
+            comecarJogo(audioElement);
+        }
+
+        function comecarJogo(audioElement){
+            const track = audioContext.createMediaElementSource(audioElement);
+            const analyser = audioContext.createAnalyser();
+
+            track.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            analyser.fftSize = 512;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            audioElement.play();
+
+            function analyzeFrequencyRanges() {
+                analyser.getByteFrequencyData(dataArray);
+
+                // Define ranges for instruments
+                const ranges = [
+                    dataArray.slice(5, 6),    // Bateria (Grave) [20 Hz - 150 Hz]
+                    dataArray.slice(6, 35),   // Guitarra (Médio-Grave) [80 Hz - 500 Hz]
+                    dataArray.slice(35, 43),  // Piano (Médio-Agudo) [100 Hz - 800 Hz]
+                    dataArray.slice(43, 250)  // Batida Aguda (Agudo) [1 kHz - 5 kHz]
+                ];
+
+                // Map ranges to actions
+                ranges.forEach((range, index) => {
+                    const average = range.reduce((a, b) => a + b, 0) / range.length;
+                    const thresholds = [180, 160, 140, 120]; // Customize thresholds per instrument
+
+                    if (average > thresholds[index]) {
+                        // Armazena as setas a serem criadas em vez de criar diretamente
+                        bufferizarSeta(index);
+                    }
+                });
+
+                requestAnimationFrame(analyzeFrequencyRanges);
+            }
+
+            analyzeFrequencyRanges();
+        }
 
         // Definir intervalos mínimos separados para cada faixa
         const MIN_INTERVALO_CRIACAO_BATERIA = 600;  // Bateria (Grave)
@@ -378,6 +411,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('musicForm').reset();
             loopJogo(); // Inicia o loop do jogo
         });
     </script>
