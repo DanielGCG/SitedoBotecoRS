@@ -19,11 +19,12 @@
 
     <div class="caixa-texto">
         <input type="number" id="velocidade" placeholder="% de velocidade">
+        <input type="number" id="quantidade" placeholder="% de quantidade">
         <button onclick="mudaRegras()">Mudar</button>
     </div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 0.0.3</div>
+        <div id="versao" class="versao">Versão: 0.0.9</div>
     </div>
 </body>
 <link rel="stylesheet" href="/pages/minigames/geral/style.css">
@@ -53,6 +54,7 @@
         width: 25%;
         height: 100%;
         top: 0;
+        border: #000000;
     }
     .pista:nth-child(1) { left: 0%; }
     .pista:nth-child(2) { left: 25%; }
@@ -91,124 +93,149 @@
     #linha-inferior {
         top: 55%; /* Ajuste a posição da linha inferior */
     }
+    /* Animação de fade-out */
+    @keyframes fadeOut {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    /* Classe para a seta correta (verde) */
+    .seta-correta {
+        background-color: #2ecc71; /* Verde */
+        animation: fadeOut 1s forwards;
+    }
+
+    /* Classe para a seta errada (vermelha) */
+    .seta-errada {
+        background-color: #e74c3c; /* Vermelho */
+        animation: fadeOut 1s forwards;
+    }
 </style>
 
 <script>
-    // Obtendo os elementos do DOM antes de utilizá-los
+    // Funções do Jogo
+    
+    // Inicialização dos elementos do DOM
     const elementoJogo = document.getElementById('jogo');
     const elementoPontuacao = document.getElementById('pontuacao');
     const linhaSuperior = document.getElementById('linha-superior');
     const linhaInferior = document.getElementById('linha-inferior');
-
-    // Calculando a altura da tela de jogo
-    const ALTURA_TELA = elementoJogo.offsetHeight;  // Obtém a altura real da tela de jogo
-
-    // Calculando a posição das linhas superior e inferior
-    const POSICAO_LINHA_SUPERIOR = linhaSuperior.offsetTop;
-    const POSICAO_LINHA_INFERIOR = linhaInferior.offsetTop;
-
-    // Outras constantes do jogo
-    let VELOCIDADE_SETAS = 1.20; // Pixels por loop
-    let PROBABILIDADE_NOVA_SETA = 0.015; // Probabilidade de criar nova seta a cada loop
-
-    // Variáveis do jogo
-    const pistas = [0, 1, 2, 3];
-    const teclasSetas = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
+    
+    // Definindo as variáveis globais do jogo
+    let VELOCIDADE_SETAS = 1.2;
+    let tempoAcumulado = 0;
+    let INTERVALO_TEMPO = 200;
     let pontuacao = 0;
     let setas = [];
-
-    function criarSeta() {
-        const indicePista = pistas[Math.floor(Math.random() * pistas.length)];
-        const elementoSeta = document.createElement('div');
-        elementoSeta.classList.add('seta');
-        elementoSeta.style.left = `${indicePista * 25}%`;
-        elementoSeta.style.top = `${ALTURA_TELA}px`; // Começa da parte inferior da tela
-        elementoSeta.dataset.pista = indicePista;
-        elementoSeta.textContent = indicePista === 0 ? '←' : indicePista === 1 ? '↑' : indicePista === 2 ? '↓' : '→';
-        elementoJogo.appendChild(elementoSeta);
-        setas.push(elementoSeta);
-    }
-
-    function moverSetas() {
-        setas.forEach((seta, indice) => {
-            const topoAtual = parseInt(seta.style.top);
-            if (topoAtual <= POSICAO_LINHA_SUPERIOR-50) { // Quando a seta ultrapassa o topo
-                elementoJogo.removeChild(seta);
-                setas.splice(indice, 1);
-                pontuacao = Math.max(0, pontuacao - 1); // Reduz um ponto, sem permitir valores negativos
-                atualizarPontuacao();
-            } else {
-                seta.style.top = `${topoAtual - VELOCIDADE_SETAS}px`;
-            }
-        });
-    }
+    const padroes = [
+        [0, 1], [1, 2], [2, 3], [0, 1, 2, 3], [0, 2]
+    ];
 
     function mudaRegras() {
-        let inputVelocidade = parseFloat(document.getElementById('velocidade').value);
+        const valorVelocidade = document.getElementById('velocidade').value;
+        const valorQuantidade = document.getElementById('quantidade').value;
 
-        // Verifica se o valor do input é válido e calcula a nova velocidade
-        if (!isNaN(inputVelocidade)) {
-            inputVelocidade = inputVelocidade / 100;  // Converte a porcentagem para um número entre 0 e 1
-            VELOCIDADE_SETAS = inputVelocidade * 3;  // Calcula a velocidade final com base na proporção
+        if (valorVelocidade && !isNaN(valorVelocidade)) {
+            // Converte o valor para um número decimal e atualiza a velocidade
+            VELOCIDADE_SETAS = (parseFloat(valorVelocidade) / 100) * 1.2;
         } else {
-            VELOCIDADE_SETAS = 1.20; // Valor padrão, caso não haja um valor válido no input
+            alert('Por favor, insira um valor numérico válido!');
         }
-
-        // Limpa o campo de entrada
-        document.getElementById('velocidade').value = '';
+        if (valorQuantidade && !isNaN(valorQuantidade)) {
+            // Converte o valor para um número decimal e atualiza a velocidade
+            INTERVALO_TEMPO =  200 / (parseFloat(valorQuantidade) / 100);
+        } else {
+            alert('Por favor, insira um valor numérico válido!');
+        }
     }
+    
+    // Função para criar novas setas com base nos padrões
+    function criarSetasComPadrao() {
+        const padrao = padroes[Math.floor(Math.random() * padroes.length)];
+    
+        const novasSetas = padrao.map(indicePista => {
+            const elementoSeta = document.createElement('div');
+            elementoSeta.classList.add('seta');
+            elementoSeta.style.left = `${indicePista * 25}%`;
+            elementoSeta.style.top = `${elementoJogo.offsetHeight}px`;
+            elementoSeta.dataset.pista = indicePista;
+            elementoSeta.textContent = ['←', '↑', '↓', '→'][indicePista];
+            elementoJogo.appendChild(elementoSeta);
+            return elementoSeta;
+        });
 
+        setas.push(...novasSetas);
+    }
+    
+    // Função para mover e remover setas
+    function moverSetas() {
+        const novasSetas = [];
+        for (const seta of setas) {
+            const topoAtual = parseFloat(seta.style.top);
+
+            if (topoAtual <= linhaSuperior.offsetTop - 50) {
+                seta.classList.add('seta-errada'); // Aplica a animação de erro
+                pontuacao = Math.max(0, pontuacao - 1);
+                atualizarPontuacao();
+
+                // Espera 1 segundo antes de remover a seta do DOM
+                setTimeout(() => {
+                    elementoJogo.removeChild(seta);
+                }, 1000);
+            } else {
+                    seta.style.top = `${topoAtual - VELOCIDADE_SETAS}px`;
+                    novasSetas.push(seta); // Adiciona apenas setas válidas
+            }
+        }
+        setas = novasSetas; // Atualiza o array de setas
+    }
+    
+    // Função para processar as teclas pressionadas
+    window.addEventListener('keydown', (evento) => {
+        const teclasSetas = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
+        const indicePista = teclasSetas.indexOf(evento.key);
+
+        if (indicePista !== -1) {
+            for (let i = 0; i < setas.length; i++) {
+                const seta = setas[i];
+                const topoAtual = parseFloat(seta.style.top);
+
+                if (
+                    parseInt(seta.dataset.pista) === indicePista &&
+                    topoAtual >= linhaSuperior.offsetTop &&
+                    topoAtual <= linhaInferior.offsetTop
+                ) {
+                    elementoJogo.removeChild(seta); // Remove a seta do DOM
+                    setas.splice(i, 1); // Remove a seta do array
+                    pontuacao++;
+                    atualizarPontuacao();
+                    break; // Para evitar múltiplos acertos na mesma tecla
+                }
+            }
+        }
+    });
+
+    // Função para atualizar a pontuação na tela
     function atualizarPontuacao() {
         elementoPontuacao.textContent = `Pontuação: ${pontuacao}`;
     }
 
-    window.addEventListener('keydown', (evento) => {
-        const indicePista = teclasSetas.indexOf(evento.key);
-        if (indicePista !== -1) {
-            const setaCorrespondente = setas.find(seta => {
-                const topoAtual = parseFloat(seta.style.top); // Use parseFloat para valores corretos
-                return (
-                    parseInt(seta.dataset.pista) === indicePista && 
-                    topoAtual >= POSICAO_LINHA_SUPERIOR && 
-                    topoAtual <= POSICAO_LINHA_INFERIOR
-                );
-            });
-
-            if (setaCorrespondente) {
-                elementoJogo.removeChild(setaCorrespondente); // Remove a seta
-                setas = setas.filter(seta => seta !== setaCorrespondente); // Atualiza o array
-                pontuacao++; // Incrementa a pontuação
-            } else {
-                pontuacao = Math.max(0, pontuacao - 1); // Penaliza o jogador
-            }
-            atualizarPontuacao();
-        }
-    });
-
+    // Função principal do loop do jogo
     function loopJogo() {
-        if (Math.random() < PROBABILIDADE_NOVA_SETA) criarSeta();
-        moverSetas();
-        requestAnimationFrame(loopJogo);
+        tempoAcumulado += VELOCIDADE_SETAS;
+
+        if (tempoAcumulado >= INTERVALO_TEMPO) {
+            criarSetasComPadrao(); // Criar novas setas a cada intervalo
+            tempoAcumulado = 0;
+        }
+
+        moverSetas(); // Mover as setas existentes
+        requestAnimationFrame(loopJogo); // Continuar o loop do jogo
     }
 
+    // Inicialização do jogo
     document.addEventListener('DOMContentLoaded', () => {
-        const elementoJogo = document.getElementById('jogo');
-        const linhaSuperior = document.getElementById('linha-superior');
-        const linhaInferior = document.getElementById('linha-inferior');
-        
-        const ALTURA_TELA = elementoJogo.offsetHeight;
-        const POSICAO_LINHA_SUPERIOR = linhaSuperior.offsetTop;
-        const POSICAO_LINHA_INFERIOR = linhaInferior.offsetTop;
-        
-        let VELOCIDADE_SETAS = 2.0; // Velocidade inicial mais perceptível
-        let PROBABILIDADE_NOVA_SETA = 0.05; // 5% de chance por frame
-
-        // Atualize as variáveis globais
-        window.VELOCIDADE_SETAS = VELOCIDADE_SETAS;
-        window.PROBABILIDADE_NOVA_SETA = PROBABILIDADE_NOVA_SETA;
-
-        // Inicie o loop do jogo
-        loopJogo(); 
+        loopJogo(); // Inicia o loop do jogo
     });
 </script>
 </html>
