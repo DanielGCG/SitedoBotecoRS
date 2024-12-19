@@ -36,7 +36,7 @@ function criarSeta() {
 function moverSetas() {
     setas.forEach((seta, indice) => {
         const topoAtual = parseInt(seta.style.top);
-        if (topoAtual <= POSICAO_LINHA_SUPERIOR) { // Quando a seta ultrapassa o topo
+        if (topoAtual <= POSICAO_LINHA_SUPERIOR-100) { // Quando a seta ultrapassa o topo
             elementoJogo.removeChild(seta);
             setas.splice(indice, 1);
             pontuacao = Math.max(0, pontuacao - 1); // Reduz um ponto, sem permitir valores negativos
@@ -91,4 +91,14 @@ function loopJogo() {
     requestAnimationFrame(loopJogo);
 }
 
-loopJogo();
+document.addEventListener('DOMContentLoaded', () => {
+    const elementoJogo = document.getElementById('jogo');
+    const linhaSuperior = document.getElementById('linha-superior');
+    const linhaInferior = document.getElementById('linha-inferior');
+    
+    const ALTURA_TELA = elementoJogo.offsetHeight;
+    const POSICAO_LINHA_SUPERIOR = linhaSuperior.offsetTop;
+    const POSICAO_LINHA_INFERIOR = linhaInferior.offsetTop;
+    
+    loopJogo(); // Inicie o jogo após as configurações
+});

@@ -223,7 +223,7 @@ function exibirAnimacaoCookies(quantidade) {
 
     for (let i = 0; i < quantidade; i++) {
         const img = document.createElement("img");
-        img.src = "/pages/minigames/cookieclicker/img/cookie_pequeno.png"; // Caminho para a imagem do cookie
+        img.src = "/pages/minigames/cookieclicker/cookie_pequeno.png"; // Caminho para a imagem do cookie
         img.classList.add("animacao-cookie"); // Classe para aplicar estilos e animação
 
         // Posicionamento inicial aleatório horizontal

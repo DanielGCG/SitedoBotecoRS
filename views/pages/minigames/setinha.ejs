@@ -23,10 +23,192 @@
     </div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 0.0.2</div>
+        <div id="versao" class="versao">Versão: 0.0.3</div>
     </div>
 </body>
-<link rel="stylesheet" href="/pages/minigames/setinha/css/style.css">
-<link rel="stylesheet" href="/pages/minigames/geral/css/style.css">
-<script src="/pages/minigames/setinha/js/script.js"></script>
+<link rel="stylesheet" href="/pages/minigames/geral/style.css">
+
+<style>
+    body {
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Desativa a rolagem */
+        height: 100%; /* Garante que o body ocupe toda a altura da página */
+    }
+    #jogo {
+        margin: 50px auto;
+        width: 90vw;
+        height: 90vh;
+        background-color: #ffffff;
+        max-height: 600px;
+        max-width: 400px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    .pista {
+        position: absolute;
+        width: 25%;
+        height: 100%;
+        top: 0;
+    }
+    .pista:nth-child(1) { left: 0%; }
+    .pista:nth-child(2) { left: 25%; }
+    .pista:nth-child(3) { left: 50%; }
+    .pista:nth-child(4) { left: 75%; }
+    .seta {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        font-size: 30px;
+        color: #ffffff;
+        background-color: #3498db;
+        border-radius: 50%;
+        transition: top 0.1s linear;
+    }
+    #pontuacao {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 20px;
+        color: #333;
+    }
+    /* Linhas da zona de ativação */
+    #linha-superior, #linha-inferior {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background-color: red;
+        pointer-events: none; /* Não bloqueia a interação com outros elementos */
+    }
+    #linha-superior {
+        top: 25%; /* Ajuste a posição da linha superior */
+    }
+    #linha-inferior {
+        top: 55%; /* Ajuste a posição da linha inferior */
+    }
+</style>
+
+<script>
+    // Obtendo os elementos do DOM antes de utilizá-los
+    const elementoJogo = document.getElementById('jogo');
+    const elementoPontuacao = document.getElementById('pontuacao');
+    const linhaSuperior = document.getElementById('linha-superior');
+    const linhaInferior = document.getElementById('linha-inferior');
+
+    // Calculando a altura da tela de jogo
+    const ALTURA_TELA = elementoJogo.offsetHeight;  // Obtém a altura real da tela de jogo
+
+    // Calculando a posição das linhas superior e inferior
+    const POSICAO_LINHA_SUPERIOR = linhaSuperior.offsetTop;
+    const POSICAO_LINHA_INFERIOR = linhaInferior.offsetTop;
+
+    // Outras constantes do jogo
+    let VELOCIDADE_SETAS = 1.20; // Pixels por loop
+    let PROBABILIDADE_NOVA_SETA = 0.015; // Probabilidade de criar nova seta a cada loop
+
+    // Variáveis do jogo
+    const pistas = [0, 1, 2, 3];
+    const teclasSetas = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
+    let pontuacao = 0;
+    let setas = [];
+
+    function criarSeta() {
+        const indicePista = pistas[Math.floor(Math.random() * pistas.length)];
+        const elementoSeta = document.createElement('div');
+        elementoSeta.classList.add('seta');
+        elementoSeta.style.left = `${indicePista * 25}%`;
+        elementoSeta.style.top = `${ALTURA_TELA}px`; // Começa da parte inferior da tela
+        elementoSeta.dataset.pista = indicePista;
+        elementoSeta.textContent = indicePista === 0 ? '←' : indicePista === 1 ? '↑' : indicePista === 2 ? '↓' : '→';
+        elementoJogo.appendChild(elementoSeta);
+        setas.push(elementoSeta);
+    }
+
+    function moverSetas() {
+        setas.forEach((seta, indice) => {
+            const topoAtual = parseInt(seta.style.top);
+            if (topoAtual <= POSICAO_LINHA_SUPERIOR-50) { // Quando a seta ultrapassa o topo
+                elementoJogo.removeChild(seta);
+                setas.splice(indice, 1);
+                pontuacao = Math.max(0, pontuacao - 1); // Reduz um ponto, sem permitir valores negativos
+                atualizarPontuacao();
+            } else {
+                seta.style.top = `${topoAtual - VELOCIDADE_SETAS}px`;
+            }
+        });
+    }
+
+    function mudaRegras() {
+        let inputVelocidade = parseFloat(document.getElementById('velocidade').value);
+
+        // Verifica se o valor do input é válido e calcula a nova velocidade
+        if (!isNaN(inputVelocidade)) {
+            inputVelocidade = inputVelocidade / 100;  // Converte a porcentagem para um número entre 0 e 1
+            VELOCIDADE_SETAS = inputVelocidade * 3;  // Calcula a velocidade final com base na proporção
+        } else {
+            VELOCIDADE_SETAS = 1.20; // Valor padrão, caso não haja um valor válido no input
+        }
+
+        // Limpa o campo de entrada
+        document.getElementById('velocidade').value = '';
+    }
+
+    function atualizarPontuacao() {
+        elementoPontuacao.textContent = `Pontuação: ${pontuacao}`;
+    }
+
+    window.addEventListener('keydown', (evento) => {
+        const indicePista = teclasSetas.indexOf(evento.key);
+        if (indicePista !== -1) {
+            const setaCorrespondente = setas.find(seta => {
+                const topoAtual = parseFloat(seta.style.top); // Use parseFloat para valores corretos
+                return (
+                    parseInt(seta.dataset.pista) === indicePista && 
+                    topoAtual >= POSICAO_LINHA_SUPERIOR && 
+                    topoAtual <= POSICAO_LINHA_INFERIOR
+                );
+            });
+
+            if (setaCorrespondente) {
+                elementoJogo.removeChild(setaCorrespondente); // Remove a seta
+                setas = setas.filter(seta => seta !== setaCorrespondente); // Atualiza o array
+                pontuacao++; // Incrementa a pontuação
+            } else {
+                pontuacao = Math.max(0, pontuacao - 1); // Penaliza o jogador
+            }
+            atualizarPontuacao();
+        }
+    });
+
+    function loopJogo() {
+        if (Math.random() < PROBABILIDADE_NOVA_SETA) criarSeta();
+        moverSetas();
+        requestAnimationFrame(loopJogo);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const elementoJogo = document.getElementById('jogo');
+        const linhaSuperior = document.getElementById('linha-superior');
+        const linhaInferior = document.getElementById('linha-inferior');
+        
+        const ALTURA_TELA = elementoJogo.offsetHeight;
+        const POSICAO_LINHA_SUPERIOR = linhaSuperior.offsetTop;
+        const POSICAO_LINHA_INFERIOR = linhaInferior.offsetTop;
+        
+        let VELOCIDADE_SETAS = 2.0; // Velocidade inicial mais perceptível
+        let PROBABILIDADE_NOVA_SETA = 0.05; // 5% de chance por frame
+
+        // Atualize as variáveis globais
+        window.VELOCIDADE_SETAS = VELOCIDADE_SETAS;
+        window.PROBABILIDADE_NOVA_SETA = PROBABILIDADE_NOVA_SETA;
+
+        // Inicie o loop do jogo
+        loopJogo(); 
+    });
+</script>
 </html>
