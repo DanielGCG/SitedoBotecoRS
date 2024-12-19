@@ -7,7 +7,7 @@
 </head>
 <body>
     <div id="jogo">
-        <div id="pontuacao">Pontuação: 0</div>
+        <div id="pontuacao">0</div>
         <!-- Linhas de ativação -->
         <div id="linha-superior"></div>
         <div id="linha-inferior"></div>
@@ -24,7 +24,7 @@
     </div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 0.0.9</div>
+        <div id="versao" class="versao">Versão: 0.1.0</div>
     </div>
 </body>
 <link rel="stylesheet" href="/pages/minigames/geral/style.css">
@@ -71,13 +71,15 @@
         background-color: #3498db;
         border-radius: 50%;
         transition: top 0.1s linear;
+        transform: translateX(+50%);
     }
     #pontuacao {
         position: absolute;
-        top: 10px;
-        left: 10px;
-        font-size: 20px;
+        left: 50%; /* Posiciona no meio da largura do container */
+        top: 18px;
+        font-size: 25px;
         color: #333;
+        transform: translate(-50%, -50%); /* Ajuste para centralizar perfeitamente */
     }
     /* Linhas da zona de ativação */
     #linha-superior, #linha-inferior {
@@ -211,13 +213,27 @@
                     atualizarPontuacao();
                     break; // Para evitar múltiplos acertos na mesma tecla
                 }
+
+                else if (
+                    parseInt(seta.dataset.pista) === indicePista &&
+                    topoAtual >= linhaSuperior.offsetTop
+                ) {
+                    seta.classList.add('seta-errada'); // Aplica a animação de erro
+                    pontuacao = Math.max(0, pontuacao - 1);
+                    atualizarPontuacao();
+
+                    // Espera 1 segundo antes de remover a seta do DOM
+                    setTimeout(() => {
+                        elementoJogo.removeChild(seta);
+                    }, 1000);
+                }
             }
         }
     });
 
     // Função para atualizar a pontuação na tela
     function atualizarPontuacao() {
-        elementoPontuacao.textContent = `Pontuação: ${pontuacao}`;
+        elementoPontuacao.textContent = `${pontuacao}`;
     }
 
     // Função principal do loop do jogo
