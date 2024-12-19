@@ -62,7 +62,7 @@
             top: 25%;
         }
         #linha-inferior {
-            top: 55%;
+            top: 45%;
         }
         @keyframes fadeOut {
             0% { opacity: 1; }
@@ -113,7 +113,7 @@
     </form>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 0.3.2</div>
+        <div id="versao" class="versao">Versão: 0.3.3</div>
     </div>
 </body>
 <script>
@@ -215,7 +215,7 @@
             // Map ranges to actions
             ranges.forEach((range, index) => {
                 const average = range.reduce((a, b) => a + b, 0) / range.length;
-                const thresholds = [180, 160, 140, 120]; // Customize thresholds per instrument
+                const thresholds = [200, 200, 170, 80]; // Customize thresholds per instrument
 
                 if (average > thresholds[index]) {
                     // Armazena as setas a serem criadas em vez de criar diretamente
@@ -233,7 +233,7 @@
     const MIN_INTERVALO_CRIACAO_BATERIA = 600;  // Bateria (Grave)
     const MIN_INTERVALO_CRIACAO_GUITARRA = 600;  // Guitarra (Médio-Grave)
     const MIN_INTERVALO_CRIACAO_PIANO = 600;  // Piano (Médio-Agudo)
-    const MIN_INTERVALO_CRIACAO_BATIDA_AGUDA = 500;  // Batida Aguda (Agudo)
+    const MIN_INTERVALO_CRIACAO_BATIDA_AGUDA = 600;  // Batida Aguda (Agudo)
 
     let lastCreationTimeBateria = 0;
     let lastCreationTimeGuitarra = 0;
