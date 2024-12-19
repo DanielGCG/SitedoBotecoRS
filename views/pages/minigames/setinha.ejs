@@ -389,44 +389,6 @@
         }
     });
 
-    const padroes = [
-        [0, 1],         // Combinação de teclas ← e ↑
-        [0, 1, 2],      // Combinação de teclas ←, ↑ e ↓
-        [0, 1, 2, 3],   // Todas as teclas
-        [1, 3]          // Combinação de teclas ↑ e →
-    ];
-
-    let bufferTeclas = []; // Buffer para acumular teclas pressionadas
-    const TEMPO_LIMITE = 100; // Tempo limite para liberar teclas
-    let tempoUltimaTecla = Date.now();
-
-    function AcumulaELibera(indicePista) {
-        const currentTime = Date.now();
-
-        // Adiciona tecla ao buffer
-        bufferTeclas.push(indicePista);
-
-        // Verifica se passou o tempo limite
-        if (currentTime - tempoUltimaTecla >= TEMPO_LIMITE) {
-            bufferTeclas = []; // Limpa buffer se tempo limite for excedido
-        }
-
-        tempoUltimaTecla = currentTime;
-
-        // Ordena e verifica se o buffer corresponde a algum padrão
-        bufferTeclas.sort();
-        for (const padrao of padroes) {
-            if (JSON.stringify(padrao) === JSON.stringify(bufferTeclas)) {
-                // Libera todas as teclas do padrão
-                padrao.forEach((faixa) => criarSetasComFaixa(faixa));
-
-                // Limpa buffer
-                bufferTeclas = [];
-                break;
-            }
-        }
-    }
-
     function atualizarPontuacao() {
         elementoPontuacao.textContent = `${pontuacao}`;
     }
