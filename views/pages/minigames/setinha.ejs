@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo de Setinhas</title>
 </head>
-<body>
+<body id="body">
     <div id="jogo">
         <div id="pontuacao">0</div>
         <!-- Linhas de ativação -->
@@ -18,13 +18,13 @@
     </div>
 
     <div class="caixa-texto">
-        <input type="number" id="velocidade" placeholder="% de velocidade">
-        <input type="number" id="quantidade" placeholder="% de quantidade">
+        <input type="number" id="velocidade" placeholder="% de velocidade" value="100">
+        <input type="number" id="quantidade" placeholder="% de quantidade" value="100">
         <button onclick="mudaRegras()">Mudar</button>
     </div>
 
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 0.1.0</div>
+        <div id="versao" class="versao">Versão: 0.2.0</div>
     </div>
 </body>
 <link rel="stylesheet" href="/pages/minigames/geral/style.css">
@@ -34,8 +34,7 @@
         text-align: center;
         margin: 0;
         padding: 0;
-        overflow: hidden; /* Desativa a rolagem */
-        height: 100%; /* Garante que o body ocupe toda a altura da página */
+        background-color: #80b56b;
     }
     #jogo {
         margin: 50px auto;
@@ -101,22 +100,41 @@
         100% { opacity: 0; }
     }
 
-    /* Classe para a seta correta (verde) */
-    .seta-correta {
-        background-color: #2ecc71; /* Verde */
-        animation: fadeOut 1s forwards;
+    /* Animação de dano */
+    @keyframes dano {
+        0% {
+            box-shadow: inset 0 0 15px rgba(128, 181, 107, 0);
+        }
+        50% {
+            box-shadow: inset 0 0 20px rgb(231, 88, 63);
+        }
+        100% {
+            box-shadow: inset 0 0 15px rgba(128, 181, 107, 0);
+        }
+    }
+
+    .tela-dano {
+        margin: 50px auto;
+        width: 90vw;
+        height: 90vh;
+        background-color: #ffffff;
+        max-height: 600px;
+        max-width: 400px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+        animation: dano 600ms forwards;
     }
 
     /* Classe para a seta errada (vermelha) */
     .seta-errada {
-        background-color: #e74c3c; /* Vermelho */
+        background-color: rgb(231, 76, 60); /* Vermelho */
         animation: fadeOut 1s forwards;
     }
 </style>
 
 <script>
-    // Funções do Jogo
-    
     // Inicialização dos elementos do DOM
     const elementoJogo = document.getElementById('jogo');
     const elementoPontuacao = document.getElementById('pontuacao');
@@ -130,7 +148,7 @@
     let pontuacao = 0;
     let setas = [];
     const padroes = [
-        [0, 1], [1, 2], [2, 3], [0, 1, 2, 3], [0, 2]
+        [0, 1], [1, 2], [2, 3], [0, 1, 2, 3], [0, 2], [0], [1], [2], [3]
     ];
 
     function mudaRegras() {
@@ -175,10 +193,13 @@
         for (const seta of setas) {
             const topoAtual = parseFloat(seta.style.top);
 
+            /* ----- SETA ESQUECIDA ----- */
+
             if (topoAtual <= linhaSuperior.offsetTop - 50) {
                 seta.classList.add('seta-errada'); // Aplica a animação de erro
                 pontuacao = Math.max(0, pontuacao - 1);
                 atualizarPontuacao();
+                mostrarDano();
 
                 // Espera 1 segundo antes de remover a seta do DOM
                 setTimeout(() => {
@@ -194,6 +215,11 @@
     
     // Função para processar as teclas pressionadas
     window.addEventListener('keydown', (evento) => {
+        // Previne o comportamento de rolagem ao pressionar as setas
+        if (evento.key.startsWith('Arrow')) {
+            evento.preventDefault();
+        }
+
         const teclasSetas = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
         const indicePista = teclasSetas.indexOf(evento.key);
 
@@ -202,6 +228,7 @@
                 const seta = setas[i];
                 const topoAtual = parseFloat(seta.style.top);
 
+                /* ----- SETA NO LUGAR CORRETO ----- */
                 if (
                     parseInt(seta.dataset.pista) === indicePista &&
                     topoAtual >= linhaSuperior.offsetTop &&
@@ -211,16 +238,19 @@
                     setas.splice(i, 1); // Remove a seta do array
                     pontuacao++;
                     atualizarPontuacao();
-                    break; // Para evitar múltiplos acertos na mesma tecla
+                    break;
                 }
 
+                /* ----- SETA APERTADA ANTES DA HORA ----- */
                 else if (
                     parseInt(seta.dataset.pista) === indicePista &&
                     topoAtual >= linhaSuperior.offsetTop
                 ) {
                     seta.classList.add('seta-errada'); // Aplica a animação de erro
+                    setas.splice(i, 1); // Remove a seta do array
                     pontuacao = Math.max(0, pontuacao - 1);
                     atualizarPontuacao();
+                    mostrarDano();
 
                     // Espera 1 segundo antes de remover a seta do DOM
                     setTimeout(() => {
@@ -253,5 +283,14 @@
     document.addEventListener('DOMContentLoaded', () => {
         loopJogo(); // Inicia o loop do jogo
     });
+
+    // Função para adicionar o efeito de dano à tela
+    function mostrarDano() {
+        // Aplica a animação de dano à tela inteira
+        elementoJogo.classList.add('tela-dano');
+        setTimeout(() => {
+            elementoJogo.classList.remove('tela-dano');
+        }, 600); // O efeito dura 600ms
+    }
 </script>
 </html>
