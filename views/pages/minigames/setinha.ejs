@@ -3,294 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Setinhas</title>
+    <title>Jogo de Setinhas com Visualizador de Música</title>
+    <style>
+        body {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #80b56b;
+        }
+        #jogo {
+            margin: 50px auto;
+            width: 90vw;
+            height: 90vh;
+            background-color: #ffffff;
+            max-height: 600px;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .pista {
+            position: absolute;
+            width: 25%;
+            height: 100%;
+            top: 0;
+            border: #000000;
+        }
+        .seta {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            font-size: 30px;
+            color: #ffffff;
+            background-color: #3498db;
+            border-radius: 50%;
+            transition: top 0.1s linear;
+            transform: translateX(+50%);
+        }
+        #pontuacao {
+            position: absolute;
+            left: 50%;
+            top: 18px;
+            font-size: 25px;
+            color: #333;
+            transform: translate(-50%, -50%);
+        }
+        #linha-superior, #linha-inferior {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: red;
+            pointer-events: none;
+        }
+        #linha-superior {
+            top: 25%;
+        }
+        #linha-inferior {
+            top: 55%;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @keyframes dano {
+            0% { box-shadow: inset 0 0 15px rgba(128, 181, 107, 0); }
+            50% { box-shadow: inset 0 0 20px rgb(231, 88, 63); }
+            100% { box-shadow: inset 0 0 15px rgba(128, 181, 107, 0); }
+        }
+        .tela-dano {
+            margin: 50px auto;
+            width: 90vw;
+            height: 90vh;
+            background-color: #ffffff;
+            max-height: 600px;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: dano 600ms forwards;
+        }
+        .seta-errada {
+            background-color: rgb(231, 76, 60);
+            animation: fadeOut 1s forwards;
+        }
+    </style>
+    <link rel="stylesheet" href="/pages/minigames/geral/style.css">
 </head>
-<body id="body">
+<body>
     <div id="jogo">
         <div id="pontuacao">0</div>
-        <!-- Linhas de ativação -->
         <div id="linha-superior"></div>
         <div id="linha-inferior"></div>
-        <div class="pista"></div>
-        <div class="pista"></div>
-        <div class="pista"></div>
-        <div class="pista"></div>
     </div>
-
-    <div class="caixa-texto">
-        <input type="number" id="velocidade" placeholder="% de velocidade" value="100">
-        <input type="number" id="quantidade" placeholder="% de quantidade" value="100">
-        <button onclick="mudaRegras()">Mudar</button>
-    </div>
-
     <div id="versao-container">
-        <div id="versao" class="versao">Versão: 0.2.0</div>
+        <div id="versao" class="versao">Versão: 0.3.0</div>
     </div>
-</body>
-<link rel="stylesheet" href="/pages/minigames/geral/style.css">
 
-<style>
-    body {
-        text-align: center;
-        margin: 0;
-        padding: 0;
-        background-color: #80b56b;
-    }
-    #jogo {
-        margin: 50px auto;
-        width: 90vw;
-        height: 90vh;
-        background-color: #ffffff;
-        max-height: 600px;
-        max-width: 400px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        position: relative;
-        overflow: hidden;
-    }
-    .pista {
-        position: absolute;
-        width: 25%;
-        height: 100%;
-        top: 0;
-        border: #000000;
-    }
-    .pista:nth-child(1) { left: 0%; }
-    .pista:nth-child(2) { left: 25%; }
-    .pista:nth-child(3) { left: 50%; }
-    .pista:nth-child(4) { left: 75%; }
-    .seta {
-        position: absolute;
-        width: 50px;
-        height: 50px;
-        line-height: 50px;
-        text-align: center;
-        font-size: 30px;
-        color: #ffffff;
-        background-color: #3498db;
-        border-radius: 50%;
-        transition: top 0.1s linear;
-        transform: translateX(+50%);
-    }
-    #pontuacao {
-        position: absolute;
-        left: 50%; /* Posiciona no meio da largura do container */
-        top: 18px;
-        font-size: 25px;
-        color: #333;
-        transform: translate(-50%, -50%); /* Ajuste para centralizar perfeitamente */
-    }
-    /* Linhas da zona de ativação */
-    #linha-superior, #linha-inferior {
-        position: absolute;
-        width: 100%;
-        height: 2px;
-        background-color: red;
-        pointer-events: none; /* Não bloqueia a interação com outros elementos */
-    }
-    #linha-superior {
-        top: 25%; /* Ajuste a posição da linha superior */
-    }
-    #linha-inferior {
-        top: 55%; /* Ajuste a posição da linha inferior */
-    }
-    /* Animação de fade-out */
-    @keyframes fadeOut {
-        0% { opacity: 1; }
-        100% { opacity: 0; }
-    }
-
-    /* Animação de dano */
-    @keyframes dano {
-        0% {
-            box-shadow: inset 0 0 15px rgba(128, 181, 107, 0);
-        }
-        50% {
-            box-shadow: inset 0 0 20px rgb(231, 88, 63);
-        }
-        100% {
-            box-shadow: inset 0 0 15px rgba(128, 181, 107, 0);
-        }
-    }
-
-    .tela-dano {
-        margin: 50px auto;
-        width: 90vw;
-        height: 90vh;
-        background-color: #ffffff;
-        max-height: 600px;
-        max-width: 400px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        position: relative;
-        overflow: hidden;
-        animation: dano 600ms forwards;
-    }
-
-    /* Classe para a seta errada (vermelha) */
-    .seta-errada {
-        background-color: rgb(231, 76, 60); /* Vermelho */
-        animation: fadeOut 1s forwards;
-    }
-</style>
-
-<script>
-    // Inicialização dos elementos do DOM
-    const elementoJogo = document.getElementById('jogo');
-    const elementoPontuacao = document.getElementById('pontuacao');
-    const linhaSuperior = document.getElementById('linha-superior');
-    const linhaInferior = document.getElementById('linha-inferior');
+    <input type="file" id="audioFile" accept="audio/*">
     
-    // Definindo as variáveis globais do jogo
-    let VELOCIDADE_SETAS = 1.2;
-    let tempoAcumulado = 0;
-    let INTERVALO_TEMPO = 200;
-    let pontuacao = 0;
-    let setas = [];
-    const padroes = [
-        [0, 1], [1, 2], [2, 3], [0, 1, 2, 3], [0, 2], [0], [1], [2], [3]
-    ];
+    <script>
+        const elementoJogo = document.getElementById('jogo');
+        const elementoPontuacao = document.getElementById('pontuacao');
+        const linhaSuperior = document.getElementById('linha-superior');
+        const linhaInferior = document.getElementById('linha-inferior');
+        
+        let VELOCIDADE_SETAS = 1.2;
+        let tempoAcumulado = 0;
+        let INTERVALO_TEMPO = 200;
+        let pontuacao = 0;
+        let setas = [];
+        let setasBuffer = []; // Buffer para armazenar setas a serem liberadas
+        let lastReleaseTime = 0; // Tempo da última liberação das setas
+        
+        const audioFileInput = document.getElementById('audioFile');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const audioElement = new Audio();
+        const fileReader = new FileReader();
 
-    function mudaRegras() {
-        const valorVelocidade = document.getElementById('velocidade').value;
-        const valorQuantidade = document.getElementById('quantidade').value;
 
-        if (valorVelocidade && !isNaN(valorVelocidade)) {
-            // Converte o valor para um número decimal e atualiza a velocidade
-            VELOCIDADE_SETAS = (parseFloat(valorVelocidade) / 100) * 1.2;
-        } else {
-            alert('Por favor, insira um valor numérico válido!');
+        // Função para armazenar setas a serem liberadas após 100ms
+        function bufferizarSeta(faixa) {
+            const novaSeta = {
+                faixa: faixa,
+                tempoCriacao: Date.now()
+            };
+            setasBuffer.push(novaSeta);
         }
-        if (valorQuantidade && !isNaN(valorQuantidade)) {
-            // Converte o valor para um número decimal e atualiza a velocidade
-            INTERVALO_TEMPO =  200 / (parseFloat(valorQuantidade) / 100);
-        } else {
-            alert('Por favor, insira um valor numérico válido!');
-        }
-    }
-    
-    // Função para criar novas setas com base nos padrões
-    function criarSetasComPadrao() {
-        const padrao = padroes[Math.floor(Math.random() * padroes.length)];
-    
-        const novasSetas = padrao.map(indicePista => {
-            const elementoSeta = document.createElement('div');
-            elementoSeta.classList.add('seta');
-            elementoSeta.style.left = `${indicePista * 25}%`;
-            elementoSeta.style.top = `${elementoJogo.offsetHeight}px`;
-            elementoSeta.dataset.pista = indicePista;
-            elementoSeta.textContent = ['←', '↑', '↓', '→'][indicePista];
-            elementoJogo.appendChild(elementoSeta);
-            return elementoSeta;
-        });
 
-        setas.push(...novasSetas);
-    }
-    
-    // Função para mover e remover setas
-    function moverSetas() {
-        const novasSetas = [];
-        for (const seta of setas) {
-            const topoAtual = parseFloat(seta.style.top);
-
-            /* ----- SETA ESQUECIDA ----- */
-
-            if (topoAtual <= linhaSuperior.offsetTop - 50) {
-                seta.classList.add('seta-errada'); // Aplica a animação de erro
-                pontuacao = Math.max(0, pontuacao - 1);
-                atualizarPontuacao();
-                mostrarDano();
-
-                // Espera 1 segundo antes de remover a seta do DOM
-                setTimeout(() => {
-                    elementoJogo.removeChild(seta);
-                }, 1000);
-            } else {
-                    seta.style.top = `${topoAtual - VELOCIDADE_SETAS}px`;
-                    novasSetas.push(seta); // Adiciona apenas setas válidas
+        // Função para liberar as setas que foram armazenadas
+        function liberarSetas() {
+            const currentTime = Date.now();
+            if (currentTime - lastReleaseTime >= 100) { // Libera as setas a cada 100ms
+                for (const setaInfo of setasBuffer) {
+                    criarSetasComFaixa(setaInfo.faixa); // Cria as setas armazenadas
+                }
+                setasBuffer = []; // Limpa o buffer
+                lastReleaseTime = currentTime; // Atualiza o tempo de liberação
             }
         }
-        setas = novasSetas; // Atualiza o array de setas
-    }
-    
-    // Função para processar as teclas pressionadas
-    window.addEventListener('keydown', (evento) => {
-        // Previne o comportamento de rolagem ao pressionar as setas
-        if (evento.key.startsWith('Arrow')) {
-            evento.preventDefault();
+
+        audioFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                fileReader.onload = () => {
+                    audioElement.src = fileReader.result;
+                    const track = audioContext.createMediaElementSource(audioElement);
+                    const analyser = audioContext.createAnalyser();
+
+                    track.connect(analyser);
+                    analyser.connect(audioContext.destination);
+
+                    analyser.fftSize = 512;
+                    const bufferLength = analyser.frequencyBinCount;
+                    const dataArray = new Uint8Array(bufferLength);
+
+                    audioElement.play();
+
+                    function analyzeFrequencyRanges() {
+                        analyser.getByteFrequencyData(dataArray);
+
+                        // Define ranges for instruments
+                        const ranges = [
+                        dataArray.slice(5, 6),    // Bateria (Grave) [20 Hz - 150 Hz]
+                        dataArray.slice(6, 35),   // Guitarra (Médio-Grave) [80 Hz - 500 Hz]
+                        dataArray.slice(35, 43),  // Piano (Médio-Agudo) [100 Hz - 800 Hz]
+                        dataArray.slice(43, 250)  // Batida Aguda (Agudo) [1 kHz - 5 kHz]
+                        ];
+
+                        // Map ranges to actions
+                        ranges.forEach((range, index) => {
+                            const average = range.reduce((a, b) => a + b, 0) / range.length;
+                            const thresholds = [180, 160, 140, 120]; // Customize thresholds per instrument
+
+                            if (average > thresholds[index]) {
+                                // Armazena as setas a serem criadas em vez de criar diretamente
+                                bufferizarSeta(index);
+                            }
+                        });
+
+                        requestAnimationFrame(analyzeFrequencyRanges);
+                    }
+
+                    analyzeFrequencyRanges();
+                };
+
+                fileReader.readAsDataURL(file);
+            }
+        });
+
+        // Definir intervalos mínimos separados para cada faixa
+        const MIN_INTERVALO_CRIACAO_BATERIA = 600;  // Bateria (Grave)
+        const MIN_INTERVALO_CRIACAO_GUITARRA = 600;  // Guitarra (Médio-Grave)
+        const MIN_INTERVALO_CRIACAO_PIANO = 600;  // Piano (Médio-Agudo)
+        const MIN_INTERVALO_CRIACAO_BATIDA_AGUDA = 500;  // Batida Aguda (Agudo)
+
+        let lastCreationTimeBateria = 0;
+        let lastCreationTimeGuitarra = 0;
+        let lastCreationTimePiano = 0;
+        let lastCreationTimeBatidaAguda = 0;
+
+        function criarSetaBateria() {
+            const currentTime = Date.now();
+            if (currentTime - lastCreationTimeBateria >= MIN_INTERVALO_CRIACAO_BATERIA) {
+                const novoElemento = document.createElement('div');
+                novoElemento.classList.add('seta');
+                novoElemento.style.left = '0%';  // Faixa 0 (Bateria)
+                novoElemento.style.top = `${elementoJogo.offsetHeight}px`;
+                novoElemento.dataset.pista = 0;
+                novoElemento.textContent = '←';  // Seta para Bateria
+                elementoJogo.appendChild(novoElemento);
+                setas.push(novoElemento);
+                lastCreationTimeBateria = currentTime;
+            }
         }
 
-        const teclasSetas = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
-        const indicePista = teclasSetas.indexOf(evento.key);
+        function criarSetaGuitarra() {
+            const currentTime = Date.now();
+            if (currentTime - lastCreationTimeGuitarra >= MIN_INTERVALO_CRIACAO_GUITARRA) {
+                const novoElemento = document.createElement('div');
+                novoElemento.classList.add('seta');
+                novoElemento.style.left = '25%';  // Faixa 1 (Guitarra)
+                novoElemento.style.top = `${elementoJogo.offsetHeight}px`;
+                novoElemento.dataset.pista = 1;
+                novoElemento.textContent = '↑';  // Seta para Guitarra
+                elementoJogo.appendChild(novoElemento);
+                setas.push(novoElemento);
+                lastCreationTimeGuitarra = currentTime;
+            }
+        }
 
-        if (indicePista !== -1) {
-            for (let i = 0; i < setas.length; i++) {
-                const seta = setas[i];
+        function criarSetaPiano() {
+            const currentTime = Date.now();
+            if (currentTime - lastCreationTimePiano >= MIN_INTERVALO_CRIACAO_PIANO) {
+                const novoElemento = document.createElement('div');
+                novoElemento.classList.add('seta');
+                novoElemento.style.left = '50%';  // Faixa 2 (Piano)
+                novoElemento.style.top = `${elementoJogo.offsetHeight}px`;
+                novoElemento.dataset.pista = 2;
+                novoElemento.textContent = '↓';  // Seta para Piano
+                elementoJogo.appendChild(novoElemento);
+                setas.push(novoElemento);
+                lastCreationTimePiano = currentTime;
+            }
+        }
+
+        function criarSetaBatidaAguda() {
+            const currentTime = Date.now();
+            if (currentTime - lastCreationTimeBatidaAguda >= MIN_INTERVALO_CRIACAO_BATIDA_AGUDA) {
+                const novoElemento = document.createElement('div');
+                novoElemento.classList.add('seta');
+                novoElemento.style.left = '75%';  // Faixa 3 (Batida Aguda)
+                novoElemento.style.top = `${elementoJogo.offsetHeight}px`;
+                novoElemento.dataset.pista = 3;
+                novoElemento.textContent = '→';  // Seta para Batida Aguda
+                elementoJogo.appendChild(novoElemento);
+                setas.push(novoElemento);
+                lastCreationTimeBatidaAguda = currentTime;
+            }
+        }
+
+        function criarSetasComFaixa(faixa) {
+            switch (faixa) {
+                case 0:  // Bateria
+                    criarSetaBateria();
+                    break;
+                case 1:  // Guitarra
+                    criarSetaGuitarra();
+                    break;
+                case 2:  // Piano
+                    criarSetaPiano();
+                    break;
+                case 3:  // Batida Aguda
+                    criarSetaBatidaAguda();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function moverSetas() {
+            const novasSetas = [];
+            for (const seta of setas) {
                 const topoAtual = parseFloat(seta.style.top);
 
-                /* ----- SETA NO LUGAR CORRETO ----- */
-                if (
-                    parseInt(seta.dataset.pista) === indicePista &&
-                    topoAtual >= linhaSuperior.offsetTop &&
-                    topoAtual <= linhaInferior.offsetTop
-                ) {
-                    elementoJogo.removeChild(seta); // Remove a seta do DOM
-                    setas.splice(i, 1); // Remove a seta do array
-                    pontuacao++;
-                    atualizarPontuacao();
-                    break;
-                }
+                /* ----- SETA ESQUECIDA ----- */
 
-                /* ----- SETA APERTADA ANTES DA HORA ----- */
-                else if (
-                    parseInt(seta.dataset.pista) === indicePista &&
-                    topoAtual >= linhaSuperior.offsetTop
-                ) {
-                    seta.classList.add('seta-errada'); // Aplica a animação de erro
-                    setas.splice(i, 1); // Remove a seta do array
+                if (topoAtual <= linhaSuperior.offsetTop - 50) {
+                    seta.classList.add('seta-errada');
                     pontuacao = Math.max(0, pontuacao - 1);
                     atualizarPontuacao();
                     mostrarDano();
 
-                    // Espera 1 segundo antes de remover a seta do DOM
                     setTimeout(() => {
                         elementoJogo.removeChild(seta);
                     }, 1000);
+                } else {
+                    seta.style.top = `${topoAtual - VELOCIDADE_SETAS}px`;
+                    novasSetas.push(seta);
                 }
             }
-        }
-    });
-
-    // Função para atualizar a pontuação na tela
-    function atualizarPontuacao() {
-        elementoPontuacao.textContent = `${pontuacao}`;
-    }
-
-    // Função principal do loop do jogo
-    function loopJogo() {
-        tempoAcumulado += VELOCIDADE_SETAS;
-
-        if (tempoAcumulado >= INTERVALO_TEMPO) {
-            criarSetasComPadrao(); // Criar novas setas a cada intervalo
-            tempoAcumulado = 0;
+            setas = novasSetas;
         }
 
-        moverSetas(); // Mover as setas existentes
-        requestAnimationFrame(loopJogo); // Continuar o loop do jogo
-    }
+        window.addEventListener('keydown', (evento) => {
+            if (evento.key.startsWith('Arrow')) {
+                evento.preventDefault();
+            }
 
-    // Inicialização do jogo
-    document.addEventListener('DOMContentLoaded', () => {
-        loopJogo(); // Inicia o loop do jogo
-    });
+            const teclasSetas = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
+            const indicePista = teclasSetas.indexOf(evento.key);
 
-    // Função para adicionar o efeito de dano à tela
-    function mostrarDano() {
-        // Aplica a animação de dano à tela inteira
-        elementoJogo.classList.add('tela-dano');
-        setTimeout(() => {
-            elementoJogo.classList.remove('tela-dano');
-        }, 600); // O efeito dura 600ms
-    }
-</script>
+            if (indicePista !== -1) {
+                for (let i = 0; i < setas.length; i++) {
+                    const seta = setas[i];
+                    const topoAtual = parseFloat(seta.style.top);
+
+                    /* ----- SETA NO LUGAR CORRETO ----- */
+
+                    if (
+                        parseInt(seta.dataset.pista) === indicePista &&
+                        topoAtual >= linhaSuperior.offsetTop &&
+                        topoAtual <= linhaInferior.offsetTop
+                    ) {
+                        elementoJogo.removeChild(seta);
+                        setas.splice(i, 1);
+                        pontuacao++;
+                        atualizarPontuacao();
+                        break;
+
+                        /* ----- SETA APERTADA ANTES DA HORA ----- */
+
+                    } else if (
+                        parseInt(seta.dataset.pista) === indicePista &&
+                        topoAtual >= linhaSuperior.offsetTop
+                    ) {
+                        seta.classList.add('seta-errada');
+                        setas.splice(i, 1);
+                        pontuacao = Math.max(0, pontuacao - 1);
+                        atualizarPontuacao();
+                        mostrarDano();
+
+                        setTimeout(() => {
+                            elementoJogo.removeChild(seta);
+                        }, 1000);
+                    }
+                }
+            }
+        });
+
+        function atualizarPontuacao() {
+            elementoPontuacao.textContent = `${pontuacao}`;
+        }
+
+        function loopJogo() {
+            tempoAcumulado += INTERVALO_TEMPO;
+            if (tempoAcumulado >= INTERVALO_TEMPO) {
+                moverSetas();
+                liberarSetas(); // Libera as setas a cada intervalo de 100ms
+                tempoAcumulado = 0;
+            }
+            requestAnimationFrame(loopJogo);
+        }
+
+        function mostrarDano() {
+            // Aplica a animação de dano à tela inteira
+            elementoJogo.classList.add('tela-dano');
+            setTimeout(() => {
+                elementoJogo.classList.remove('tela-dano');
+            }, 600); // O efeito dura 600ms
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loopJogo(); // Inicia o loop do jogo
+        });
+    </script>
+</body>
 </html>
