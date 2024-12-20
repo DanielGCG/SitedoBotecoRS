@@ -116,6 +116,7 @@
         <div id="versao" class="versao">Versão: 0.3.3</div>
     </div>
 </body>
+
 <script>
     const elementoJogo = document.getElementById('jogo');
     const elementoPontuacao = document.getElementById('pontuacao');
@@ -132,7 +133,8 @@
     
     const audioFileInput = document.getElementById('audioFile');
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const audioElement = new Audio();
+    const audioElementPlayer = new Audio();
+    const audioElementSystem = new Audio();  // Áudio separado para o sistema
     const fileReader = new FileReader();
 
 
@@ -165,41 +167,45 @@
         if (customFile) {
             // Caso o usuário tenha selecionado um arquivo personalizado
             const audioURL = URL.createObjectURL(customFile);
-            audioElement.src = audioURL;
+            audioElementPlayer.src = audioURL;
+            audioElementSystem.src = audioURL; // O áudio processado também é o mesmo
         } else {
             // Caso tenha selecionado uma música da lista
             switch (selectedMusic) {
                 case 'BringMeToLife':
-                    audioElement.src = "/pages/minigames/setinha/musicas/BringMe.mp3";
+                    audioElementPlayer.src = "/pages/minigames/setinha/musicas/360.mp3";
+                    audioElementSystem.src = "/pages/minigames/setinha/musicas/BringMe.mp3"; // Para análise
                     break;
                 case '360':
-                    audioElement.src = "/pages/minigames/setinha/musicas/360.mp3";
+                    audioElementPlayer.src = "/pages/minigames/setinha/musicas/360.mp3";
+                    audioElementSystem.src = "/pages/minigames/setinha/musicas/360.mp3";
                     break;
                 case 'Crawling':
-                    audioElement.src = "/pages/minigames/setinha/musicas/Crawling.mp3";
+                    audioElementPlayer.src = "/pages/minigames/setinha/musicas/Crawling.mp3";
+                    audioElementSystem.src = "/pages/minigames/setinha/musicas/Crawling.mp3";
                     break;
                 default:
                     alert("Música não encontrada!");
                     break;
             }
         }
-        
-        // Iniciar o jogo com o audioElement, não com o audioURL
-        comecarJogo(audioElement);
+
+        // Iniciar o jogo com o áudio do sistema para análise, mas tocando a música para o jogador
+        comecarJogo(audioElementSystem);
+        audioElementPlayer.play(); // Tocar a música para o jogador
     }
 
-    function comecarJogo(audioElement){
-        const track = audioContext.createMediaElementSource(audioElement);
+    function comecarJogo(audioElement) {
         const analyser = audioContext.createAnalyser();
-
-        track.connect(analyser);
-        analyser.connect(audioContext.destination);
+                        
+        // Criando o AudioBufferSourceNode para análise, mas sem conectá-lo ao destino (sem reproduzir)
+        const bufferSource = audioContext.createBufferSource();
+        bufferSource.buffer = audioBuffer;
+        bufferSource.connect(analyser);
 
         analyser.fftSize = 512;
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
-
-        audioElement.play();
 
         function analyzeFrequencyRanges() {
             analyser.getByteFrequencyData(dataArray);
@@ -416,4 +422,6 @@
         loopJogo(); // Inicia o loop do jogo
     });
 </script>
+
+
 </html>

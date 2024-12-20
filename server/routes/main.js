@@ -143,6 +143,14 @@ router.get('/carolls', (req, res) => {
     res.render('pages/eastereggs/carolls', { locals: locals });
 });
 
+router.get('/pokebsmp', (req, res) => {
+    const locals = {
+        title: "PokeBSMP",
+        description: "Site oficial do PokeBSMP"
+    }
+    res.render('pages/inicial/pokebsmp', { locals: locals });
+});
+
 router.get('/notificacoes', (req, res) => {
     const locals = {
         title: "Match!",
@@ -188,6 +196,16 @@ router.get('/filmedagalera/match', (req, res) => {
         description: "Veja quem é muito você!"
     }
     res.render('pages/filmedagalera/match', { locals: locals });
+});
+
+// Rota para página em manutenção
+router.get('/manutencao', (req, res) => {
+    const locals = {
+        title: "Manutenção",
+        description: "Página atualmente em manutenção..."
+    }
+    res.status(503);
+    res.render('layouts/503', { locals: locals });
 });
 
 /* ------ NÃO ENCONTRADO ------*/
