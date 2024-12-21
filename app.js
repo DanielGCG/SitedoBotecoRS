@@ -228,6 +228,7 @@ app.post('/galeriaEdit/:endereco/:nome/:nomenovo', async (req, res) => {
 // Rota principal
 app.use('/', require('./server/routes/main'));
 
+
 // Inicia o servidor
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

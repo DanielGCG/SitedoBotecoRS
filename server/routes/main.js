@@ -216,6 +216,21 @@ router.get('/manutencao', (req, res) => {
     res.render('layouts/503', { locals: locals });
 });
 
+/* ------ SEM HEADER ------*/
+
+router.get('/noheader/galeria/pokebsmp', (req, res) => {
+    const locals = {
+        title: "Manutenção",
+        description: "Página atualmente em manutenção..."
+    };
+
+    res.render('pages/galeria/pokebsmp_reduzido', {
+        layout: 'layouts/noheader',  // Passa o nome do layout como string
+        locals: locals
+    });
+});
+
+
 /* ------ NÃO ENCONTRADO ------*/
 
 // Rota para página não encontrada
