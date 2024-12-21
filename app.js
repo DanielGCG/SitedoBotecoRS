@@ -4,6 +4,7 @@ const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const cors = require('cors');
 const multer = require('multer');
+const sharp = require('sharp');
 const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
@@ -119,20 +120,47 @@ app.post('/galeriaUpload/:endereco/:nome', upload.single('imagem'), async (req, 
     return res.status(400).json({ success: false, message: 'Nenhum arquivo de imagem enviado.' });
   }
 
-  try {
-    const galeriaRef = ref(storageFirebase, `galeria/${endereco}/${nome}`);
-    
-    // Fazendo o upload do arquivo para o Firebase Storage
-    const snapshot = await uploadBytes(galeriaRef, imagem.buffer);
-
-    // Obtém a URL de download do arquivo enviado
-    const downloadURL = await getDownloadURL(snapshot.ref);
-
-    // Envia a resposta com a URL do arquivo enviado
-    res.json({ success: true, message: 'Arquivo enviado com sucesso!', downloadURL });
-  } catch (error) {
-    console.error('Erro ao fazer upload para o Firebase:', error);
-    res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
+  if (endereco === "jogador"){
+    try {
+      const galeriaRef = ref(storageFirebase, `galeria/${endereco}/${nome}`);
+      
+      // Fazendo o upload do arquivo para o Firebase Storage
+      const snapshot = await uploadBytes(galeriaRef, imagem.buffer);
+  
+      // Obtém a URL de download do arquivo enviado
+      const downloadURL = await getDownloadURL(snapshot.ref);
+  
+      // Envia a resposta com a URL do arquivo enviado
+      res.json({ success: true, message: 'Arquivo enviado com sucesso!', downloadURL });
+    } catch (error) {
+      console.error('Erro ao fazer upload para o Firebase:', error);
+      res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
+    }
+  }
+  else{
+    try {
+      // Fazendo o tratamento da imagem antes do upload
+      const processedImageBuffer = await sharp(imagem.buffer)
+        .resize(1080, 720, { // Limita a imagem a 1080x720px, mantendo a proporção
+          fit: sharp.fit.inside,  // Ajusta para dentro do limite sem cortar
+          withoutEnlargement: true, // Não aumenta imagens pequenas
+        })
+        .toBuffer(); // Converte a imagem processada em buffer para o upload
+  
+      const galeriaRef = ref(storageFirebase, `galeria/${endereco}/${nome}`);
+      
+      // Fazendo o upload do arquivo para o Firebase Storage
+      const snapshot = await uploadBytes(galeriaRef, processedImageBuffer);
+  
+      // Obtém a URL de download do arquivo enviado
+      const downloadURL = await getDownloadURL(snapshot.ref);
+  
+      // Envia a resposta com a URL do arquivo enviado
+      res.json({ success: true, message: 'Arquivo enviado com sucesso!', downloadURL });
+    } catch (error) {
+      console.error('Erro ao fazer upload para o Firebase:', error);
+      res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
+    }
   }
 });
 
