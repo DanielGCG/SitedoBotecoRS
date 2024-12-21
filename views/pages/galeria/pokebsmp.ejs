@@ -1,0 +1,50 @@
+<main>
+    <h1>⭐PokeBSMP⭐</h1>
+    <div class="caixa-texto">
+        <h4>Adicione uma imagem de destaque!</h4>
+        <h5>basta clicar no quadro com +</h5>
+    </div>
+    <div class="galeria" id="galeria">
+        <!-- As imagens serão adicionadas aqui dinamicamente -->
+    </div>
+    <div id="mensagem" style="display: none;"></div> <!-- Para exibir mensagens -->
+</main>
+
+<!-- Popup para exibir a imagem com fundo desfocado e botões -->
+<div id="popup" class="popup" style="display: none;">
+    <div id="popup-conteudo" class="popup-conteudo">
+        <img id="imagem-popup" src="" alt="Imagem da obra">
+        <div class="acoes">
+            <button class="deletar" onclick="abrirConfirmacaoDelecao((document.getElementById('nome-imagem').textContent))">Deletar</button>
+            <button class="branco" id="editarNomeBtn">Editar</button>
+            <button class="branco" onclick="fecharPopup()">Fechar</button>
+        </div>
+        <div id="campo-editar" style="display: none; margin-top: 10px;">
+            <input type="text" id="novoNome" placeholder="Novo nome">
+            <button class="salvar" onclick="editarNomeObra()">Salvar</button>
+        </div>
+        <div id="nome-imagem" style="margin-top: 10px;"></div>
+    </div>
+</div>
+
+<!-- Popup de confirmação de exclusão -->
+<div id="popup-confirmacao" class="popup">
+    <div id="popup-confirmacao-conteudo" class="popup-conteudo">
+        <p>Tem certeza de que deseja excluir esta obra?</p>
+        <div class="acoes">
+            <button id="confirmarDelecaoBtn" onclick="confirmarRemocao()">Sim, excluir</button>
+            <button onclick="fecharConfirmacao()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="/pages/galeria/geral/style.css">
+
+<style>
+main {
+    text-align: center;
+}
+</style>
+
+<script>const endereco = "pokebsmp";</script>
+<script type="module" defer src="/pages/galeria/geral/script.js"></script>  

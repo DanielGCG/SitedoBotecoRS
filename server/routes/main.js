@@ -101,6 +101,14 @@ router.get('/galeria/jogador', (req, res) => {
     res.render('pages/galeria/jogador', { locals: locals });
 });
 
+router.get('/galeria/pokebsmp', (req, res) => {
+    const locals = {
+        title: "Destaques do Boteco",
+        description: "Só coisa boa"
+    }
+    res.render('pages/galeria/pokebsmp', { locals: locals });
+});
+
 router.get('/galeria/pets', (req, res) => {
     const locals = {
         title: "Pets do Boteco",
