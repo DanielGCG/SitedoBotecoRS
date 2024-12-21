@@ -6,7 +6,7 @@ const cors = require('cors');
 const multer = require('multer');
 const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
-const { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject } = require('firebase/storage');
+const { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -154,6 +154,46 @@ app.post('/galeriaDelete/:endereco/:nome', upload.single('imagem'), async (req, 
     
     // Trata o erro e responde ao cliente
     res.status(500).json({ success: false, message: 'Erro ao deletar a imagem. Tente novamente.' });
+  }
+});
+
+async function renameFile(oldPath, newPath) {
+  try {
+    const oldRef = ref(storageFirebase, oldPath);
+    const newRef = ref(storageFirebase, newPath);
+
+    const fileContent = await getBytes(oldRef);
+
+    // Faz o upload do arquivo com o novo nome
+    await uploadBytes(newRef, fileContent);
+
+    // Exclui o arquivo antigo
+    await deleteObject(oldRef);
+
+    return { success: true, message: `Arquivo renomeado para ${newPath}` };
+  } catch (error) {
+    console.error('Erro ao renomear arquivo:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+app.post('/galeriaEdit/:endereco/:nome/:nomenovo', async (req, res) => {
+  const { endereco, nome, nomenovo } = req.params;
+
+  const oldPath = `galeria/${endereco}/${nome}`;
+  const newPath = `galeria/${endereco}/${nomenovo}`;
+
+  try {
+    const result = await renameFile(oldPath, newPath);
+
+    if (result.success) {
+      return res.status(200).json({ success: true });
+    } else {
+      return res.json({ success: false});
+    }
+  } catch (error) {
+    console.error('Erro no endpoint:', error);
+    return res.status(500).send({ success: false, error: error.message });
   }
 });
 

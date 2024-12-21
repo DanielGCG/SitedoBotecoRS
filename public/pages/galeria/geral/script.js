@@ -67,7 +67,7 @@ async function removerObraNoFirebase(nomeObra) {
 
             // Remove a obra do vetor obrasLocais
             obrasLocais = obrasLocais.filter(obra => obra.nome !== nomeObra);
-            carregarObras();  // Atualiza a galeria sem a obra deletada
+            carregarObras();
         } else {
             console.error('Erro:', result.message);
             exibirMensagem('Erro ao remover a obra. Tente novamente.', 'error');
@@ -127,7 +127,7 @@ async function uploadFile() {
         if (data.success) {
             exibirMensagem('Arquivo enviado com sucesso!', 'success');
             // Adiciona a nova obra ao vetor de obrasLocais
-            obrasLocais.push({ nome: nomeObra, url: `/path/to/image/${nomeArquivo}` });
+            obrasLocais.push({ nome: nomeObra, url: data.downloadURL });
             carregarObras();  // Atualiza a galeria com a nova obra
         } else {
             exibirMensagem(data.message || 'Erro desconhecido.', 'error');
@@ -165,7 +165,7 @@ function abrirPopupComImagem(url, nome) {
             <button class="branco" onclick="fecharPopup()">Fechar</button>
         </div>
         <div id="campo-editar" style="display: none; margin-top: 10px;">
-            <input type="text" id="novoNome" value="${nome}" placeholder="Novo nome">
+            <input type="text" id="novoNomeInput" value="${nome}" placeholder="Novo nome">
             <button class="salvar" onclick="editarNomeObra('${nome}', '${url}')">Salvar</button>
         </div>
         <div id="nome-imagem" style="margin-top: 10px;">${nome}</div>
@@ -190,34 +190,51 @@ function abrirPopupComImagem(url, nome) {
 }
 
 async function editarNomeObra(nomeAtual, url) {
-    const novoNomeInput = document.getElementById('novoNome');
-    const novoNome = novoNomeInput.value.trim();
+    const novoNomeInput = document.getElementById('novoNomeInput');
+    let novoNome = novoNomeInput.value.trim();
 
     if (!novoNome || novoNome === nomeAtual) {
         exibirMensagem('Insira um novo nome para a imagem.', 'error');
         return;
     }
 
+    const invalidChars = /[<>:"/\\|?*~]/;
+    if (invalidChars.test(novoNome)) {
+        exibirMensagem('O nome contém caracteres inválidos.', 'error');
+        return;
+    }
+
     try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const novaImagemRef = ref(storage, `galeria/${endereco}/${novoNome}.png`);
-        const imagemAntigaRef = ref(storage, `galeria/${endereco}/${nomeAtual}.png`);
+        // Define o URL do backend para renomear o arquivo
+        const apiUrl = `/galeriaEdit/${endereco}/${nomeAtual + ".png"}/${novoNome + ".png"}`;
 
-        await uploadBytes(novaImagemRef, blob);
-        await deleteObject(imagemAntigaRef);
+        // Faz a requisição POST ao backend
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-        // Atualiza o nome no vetor obrasLocais
-        obrasLocais = obrasLocais.map(obra => 
-            obra.nome === nomeAtual ? { nome: novoNome, url } : obra
-        );
-        carregarObras();  // Atualiza a galeria com o nome da obra alterado
+        const result = await response.json();
 
-        obrasLocais = obrasLocais.map(obra => obra.nome === nomeAtual ? { nome: novoNome, url } : obra);
-        carregarObras();
+        if (result.success) {
+            // Atualiza o nome no vetor obrasLocais
+            for (let i = 0; i < obrasLocais.length; i++) {
+                if (obrasLocais[i].nome === nomeAtual && obrasLocais[i].url === url) {
+                    obrasLocais[i].nome = novoNome;
+                    break;
+                }
+            }
 
-        exibirMensagem('Nome da obra atualizado com sucesso!', 'success');
-        fecharPopup();
+            // Atualiza a galeria com o nome da obra alterado
+            carregarObras();
+
+            exibirMensagem('Nome da obra atualizado com sucesso!', 'success');
+            fecharPopup();
+        } else {
+            throw new Error(result.message || 'Erro desconhecido ao renomear a obra.');
+        }
     } catch (error) {
         console.error('Erro ao editar o nome da obra:', error);
         exibirMensagem('Erro ao editar o nome da obra. Tente novamente.', 'error');
