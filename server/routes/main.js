@@ -230,7 +230,6 @@ router.get('/noheader/galeria/pokebsmp', (req, res) => {
     });
 });
 
-
 /* ------ NÃO ENCONTRADO ------*/
 
 // Rota para página não encontrada
