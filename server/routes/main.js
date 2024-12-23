@@ -206,6 +206,34 @@ router.get('/filmedagalera/match', (req, res) => {
     res.render('pages/filmedagalera/match', { locals: locals });
 });
 
+/* ------ SEM HEADER ------*/
+
+router.get('/noheader/galeria/pokebsmp', (req, res) => {
+    const locals = {
+        title: "PokeBSMP",
+        description: "Página do pokeBSMP"
+    };
+
+    res.render('pages/galeria/pokebsmp_reduzido', {
+        layout: 'layouts/noheader',
+        locals: locals
+    });
+});
+
+router.get('/noheader/galeria/pokebsmp', (req, res) => {
+    const locals = {
+        title: "PokeBSMP",
+        description: "Página do pokeBSMP"
+    };
+
+    res.render('pages/galeria/pokebsmp_reduzido', {
+        layout: 'layouts/noheader',
+        locals: locals
+    });
+});
+
+/* ------ SERVIÇO ------*/
+
 // Rota para página em manutenção
 router.get('/manutencao', (req, res) => {
     const locals = {
@@ -213,24 +241,11 @@ router.get('/manutencao', (req, res) => {
         description: "Página atualmente em manutenção..."
     }
     res.status(503);
-    res.render('layouts/503', { locals: locals });
-});
-
-/* ------ SEM HEADER ------*/
-
-router.get('/noheader/galeria/pokebsmp', (req, res) => {
-    const locals = {
-        title: "Manutenção",
-        description: "Página atualmente em manutenção..."
-    };
-
-    res.render('pages/galeria/pokebsmp_reduzido', {
-        layout: 'layouts/noheader',  // Passa o nome do layout como string
+    res.render('pages/servico/503', {
+        layout: 'layouts/noheader',
         locals: locals
     });
 });
-
-/* ------ NÃO ENCONTRADO ------*/
 
 // Rota para página não encontrada
 router.use((req, res) => {
@@ -239,7 +254,10 @@ router.use((req, res) => {
         description: "Se ferrou KKKKKK"
     }
     res.status(404);
-    res.render('layouts/404', { layout: false, locals: locals });
+    res.render('pages/servico/404', {
+        layout: 'layouts/noheader',
+        locals: locals
+    });
 });
 
 module.exports = router;

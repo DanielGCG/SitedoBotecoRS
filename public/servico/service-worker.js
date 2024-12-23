@@ -1,24 +1,36 @@
-const CACHE_NAME = 'v1';
+const CACHE_NAME = 'v2';
 const CACHE_ASSETS = [
     '/',
-    '/index.ejs',               // Página principal (renderizada via EJS)
-    '/404.ejs',                 // Página 404
-    '/css/index.css',           // Estilos principais
-    '/css/style.css',           // Estilos adicionais
-    '/js/script.js',            // Scripts JS principais
-    '/img/gabi404.png',         // Imagem de erro 404
-    '/img/icon-192x192.png',    // Ícone de 192x192
-    '/img/papeldeparede.jpg',   // Imagem de fundo
-    '/img/plaquinha.png',       // Imagem da plaquinha
-    '/img/imagemdodia.jpg',     // Imagem do dia
+    '/index.html',
+    '/404.html',
+    '/css/index.css',
+    '/css/style.css',
+    '/js/script.js',
+    '/img/gabi404.png',
+    '/img/icon-192x192.png',
+    '/img/papeldeparede.jpg',
+    '/img/plaquinha.png',
+    '/img/imagemdodia.jpg',
     '/service-worker.js'
 ];
 
 self.addEventListener('install', (event) => {
+    console.log('Service Worker instalado!');
+    event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate', (event) => {
+    console.log('Service Worker ativado!');
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            console.log('Cache assets');
-            return cache.addAll(CACHE_ASSETS);
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cache => {
+                    if (cache !== CACHE_NAME) {
+                        console.log('Removendo cache antigo:', cache);
+                        return caches.delete(cache);
+                    }
+                })
+            );
         })
     );
 });
@@ -26,12 +38,11 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then(cacheResponse => {
-            // Retorna do cache se disponível ou tenta buscar na rede
-            return cacheResponse || fetch(event.request)
-                .catch(() => {
-                    // Caso a rede falhe, podemos fornecer uma resposta de fallback
-                    return caches.match('/404.ejs');
-                });
+            return cacheResponse || fetch(event.request).catch(() => {
+                if (event.request.destination === 'document') {
+                    return caches.match('/404.html'); // Fallback seguro
+                }
+            });
         })
     );
 });

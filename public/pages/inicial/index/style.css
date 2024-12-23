@@ -20,7 +20,7 @@ main {
     overflow: hidden;
     aspect-ratio: 1; /* Proporção quadrada */
     width: 100%; /* Ajusta a largura para o tamanho do contêiner */
-    max-width: 550px; /* Limita a largura máxima */
+    max-width: 450px; /* Limita a largura máxima */
     margin: auto; /* Centraliza horizontalmente */
     position: relative; /* Necessário para posicionar a plaquinha */
 }
