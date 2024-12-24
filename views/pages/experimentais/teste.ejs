@@ -1,8 +1,279 @@
-<div style="position: relative; width: 100%; height: 0; padding-top: 56.2225%;
- padding-bottom: 0; box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); margin-top: 1.6em; margin-bottom: 0.9em; overflow: hidden;
- border-radius: 8px; will-change: transform;">
-  <iframe loading="lazy" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0;margin: 0;"
-    src="https://www.canva.com/design/DAGV9R_ogNs/lLR5ivjJK2w9ooy92iHwYA/view?embed" allowfullscreen="allowfullscreen" allow="fullscreen">
-  </iframe>
-</div>
-<a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAGV9R_ogNs&#x2F;lLR5ivjJK2w9ooy92iHwYA&#x2F;view?utm_content=DAGV9R_ogNs&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener"></a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Setinhas com Visualizador de Música</title>
+    <style>
+        body {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #80b56b;
+        }
+        #jogo {
+            margin: 50px auto;
+            width: 90vw;
+            height: 90vh;
+            background-color: #ffffff;
+            max-height: 600px;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .pista {
+            position: absolute;
+            width: 25%;
+            height: 100%;
+            top: 0;
+            border: #000000;
+        }
+        .seta {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            font-size: 30px;
+            color: #ffffff;
+            background-color: #3498db;
+            border-radius: 50%;
+            transition: top 0.1s linear;
+            transform: translateX(+50%);
+        }
+        #pontuacao {
+            position: absolute;
+            left: 50%;
+            top: 18px;
+            font-size: 25px;
+            color: #333;
+            transform: translate(-50%, -50%);
+        }
+        #linha-superior, #linha-inferior {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: red;
+            pointer-events: none;
+        }
+        #linha-superior {
+            top: 25%;
+        }
+        #linha-inferior {
+            top: 45%;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @keyframes dano {
+            0% { box-shadow: inset 0 0 15px rgba(128, 181, 107, 0); }
+            50% { box-shadow: inset 0 0 20px rgb(231, 88, 63); }
+            100% { box-shadow: inset 0 0 15px rgba(128, 181, 107, 0); }
+        }
+        .tela-dano {
+            margin: 50px auto;
+            width: 90vw;
+            height: 90vh;
+            background-color: #ffffff;
+            max-height: 600px;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: dano 600ms forwards;
+        }
+        .seta-errada {
+            background-color: rgb(231, 76, 60);
+            animation: fadeOut 1s forwards;
+        }
+        #upload-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="jogo">
+        <div id="pontuacao">0</div>
+        <div id="linha-superior"></div>
+        <div id="linha-inferior"></div>
+    </div>
+    
+    <div id="upload-container">
+        <input type="file" id="sequenciaArquivo" accept=".txt" />
+        <button onclick="comecarJogo()">Play</button>
+    </div>
+
+    <div id="versao-container">
+        <div id="versao" class="versao">Versão: 0.3.3</div>
+    </div>
+
+<script>
+const VELOCIDADE_SETAS = 1.2; // Velocidade das setas
+const setasProgramadas = [];  // Armazenará as setas a serem criadas
+
+let tempoAcumulado = 0;
+let pontuacao = 0;
+let setas = [];
+const elementoJogo = document.getElementById('jogo');
+const elementoPontuacao = document.getElementById('pontuacao');
+const linhaSuperior = document.getElementById('linha-superior');
+const linhaInferior = document.getElementById('linha-inferior');
+const tickInterval = 100; // Intervalo de tempo em milissegundos para o loop do jogo
+
+// Função para ler o arquivo de texto que contém os tempos e setas
+function carregarSequenciaDeSetas(arquivo) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const conteudo = event.target.result;
+        const linhas = conteudo.split('\n');
+        for (const linha of linhas) {
+            const [setasString, tempoString] = linha.split(',');
+            if (setasString && tempoString) {
+                const setasArray = setasString.split(' ').map(Number);
+                const tempo = parseInt(tempoString.trim());
+
+                setasProgramadas.push({
+                    tempo: tempo,
+                    setas: setasArray  // [pista1, pista2, pista3, pista4]
+                });
+            }
+        }
+    };
+    reader.readAsText(arquivo);
+}
+
+// Função para liberar as setas com base no tempo
+function liberarSetas() {
+    const tempoAtual = Date.now() - tempoAcumulado;
+
+    // Verifica se chegou a hora de liberar novas setas
+    setasProgramadas.forEach((seta, index) => {
+        if (tempoAtual >= seta.tempo) {
+            for (let i = 0; i < 4; i++) {
+                if (seta.setas[i] === 1) {
+                    criarSeta(i);  // Cria a seta na pista correspondente
+                }
+            }
+            setasProgramadas.splice(index, 1);  // Remove a seta após criá-la
+        }
+    });
+}
+
+// Função para criar a seta
+function criarSeta(pista) {
+    const novaSeta = document.createElement('div');
+    novaSeta.classList.add('seta');
+    novaSeta.style.top = `${elementoJogo.offsetHeight}px`;  // Começa na parte inferior
+    novaSeta.dataset.pista = pista;
+
+    // Definir a posição horizontal correta para cada pista
+    const posicoes = [
+        '5%',   // Pista 0 (esquerda)
+        '25%',  // Pista 1 (meio-esquerda)
+        '50%',  // Pista 2 (meio-direita)
+        '75%'   // Pista 3 (direita)
+    ];
+    
+    novaSeta.style.left = posicoes[pista]; // Define a posição horizontal da seta
+
+    // Determina a direção da seta com base na pista
+    let setaTexto = '';
+    switch (pista) {
+        case 0: setaTexto = '←'; break;
+        case 1: setaTexto = '↑'; break;
+        case 2: setaTexto = '↓'; break;
+        case 3: setaTexto = '→'; break;
+    }
+
+    novaSeta.textContent = setaTexto;
+    elementoJogo.appendChild(novaSeta);
+    setas.push(novaSeta);
+}
+
+// Função para mover as setas na tela
+function moverSetas() {
+    const novasSetas = [];
+    for (const seta of setas) {
+        const topoAtual = parseFloat(seta.style.top);
+
+        if (topoAtual <= linhaSuperior.offsetTop - 50) {
+            seta.classList.add('seta-errada');
+            pontuacao = Math.max(0, pontuacao - 1);
+            atualizarPontuacao();
+            mostrarDano();
+
+            setTimeout(() => {
+                elementoJogo.removeChild(seta);
+            }, 1000);
+        } else {
+            seta.style.top = `${topoAtual - VELOCIDADE_SETAS}px`;
+            novasSetas.push(seta);
+        }
+    }
+    setas = novasSetas;
+}
+
+// Função para atualizar a pontuação
+function atualizarPontuacao() {
+    elementoPontuacao.textContent = `${pontuacao}`;
+}
+
+// Loop do jogo para mover setas e liberar novas com base no tick
+function loopJogo() {
+    liberarSetas();
+    moverSetas();
+    requestAnimationFrame(loopJogo);
+}
+
+// Função para começar o jogo
+function comecarJogo() {
+    // Aqui, você pode carregar a sequência de setas de um arquivo de texto.
+    const arquivo = document.getElementById('sequenciaArquivo').files[0];
+    if (arquivo) {
+        carregarSequenciaDeSetas(arquivo);
+        tempoAcumulado = Date.now(); // Marca o início do jogo
+        loopJogo();
+    } else {
+        alert("Por favor, selecione um arquivo de sequência.");
+    }
+}
+
+window.addEventListener('keydown', (evento) => {
+    if (evento.key.startsWith('Arrow')) {
+        evento.preventDefault();
+    }
+
+    const teclasSetas = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
+    const indicePista = teclasSetas.indexOf(evento.key);
+
+    if (indicePista !== -1) {
+        for (let i = 0; i < setas.length; i++) {
+            const seta = setas[i];
+            const topoAtual = parseFloat(seta.style.top);
+
+            // Verifica se a seta foi pressionada na posição certa
+            if (parseInt(seta.dataset.pista) === indicePista && topoAtual >= linhaSuperior.offsetTop && topoAtual <= linhaInferior.offsetTop) {
+                elementoJogo.removeChild(seta);
+                setas.splice(i, 1);
+                pontuacao++;
+                atualizarPontuacao();
+                break;
+            }
+        }
+    }
+});
+
+function mostrarDano() {
+    elementoJogo.classList.add('tela-dano');
+    setTimeout(() => {
+        elementoJogo.classList.remove('tela-dano');
+    }, 600);
+}
+
+</script>
+</body>
+</html>

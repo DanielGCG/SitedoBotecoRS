@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Música</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #252525;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        .player {
+            background-color: #424242;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            max-width: 750px;
+            text-align: center;
+            overflow-y: auto;
+            margin-right: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        #progress {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        #progress-bar {
+            height: 100%;
+            background: #4caf50;
+            border-radius: 4px;
+        }
+        .time {
+            font-size: 14px;
+            color: #e0e0e0;
+            margin: 5px 0;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:active {
+            background-color: #388e3c;
+        }
+        #volume {
+            width: 100%;
+            margin: 20px 0;
+        }
+        .table-container {
+            background-color: #424242;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            max-width: 750px;
+            overflow-y: auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        table {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 1000px;
+            text-align: center;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        button.checkbox-btn {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            color: rgb(0, 0, 0);
+            background-color: #c0c0c0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        button.checkbox-btn.checked {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        #save-btn {
+            margin-top: auto;
+        }
+
+        .highlight {
+            background-color: rgba(255, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Player -->
+        <div class="player">
+            <h1>Ferramenta de Mapeamento</h1>
+            <h4>Música</h4>
+            <input type="file" id="music-input" accept="audio/*">
+            <br>
+            <button id="backward-btn">Retroceder 600ms</button>
+            <button id="play-pause-btn">Play</button>
+            <button id="forward-btn">Avançar 600ms</button>
+            <button id="speed-btn">Velocidade: 1x</button>
+            <br>
+            <div id="progress">
+                <div id="progress-bar"></div>
+            </div>
+            <div class="time" id="current-time">0:00:000</div>
+            <div class="time" id="duration-time">0:00:000</div>
+            <br>
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="0.1">
+            <div class="time" id="volume-level">Volume: 10%</div>
+            <br>
+            <button id="save-btn">Salvar Tabela</button>
+            <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <h4>Voltar de onde parou</h4>
+            <input type="file" id="load-file-btn" accept=".txt">
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table id="marker-table"></table>
+           
+        </div>
+    </div>
+
+    <script>
+        const MARKER_INTERVAL = 600; // Intervalo de 300ms (600ms = 0.6s)
+    
+        const musicInput = document.getElementById('music-input');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const progress = document.getElementById('progress');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const durationTimeDisplay = document.getElementById('duration-time');
+        const volumeControl = document.getElementById('volume');
+        const volumeLevelDisplay = document.getElementById('volume-level');
+        const saveBtn = document.getElementById('save-btn');
+        const markerTable = document.getElementById('marker-table');
+        const speedBtn = document.getElementById('speed-btn');
+        const loadfile = document.getElementById('load-file-btn');
+    
+        let audio = new Audio();
+        
+        let isPlaying = false;
+        let animationFrameId;
+    
+        const speeds = [0.25, 0.5, 0.75, 1]; // Velocidades de reprodução
+        let currentSpeedIndex = 3; // Índice de velocidade atual
+    
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            const ms = Math.floor((seconds % 1) * 1000);
+            return `${mins}:${secs < 10 ? '0' + secs : secs}:${ms < 100 ? '0' + ms : ms}`;
+        }
+    
+        musicInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const objectURL = URL.createObjectURL(file);
+                audio.src = objectURL;
+                audio.load();
+            }
+        });
+    
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                playPauseBtn.textContent = 'Play';
+            } else {
+                audio.play();
+                playPauseBtn.textContent = 'Pause';
+                updateProgressBar();
+                requestAnimationFrame(updateProgressBar);
+            }
+            isPlaying = !isPlaying;
+        });
+    
+        audio.addEventListener('loadedmetadata', () => {
+            durationTimeDisplay.textContent = formatTime(audio.duration);
+            generateTable(); // Gerar a tabela de marcadores quando o áudio for carregado
+        });
+
+    
+        audio.addEventListener('timeupdate', () => {
+            updateProgressBar();
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+            highlightMarker();
+        });
+    
+        progress.addEventListener('click', (e) => {
+            const progressWidth = progress.offsetWidth;
+            const clickPosition = e.offsetX;
+            const newTime = (clickPosition / progressWidth) * audio.duration;
+            audio.currentTime = newTime;
+        });
+    
+        volumeControl.addEventListener('input', () => {
+            audio.volume = volumeControl.value/10;
+            volumeLevelDisplay.textContent = `Volume: ${Math.round(volumeControl.value * 100)}%`;
+        });
+    
+        function updateProgressBar() {
+            const progressWidth = progress.offsetWidth;
+            const currentProgress = (audio.currentTime / audio.duration) * progressWidth;
+            progressBar.style.width = `${currentProgress}px`;
+
+            // A chamada recursiva para atualizar a barra de progresso mais rapidamente
+            if (isPlaying) {
+                animationFrameId = requestAnimationFrame(updateProgressBar);
+            }
+        }
+
+        function generateTable() {
+            const markersCount = Math.floor(audio.duration * 1000 / MARKER_INTERVAL);
+            for (let i = 0; i < markersCount; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < 4; j++) {
+                    const cell = document.createElement('td');
+                    const button = document.createElement('button');
+                    button.classList.add('checkbox-btn');
+                    
+                    // Define as setas iniciais para cada botão
+                    const arrows = ['←', '↓', '↑', '→'];
+                    button.textContent = arrows[j];
+                    
+                    // Adiciona o evento de clique ao botão
+                    button.addEventListener('click', () => {
+                        button.classList.toggle('checked');
+                        
+                        // Verifica se o botão está "checado" ou não e ajusta o texto
+                        if (button.classList.contains('checked')) {
+                            button.textContent = ''; // Oculta o texto
+                        } else {
+                            button.textContent = arrows[j]; // Restaura a seta correspondente
+                        }
+                    });
+                    
+                    cell.appendChild(button);
+                    row.appendChild(cell);
+                }
+                markerTable.appendChild(row);
+            }
+        }
+
+        function highlightMarker() {
+            const markers = markerTable.querySelectorAll('tr');
+            const currentTimeMs = audio.currentTime * 1000;
+            const markerIndex = Math.floor(currentTimeMs / MARKER_INTERVAL);
+    
+            markers.forEach((row, index) => {
+                if (index === markerIndex) {
+                    row.classList.add('highlight');
+                } else {
+                    row.classList.remove('highlight');
+                }
+            });
+        }
+    
+        function saveTable() {
+            // Obter o nome do arquivo de música carregado
+            const musicInput = document.getElementById('music-input');
+            const musicFileName = musicInput.files[0]?.name || 'tabela_marcacoes'; // Nome padrão caso nenhum arquivo esteja carregado
+            const txtFileName = 'tabela_marcacoes_'+ musicFileName.replace(/\.[^/.]+$/, '') + '.txt'; // Substituir a extensão por .txt
+
+            const rows = markerTable.querySelectorAll('tr');
+            const data = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowData = Array.from(cells).map(cell => {
+                    const button = cell.querySelector('button');
+                    return button.classList.contains('checked') ? '1' : '0';
+                }).join(' ');
+                data.push(rowData);
+            });
+
+            const fileBlob = new Blob([data.join('\n')], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(fileBlob);
+            link.download = txtFileName; // Usar o nome do arquivo com base na música
+            link.click();
+        }
+    
+        function adjustTime(direction) {
+            let currentTimeInMs = audio.currentTime * 1000;
+            let adjustedTimeInMs;
+    
+            if (currentTimeInMs % MARKER_INTERVAL === 0) {
+                adjustedTimeInMs = direction === 'forward' ? currentTimeInMs + MARKER_INTERVAL : currentTimeInMs - MARKER_INTERVAL;
+            } else {
+                adjustedTimeInMs = direction === 'forward' 
+                    ? Math.ceil(currentTimeInMs / MARKER_INTERVAL) * MARKER_INTERVAL
+                    : Math.floor(currentTimeInMs / MARKER_INTERVAL) * MARKER_INTERVAL;
+            }
+    
+            audio.currentTime = adjustedTimeInMs / 1000;
+            updateProgressBar();
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+        }
+    
+        function changeSpeed() {
+            currentSpeedIndex = (currentSpeedIndex + 1) % speeds.length;
+            const newSpeed = speeds[currentSpeedIndex];
+            audio.playbackRate = newSpeed;
+            speedBtn.textContent = `Velocidade: ${newSpeed}x`;
+        }
+
+        function loadTableFromContent(content) {
+            const rows = content.split('\n'); // Divide o conteúdo em linhas
+            markerTable.innerHTML = ''; // Limpa a tabela atual
+
+            rows.forEach((row, rowIndex) => {
+                const rowElement = document.createElement('tr');
+                const cells = row.split(' '); // Divide cada linha em células
+
+                cells.forEach((cellValue, cellIndex) => {
+                    const cellElement = document.createElement('td');
+                    const button = document.createElement('button');
+                    button.classList.add('checkbox-btn');
+                    
+                    // Define as setas iniciais
+                    const arrows = ['←', '↓', '↑', '→'];
+                    button.textContent = arrows[cellIndex];
+
+                    // Se o valor for '1', o botão é "checado"
+                    if (cellValue === '1') {
+                        button.classList.add('checked');
+                        button.textContent = ''; // Oculta a seta ao marcar
+                    }
+
+                    // Adiciona o evento de clique ao botão
+                    button.addEventListener('click', () => {
+                        button.classList.toggle('checked');
+                        button.textContent = button.classList.contains('checked') ? '' : arrows[cellIndex];
+                    });
+
+                    cellElement.appendChild(button);
+                    rowElement.appendChild(cellElement);
+                });
+
+                markerTable.appendChild(rowElement);
+            });
+        }
+    
+        // Botões de retroceder e avançar
+        document.getElementById('backward-btn').addEventListener('click', () => {
+                    adjustTime('backward');
+                });
+            
+                document.getElementById('forward-btn').addEventListener('click', () => {
+                    adjustTime('forward');
+                });
+
+                document.getElementById('load-file-btn').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = e.target.result;
+                    loadTableFromContent(content);
+                };
+                reader.readAsText(file);
+            }
+        });
+    
+        speedBtn.addEventListener('click', changeSpeed);
+    
+        saveBtn.addEventListener('click', saveTable);
+
+
+        window.addEventListener('DOMContentLoaded', () => {
+            volumeControl.value = 0.1; // Inicializa o volume a 10%
+            audio.volume = 0.1;
+            volumeLevelDisplay.textContent = 'Volume: 10%';
+
+            loadfile.value = '';
+            musicInput.value = '';
+            generateTable(); // Gera a tabela ao carregar a página
+        });
+        window.addEventListener('DOMContentLoaded', () => {
+            
+        });
+    </script>
+    
+</body>
+</html>

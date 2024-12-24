@@ -232,6 +232,18 @@ router.get('/noheader/galeria/pokebsmp', (req, res) => {
     });
 });
 
+router.get('/teste2', (req, res) => {
+    const locals = {
+        title: "teste2",
+        description: "testetesteteste"
+    };
+
+    res.render('pages/experimentais/teste2', {
+        layout: 'layouts/noheader',
+        locals: locals
+    });
+});
+
 /* ------ SERVIÇO ------*/
 
 // Rota para página em manutenção
