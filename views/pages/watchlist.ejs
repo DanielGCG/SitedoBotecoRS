@@ -82,8 +82,8 @@
         <div id="popup-confirmacao-conteudo" class="popup-conteudo">
             <p>Tem certeza de que deseja excluir esta obra?</p>
             <div class="acoes">
-                <button id="confirmarDelecaoBtn">Sim, excluir</button>
-                <button onclick="fecharConfirmacao()">Cancelar</button>
+                <button id="confirmarDelecaoBtn" class="deletar">Sim, excluir</button>
+                <button onclick="fecharConfirmacao()" class="branco">Cancelar</button>
             </div>
         </div>
     </div>
@@ -216,9 +216,7 @@ function listarObras() {
 function abrirPopupAdicionar() {
     const popup = document.getElementById('popup');
     const popupConteudo = document.getElementById('popup-conteudo');
-    const imagemPopup = document.getElementById('imagem-popup');
-    const nomeImagem = document.getElementById('nome-imagem');
-
+    
     popupConteudo.innerHTML = `
         <h2>Enviar obra</h2>
         <form id="formUpload" style="margin-top: 10px;">
@@ -228,8 +226,8 @@ function abrirPopupAdicionar() {
             <label for="fileInput">Escolha uma imagem:</label>
             <input type="file" id="fileInput" accept="image/*" required>
             <br><br>
-            <button type="button" onclick="uploadObraFirebase()">Enviar</button>
-            <button type="button" onclick="fecharPopup()">Fechar</button>
+            <button type="button" class="branco" onclick="uploadObraFirebase()">Enviar</button>
+            <button type="button" class="branco" onclick="fecharPopup()">Fechar</button>
         </form>
     `;
 
