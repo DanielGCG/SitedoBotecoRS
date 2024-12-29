@@ -173,7 +173,7 @@
             // Caso tenha selecionado uma música da lista
             switch (selectedMusic) {
                 case 'BringMeToLife':
-                    audioElementPlayer.src = "/pages/minigames/setinha/musicas/360.mp3";
+                    audioElementPlayer.src = "/pages/minigames/setinha/musicas/BringMe.mp3";
                     audioElementSystem.src = "/pages/minigames/setinha/musicas/BringMe.mp3"; // Para análise
                     break;
                 case '360':
@@ -192,47 +192,71 @@
 
         // Iniciar o jogo com o áudio do sistema para análise, mas tocando a música para o jogador
         comecarJogo(audioElementSystem);
+        audioElementSystem.volume = 0;  // Música do sistema não será ouvida
         audioElementPlayer.play(); // Tocar a música para o jogador
+        audioElementPlayer.volume = 0.1;
     }
 
     function comecarJogo(audioElement) {
-        const analyser = audioContext.createAnalyser();
+        carregarAudio(audioElement.src).then(audioBuffer => {
+            const analyser = audioContext.createAnalyser();
                         
-        // Criando o AudioBufferSourceNode para análise, mas sem conectá-lo ao destino (sem reproduzir)
-        const bufferSource = audioContext.createBufferSource();
-        bufferSource.buffer = audioBuffer;
-        bufferSource.connect(analyser);
+            // Criando o AudioBufferSourceNode para análise, mas sem conectá-lo ao destino (sem reproduzir)
+            const bufferSource = audioContext.createBufferSource();
+            bufferSource.buffer = audioBuffer;
+            bufferSource.connect(analyser);
 
-        analyser.fftSize = 512;
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
+            analyser.fftSize = 512;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
 
-        function analyzeFrequencyRanges() {
-            analyser.getByteFrequencyData(dataArray);
+            function analyzeFrequencyRanges() {
+                analyser.getByteFrequencyData(dataArray);
 
-            // Define ranges for instruments
-            const ranges = [
-                dataArray.slice(5, 6),    // Bateria (Grave) [20 Hz - 150 Hz]
-                dataArray.slice(6, 35),   // Guitarra (Médio-Grave) [80 Hz - 500 Hz]
-                dataArray.slice(35, 42),  // Piano (Médio-Agudo) [100 Hz - 800 Hz]
-                dataArray.slice(42, 250)  // Batida Aguda (Agudo) [1 kHz - 5 kHz]
-            ];
+                // Define ranges for instruments
+                const ranges = [
+                    dataArray.slice(5, 6),    // Bateria (Grave) [20 Hz - 150 Hz]
+                    dataArray.slice(6, 35),   // Guitarra (Médio-Grave) [80 Hz - 500 Hz]
+                    dataArray.slice(35, 42),  // Piano (Médio-Agudo) [100 Hz - 800 Hz]
+                    dataArray.slice(42, 250)  // Batida Aguda (Agudo) [1 kHz - 5 kHz]
+                ];
 
-            // Map ranges to actions
-            ranges.forEach((range, index) => {
-                const average = range.reduce((a, b) => a + b, 0) / range.length;
-                const thresholds = [200, 200, 170, 80]; // Customize thresholds per instrument
+                // Map ranges to actions
+                ranges.forEach((range, index) => {
+                    const average = range.reduce((a, b) => a + b, 0) / range.length;
+                    const thresholds = [200, 200, 170, 80]; // Customize thresholds per instrument
 
-                if (average > thresholds[index]) {
-                    // Armazena as setas a serem criadas em vez de criar diretamente
-                    bufferizarSeta(index);
-                }
-            });
+                    if (average > thresholds[index]) {
+                        // Armazena as setas a serem criadas em vez de criar diretamente
+                        bufferizarSeta(index);
+                    }
+                });
 
-            requestAnimationFrame(analyzeFrequencyRanges);
-        }
+                requestAnimationFrame(analyzeFrequencyRanges);
+            }
 
-        analyzeFrequencyRanges();
+            analyzeFrequencyRanges();
+
+            // Iniciar a reprodução do áudio
+            bufferSource.start();
+        }).catch(err => {
+            console.error('Erro ao carregar o áudio:', err);
+        });
+    }
+
+    function carregarAudio(audioUrl) {
+        return new Promise((resolve, reject) => {
+            const request = new XMLHttpRequest();
+            request.open('GET', audioUrl, true);
+            request.responseType = 'arraybuffer';
+            request.onload = function () {
+                audioContext.decodeAudioData(request.response, function (buffer) {
+                    resolve(buffer);  // Retorna o AudioBuffer carregado
+                }, reject);
+            };
+            request.onerror = reject;
+            request.send();
+        });
     }
 
     // Definir intervalos mínimos separados para cada faixa
@@ -269,7 +293,7 @@
             novoElemento.style.left = '25%';  // Faixa 1 (Guitarra)
             novoElemento.style.top = `${elementoJogo.offsetHeight}px`;
             novoElemento.dataset.pista = 1;
-            novoElemento.textContent = '↑';  // Seta para Guitarra
+            novoElemento.textContent = '↓';  // Seta para Guitarra
             elementoJogo.appendChild(novoElemento);
             setas.push(novoElemento);
             lastCreationTimeGuitarra = currentTime;
@@ -284,7 +308,7 @@
             novoElemento.style.left = '50%';  // Faixa 2 (Piano)
             novoElemento.style.top = `${elementoJogo.offsetHeight}px`;
             novoElemento.dataset.pista = 2;
-            novoElemento.textContent = '↓';  // Seta para Piano
+            novoElemento.textContent = '↑';  // Seta para Piano
             elementoJogo.appendChild(novoElemento);
             setas.push(novoElemento);
             lastCreationTimePiano = currentTime;
@@ -354,7 +378,7 @@
             evento.preventDefault();
         }
 
-        const teclasSetas = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'];
+        const teclasSetas = ['ArrowLeft', 'ArrowDown', 'ArrowUp', 'ArrowRight'];
         const indicePista = teclasSetas.indexOf(evento.key);
 
         if (indicePista !== -1) {
@@ -421,6 +445,20 @@
         document.getElementById('musicForm').reset();
         loopJogo(); // Inicia o loop do jogo
     });
+
+    audioElementSystem.onload = () => {
+        fetch(audioElementSystem.src)
+            .then(response => response.arrayBuffer())
+            .then(data => {
+                audioContext.decodeAudioData(data, (buffer) => {
+                    audioBuffer = buffer;  // Define o buffer de áudio
+                    comecarJogo(audioElementSystem);  // Agora pode começar o jogo após carregar o buffer
+                }, (error) => {
+                    console.error('Erro ao decodificar o áudio', error);
+                });
+            });
+    };
+
 </script>
 
 

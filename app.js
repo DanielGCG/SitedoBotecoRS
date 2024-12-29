@@ -225,6 +225,77 @@ app.post('/galeriaEdit/:endereco/:nome/:nomenovo', async (req, res) => {
   }
 });
 
+app.get('/watchlistDownload', async (req, res) => {
+  try {
+    const watchlistRef = ref(storageFirebase, `listaFilmes`);
+    const result = await listAll(watchlistRef);
+
+    const obras = await Promise.all(
+      result.items.map(async (itemRef) => {
+        const url = await getDownloadURL(itemRef);
+        const nome = itemRef.name.split('.').slice(0, -1).join('.'); // Remove a extensão
+        return { nome, url };
+      })
+    );
+
+    res.json({ success: true, obras });
+  } catch (error) {
+    console.error('Erro ao carregar obras:', error);
+    res.status(500).json({ success: false, message: 'Erro ao carregar obras.' });
+  }
+});
+
+app.post('/watchlistDelete/:nome', upload.single('imagem'), async (req, res) => {
+  const nome = req.params.nome;
+
+  try {
+    // Referência ao arquivo no Firebase Storage
+    const fileRef = ref(storageFirebase, `listaFilmes/${nome}.png`);
+
+    // Deleta o arquivo
+    await deleteObject(fileRef);
+
+    // Responde com sucesso
+    res.status(200).json({ success: true, message: 'Arquivo deletado com sucesso!' });
+  } catch (error) {
+    
+    // Trata o erro e responde ao cliente
+    res.status(500).json({ success: false, message: 'Erro ao deletar a imagem. Tente novamente.' });
+  }
+});
+
+app.post('/watchlistUpload/:nome', upload.single('imagem'), async (req, res) => {
+  const nome = req.params.nome;
+  const imagem = req.file; // Aqui, `imagem` será o arquivo enviado pelo frontend via FormData
+
+  if (!imagem) {
+    return res.status(400).json({ success: false, message: 'Nenhum arquivo de imagem enviado.' });
+  }
+  try {
+    // Fazendo o tratamento da imagem antes do upload
+    const processedImageBuffer = await sharp(imagem.buffer)
+      .resize(478, 641, { // Limita a imagem a 478x641px, mantendo a proporção
+        fit: sharp.fit.inside,  // Ajusta para dentro do limite sem cortar
+        withoutEnlargement: true, // Não aumenta imagens pequenas
+      })
+      .toBuffer(); // Converte a imagem processada em buffer para o upload
+
+    const galeriaRef = ref(storageFirebase, `listaFilmes/${nome}.png`);
+    
+    // Fazendo o upload do arquivo para o Firebase Storage
+    const snapshot = await uploadBytes(galeriaRef, processedImageBuffer);
+
+    // Obtém a URL de download do arquivo enviado
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    // Envia a resposta com a URL do arquivo enviado
+    res.json({ success: true, message: 'Arquivo enviado com sucesso!', downloadURL });
+  } catch (error) {
+    console.error('Erro ao fazer upload para o Firebase:', error);
+    res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
+  }
+});
+
 // Rota principal
 app.use('/', require('./server/routes/main'));
 

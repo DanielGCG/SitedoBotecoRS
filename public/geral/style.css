@@ -9,6 +9,7 @@
     --fonte-padrao-tamanho: auto;
     --fonte-padrao-largura: <100>;
     --fonte-padrao-estilo: normal;
+    --cor-transparente: #f9f9f936;
 }
 
 html {

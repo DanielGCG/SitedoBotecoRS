@@ -21,12 +21,12 @@ router.get('/sugerir', (req, res) => {
 
 /* ------ WATCHLIST ------*/
 
-router.get('/lista', (req, res) => {
+router.get('/watchlist', (req, res) => {
     const locals = {
         title: "Lista de Filmes/Séries",
         description: "Oficial hein! :D"
     }
-    res.render('pages/lista', { locals: locals });
+    res.render('pages/watchlist', { locals: locals });
 });
 
 /* ------ Cutucar ------*/

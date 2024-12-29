@@ -1,0 +1,282 @@
+<style>
+    main{
+        text-align: center;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .tabela {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .conteudo, .adicionar-obra {
+        background-color: var(--cor-transparente);
+        padding-top: 10px;
+        padding-bottom: 10px;
+        text-align: center;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        height: 300px;
+    }
+
+    .conteudo .capa, .adicionar-obra .capa {
+        max-height: 80%;
+        max-width: 90%;
+        width: auto;
+        border-radius: 4px;
+        object-fit:contain;
+        cursor: url('/img/cursor-mao.png'), auto;
+    }
+
+    .conteudo h1, .adicionar-obra h1, .popup-conteudo #nome-imagem {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        text-transform: uppercase;
+        margin-left: 3px;
+        margin-right: 3px;
+    }
+
+    .status-acoes {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+</style>
+
+<link rel="stylesheet" href="/geral/popup.css">
+
+<main>
+    <h2 style="text-align: center; align-items: center;">WatchList do Boteco</h2>
+    
+    <div class="caixa-texto">
+        <h4>Quer sugerir filme/série?</h4>
+        <h5>clique na aba com +</h5>
+    </div>
+
+    <div class="container">
+        <div class="tabela">
+            <!-- Aqui serão inseridas as obras -->
+        </div>
+    </div>
+
+    <div id="popup" class="popup" style="display: none;">
+        <div id="popup-conteudo" class="popup-conteudo">
+            <!-- Aqui será inserido conteudo do popup -->
+        </div>
+    </div>
+
+    <!-- Popup de confirmação de exclusão -->
+    <div id="popup-confirmacao" class="popup" style="display: none;">
+        <div id="popup-confirmacao-conteudo" class="popup-conteudo">
+            <p>Tem certeza de que deseja excluir esta obra?</p>
+            <div class="acoes">
+                <button id="confirmarDelecaoBtn">Sim, excluir</button>
+                <button onclick="fecharConfirmacao()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+
+// Vetor de obras locais
+let obraslocais = [];
+
+document.addEventListener('DOMContentLoaded', () => carregarListaFirebase());
+
+async function carregarListaFirebase() {
+    try {
+        const response = await fetch(`/watchlistDownload`);
+        const data = await response.json();
+
+        if (!data.success) {
+            console.error('Erro ao carregar obras:', data.message);
+            return;
+        }
+
+        obraslocais = data.obras;
+        console.log('Obras carregadas com sucesso!');
+        listarObras();
+    } catch (error) {
+        console.error('Erro ao buscar obras do backend:', error);
+    }
+}
+
+async function deletarObraFireBase (nome) {
+    try {
+        const response = await fetch(`/watchlistDelete/${nome}`, {
+            method: 'POST',
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            console.error('Erro ao carregar obras:', data.message);
+            return;
+        }
+
+        obraslocais = obraslocais.filter(obra => obra.nome !== nome);
+        console.log('Removemos obra com sucesso!');
+        listarObras();
+    } catch (error) {
+        console.error('Erro ao buscar obras do backend:', error);
+    }
+}
+
+async function uploadObraFirebase() {
+    const fileInput = document.getElementById('fileInput');
+    const nomeObraInput = document.getElementById('nomeObra');
+    const nomeObra = nomeObraInput.value.trim();
+
+    if (fileInput.files.length === 0) {
+        exibirMensagem('Por favor, selecione um arquivo!', 'error');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    if (!file.type.startsWith('image/')) {
+        fecharPopup();
+        alert("Por favor, selecione um arquivo de imagem válido!");
+        exibirMensagem('Por favor, selecione um arquivo de imagem válido!', 'error');
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('imagem', file);
+
+        const response = await fetch(`/watchlistUpload/${nomeObra}`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            obraslocais.push({ nome: nomeObra, url: data.downloadURL });
+            listarObras();
+
+        } else {
+            exibirMensagem(data.message || 'Erro desconhecido.', 'error');
+        }
+
+        fecharPopup();
+        fileInput.value = '';
+        nomeObraInput.value = '';
+    } catch (error) {
+        console.error('Erro ao enviar o arquivo:', error);
+        exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
+    }
+}
+
+function listarObras() {
+    // Ordenar por ordem alfabética
+    obraslocais.sort((a, b) => a.nome.localeCompare(b.nome));
+
+    // Seleciona a tabela onde as obras serão exibidas
+    const tabela = document.querySelector('.tabela');
+    tabela.innerHTML = ''; // Limpa o conteúdo existente
+
+    const quadroInicial = document.createElement('div');
+    quadroInicial.className = 'conteudo';
+
+    quadroInicial.innerHTML = `
+            <img src="pages/lista/+.png" class="capa" alt="Adicionar" onclick="abrirPopupAdicionar()">
+            <h1>Adicionar</h1>
+        `;
+
+    tabela.appendChild(quadroInicial)
+
+    // Cria elementos para cada obra
+    obraslocais.forEach(obra => {
+        const conteudo = document.createElement('div');
+        conteudo.className = 'conteudo';
+
+        conteudo.innerHTML = `
+            <img src="${obra.url}" class="capa" alt="Capa de ${obra.nome}" onclick="abrirPopup('${obra.url}', '${obra.nome}')">
+            <h1>${obra.nome}</h1>
+        `;
+
+        tabela.appendChild(conteudo);
+    });
+}
+
+function abrirPopupAdicionar() {
+    const popup = document.getElementById('popup');
+    const popupConteudo = document.getElementById('popup-conteudo');
+    const imagemPopup = document.getElementById('imagem-popup');
+    const nomeImagem = document.getElementById('nome-imagem');
+
+    popupConteudo.innerHTML = `
+        <h2>Enviar obra</h2>
+        <form id="formUpload" style="margin-top: 10px;">
+            <label for="nomeObra">Nome da Obra:</label>
+            <input type="text" id="nomeObra" placeholder="nome da obra" required>
+            <br><br>
+            <label for="fileInput">Escolha uma imagem:</label>
+            <input type="file" id="fileInput" accept="image/*" required>
+            <br><br>
+            <button type="button" onclick="uploadObraFirebase()">Enviar</button>
+            <button type="button" onclick="fecharPopup()">Fechar</button>
+        </form>
+    `;
+
+    popup.style.display = 'flex';
+    popupConteudo.style.display = 'block';
+}
+
+function abrirPopup(url, nome) {
+    const popup = document.getElementById('popup');
+    popup.style.display = '';
+    const popupConteudo = document.getElementById('popup-conteudo');
+
+    popupConteudo.innerHTML = `
+        <img id="imagem-popup" src="${url}" alt="Imagem da obra">
+        <div class="acoes">
+            <button class="deletar" onclick="abrirConfirmacaoDelecao('${nome}')">Deletar</button>
+            <button class="branco" onclick="fecharPopup()">Fechar</button>
+        </div>
+        <div id="nome-imagem" style="margin-top: 10px;">${nome}</div>
+    `;
+
+    popup.style.display = 'flex';
+    const nomeImagem = document.getElementById('nome-imagem');
+}
+
+function abrirConfirmacaoDelecao(nome) {
+    const popupConfirmacao = document.getElementById('popup-confirmacao');
+    const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
+    confirmarDelecaoBtn.setAttribute('data-nome-obra', nome); // Passa o nome da obra
+    popupConfirmacao.style.display = 'flex';
+}
+
+function fecharPopup(){
+    const popup = document.getElementById('popup');
+    popup.style.display = 'none';
+}
+
+// Confirmar a exclusão diretamente ao clicar no botão
+document.getElementById('confirmarDelecaoBtn').addEventListener('click', async function() {
+    const nomeObra = this.getAttribute('data-nome-obra');
+    await deletarObraFireBase(nomeObra);
+    fecharConfirmacao();
+    fecharPopup();
+});
+
+function fecharConfirmacao() {
+    const popupConfirmacao = document.getElementById('popup-confirmacao');
+    popupConfirmacao.style.display = 'none';
+}
+</script>

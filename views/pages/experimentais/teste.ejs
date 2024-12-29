@@ -112,7 +112,7 @@
     </div>
 
 <script>
-const VELOCIDADE_SETAS = 1.2; // Velocidade das setas
+const VELOCIDADE_SETAS = 1.5; // Velocidade das setas
 const setasProgramadas = [];  // Armazenará as setas a serem criadas
 
 let tempoAcumulado = 0;
@@ -122,7 +122,8 @@ const elementoJogo = document.getElementById('jogo');
 const elementoPontuacao = document.getElementById('pontuacao');
 const linhaSuperior = document.getElementById('linha-superior');
 const linhaInferior = document.getElementById('linha-inferior');
-const tickInterval = 100; // Intervalo de tempo em milissegundos para o loop do jogo
+const tickInterval = 600; // Intervalo de tempo para o *tick* em milissegundos
+let tickAtual = 0; // Marca o tempo atual de tick
 
 // Função para ler o arquivo de texto que contém os tempos e setas
 function carregarSequenciaDeSetas(arquivo) {
@@ -131,13 +132,11 @@ function carregarSequenciaDeSetas(arquivo) {
         const conteudo = event.target.result;
         const linhas = conteudo.split('\n');
         for (const linha of linhas) {
-            const [setasString, tempoString] = linha.split(',');
-            if (setasString && tempoString) {
+            const [setasString] = linha.split(',');
+            if (setasString) {
                 const setasArray = setasString.split(' ').map(Number);
-                const tempo = parseInt(tempoString.trim());
 
                 setasProgramadas.push({
-                    tempo: tempo,
                     setas: setasArray  // [pista1, pista2, pista3, pista4]
                 });
             }
@@ -148,19 +147,15 @@ function carregarSequenciaDeSetas(arquivo) {
 
 // Função para liberar as setas com base no tempo
 function liberarSetas() {
-    const tempoAtual = Date.now() - tempoAcumulado;
-
-    // Verifica se chegou a hora de liberar novas setas
-    setasProgramadas.forEach((seta, index) => {
-        if (tempoAtual >= seta.tempo) {
-            for (let i = 0; i < 4; i++) {
-                if (seta.setas[i] === 1) {
-                    criarSeta(i);  // Cria a seta na pista correspondente
-                }
+    if (tickAtual < setasProgramadas.length) {
+        const seta = setasProgramadas[tickAtual];
+        for (let i = 0; i < 4; i++) {
+            if (seta.setas[i] === 1) {
+                criarSeta(i);  // Cria a seta na pista correspondente
             }
-            setasProgramadas.splice(index, 1);  // Remove a seta após criá-la
         }
-    });
+        tickAtual++; // Avança para a próxima linha do arquivo
+    }
 }
 
 // Função para criar a seta
@@ -226,7 +221,7 @@ function atualizarPontuacao() {
 function loopJogo() {
     liberarSetas();
     moverSetas();
-    requestAnimationFrame(loopJogo);
+    setTimeout(loopJogo, tickInterval); // Usa setTimeout para controlar o tick
 }
 
 // Função para começar o jogo
