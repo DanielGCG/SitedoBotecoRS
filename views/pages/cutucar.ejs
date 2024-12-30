@@ -14,10 +14,19 @@
     
         <!-- Campo de texto para escrever a mensagem -->
         <textarea class="entrada-texto-grande" id="messageText" placeholder="Escreva o resto da mensagem..."></textarea>
+
+        <div class="upload-container">
+            <label for="mediaFile" class="branco">
+                <span>📤 Upload de Mídia</span>
+            </label>
+            <input type="file" id="mediaFile" accept="image/*,video/*" style="display: none;" />
+            <span id="fileName" class="file-name"></span>
+        </div>
+        
     
         <!-- Botão para enviar o tweet -->
         <button id="tweetButton">Postar Tweet</button>
-    </div>    
+    </div>     
 
     <div class="post-twitter"></div>
 
@@ -149,44 +158,62 @@
         }
     });
 
+    document.getElementById('mediaFile').addEventListener('change', (event) => {
+        const fileNameSpan = document.getElementById('fileName');
+        const file = event.target.files[0];
+
+        fileNameSpan.textContent = file ? file.name : 'Nenhum arquivo selecionado';
+    });
+
     // Lógica para envio de tweet
-    document.getElementById('tweetButton').addEventListener('click', () => {
-        if (validacaoUsuario !== true){
-            alert("Usuário sem permissão para envio de tweet");
-            return false;
-        }
+    document.getElementById('tweetButton').addEventListener('click', async () => {
+    if (validacaoUsuario !== true) {
+        alert("Usuário sem permissão para envio de tweet");
+        return false;
+    }
 
-        const mention = mentionInput.value.trim();
-        const messageText = document.getElementById('messageText').value.trim();
+    const mention = mentionInput.value.trim();
+    const messageText = document.getElementById('messageText').value.trim();
+    const mediaFile = document.getElementById('mediaFile').files[0];
 
-        if (!mention || !messageText) {
-            alert('Por favor, preencha ambos os campos.');
-            return;
-        }
+    if (!mention || !messageText) {
+        alert('Por favor, preencha ambos os campos.');
+        return;
+    }
 
-        const tweetText = `☝${mention}, ${messageText}
+    if (!mediaFile) {
+        alert('Por favor, selecione um arquivo de mídia.');
+        return;
+    }
+
+    const tweetText = `☝${mention}, ${messageText}
 
 
 
 🔗https://www.boteco.live/cutucar`;
 
-        fetch('/tweet', {
+    const formData = new FormData();
+    formData.append('text', tweetText);
+    formData.append('media', mediaFile);
+
+    try {
+        const response = await fetch('/tweet-media', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text: tweetText }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Tweet enviado com sucesso!');
-                    document.getElementById('messageText').value = '';
-                    document.getElementById('mention').value = '';
-                } else {
-                    alert('Erro ao enviar o tweet.');
-                }
-            })
-            .catch(error => alert('Erro: ' + error.message));
-    });
+            body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('Tweet enviado com sucesso!');
+            document.getElementById('messageText').value = '';
+            document.getElementById('mention').value = '';
+            document.getElementById('mediaFile').value = '';
+        } else {
+            alert('Erro ao enviar o tweet: ' + data.message);
+        }
+    } catch (error) {
+        alert('Erro: ' + error.message);
+    }
+});
 </script>

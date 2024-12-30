@@ -38,14 +38,6 @@ app.set('view engine', 'ejs');
 // Serve arquivos estáticos
 app.use(express.static('public'));
 
-// Configuração do Twitter API
-const twitterClient = new TwitterApi({
-  appKey: process.env.TWITTER_APP_KEY,
-  appSecret: process.env.TWITTER_APP_SECRET,
-  accessToken: process.env.TWITTER_ACCESS_TOKEN,
-  accessSecret: process.env.TWITTER_ACCESS_SECRET,
-});
-
 // Configuração do Firebase API
 const firebaseConfig = {
   apiKey: process.env.FB_APIKEY,
@@ -59,18 +51,38 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const storageFirebase = getStorage(firebaseApp);
 
-// Rota para postar no Twitter
-app.post('/tweet', async (req, res) => {
-  const { text } = req.body; // Recebe o texto do tweet enviado na requisição
+// Configuração do Twitter API
+const twitterClient = new TwitterApi({
+  appKey: process.env.TWITTER_APP_KEY,
+  appSecret: process.env.TWITTER_APP_SECRET,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN,
+  accessSecret: process.env.TWITTER_ACCESS_SECRET,
+});
 
-  if (!text) {
-    return res.status(400).send('Texto do tweet é obrigatório.');
+// Rota para postar no Twitter com mídia
+app.post('/tweet-media', upload.single('media'), async (req, res) => {
+  const { text } = req.body; // Texto do tweet
+  const media = req.file; // Arquivo de mídia enviado no campo 'media'
+
+  if (!media) {
+    return res.status(400).json({ success: false, message: 'Arquivo de mídia é obrigatório.' });
   }
 
   try {
-    const tweet = await twitterClient.v2.tweet(text); // Envia o tweet com o texto
-    res.json({ success: true, message: 'Tweet enviado com sucesso!' });
+    // Upload da mídia para o Twitter
+    const mediaId = await twitterClient.v1.uploadMedia(media.buffer, {
+      mimeType: media.mimetype, // Tipo MIME do arquivo
+    });
+
+    // Publicação do tweet com texto e mídia
+    const tweet = await twitterClient.v2.tweet({
+      text,
+      media: { media_ids: [mediaId] },
+    });
+
+    res.json({ success: true, message: 'Tweet enviado com sucesso!', tweet });
   } catch (error) {
+    console.error('Erro ao postar tweet com mídia:', error);
     res.status(500).json({ success: false, message: 'Erro ao postar o tweet: ' + error.message });
   }
 });

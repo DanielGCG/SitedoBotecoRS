@@ -102,3 +102,36 @@ main {
     background-color: #f0f0f0;
     cursor: url('/img/cursor-mao.png'), auto;
 }
+
+/* Container para alinhar os elementos */
+.upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Estilo do botão de upload */
+.branco {
+    padding: 10px 20px;
+    background-color: white; /* Branco */
+    color: #333; /* Cor do texto */
+    border: 1px solid #ccc; /* Borda clara */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 12px;
+}
+
+/* Efeito hover no botão */
+.branco:hover {
+    background-color: #f1f1f1; /* Tom mais claro no hover */
+    cursor: url('/img/cursor-mao.png'), auto;
+}
+
+/* Estilo para o nome do arquivo */
+.file-name {
+    font-size: 12px;
+    color: #555555;
+    font-style: italic;
+}
