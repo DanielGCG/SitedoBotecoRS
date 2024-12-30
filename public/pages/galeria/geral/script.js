@@ -98,7 +98,6 @@ async function uploadFile() {
     const fileInput = document.getElementById('fileInput');
     const nomeObraInput = document.getElementById('nomeObra');
     const nomeObra = nomeObraInput.value.trim();
-    const nomeArquivo = nomeObra + ".png";
 
     if (fileInput.files.length === 0) {
         exibirMensagem('Por favor, selecione um arquivo!', 'error');
@@ -117,7 +116,7 @@ async function uploadFile() {
         const formData = new FormData();
         formData.append('imagem', file);
 
-        const response = await fetch(`/galeriaUpload/${endereco}/${nomeArquivo}`, {
+        const response = await fetch(`/galeriaUpload/${endereco}/${nomeObra}.png`, {
             method: 'POST',
             body: formData,
         });
@@ -198,7 +197,7 @@ async function editarNomeObra(nomeAtual, url) {
         return;
     }
 
-    const invalidChars = /\//;
+    const invalidChars = /[<>:"/\\|?*~]/;
     if (invalidChars.test(novoNome)) {
         exibirMensagem('O nome contém caracteres inválidos.', 'error');
         return;
