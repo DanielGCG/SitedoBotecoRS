@@ -198,7 +198,7 @@ async function editarNomeObra(nomeAtual, url) {
         return;
     }
 
-    const invalidChars = /[<>:"/\\|?*~]/;
+    const invalidChars = /\//;
     if (invalidChars.test(novoNome)) {
         exibirMensagem('O nome contém caracteres inválidos.', 'error');
         return;
