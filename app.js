@@ -64,26 +64,29 @@ app.post('/tweet-media', upload.single('media'), async (req, res) => {
   const { text } = req.body; // Texto do tweet
   const media = req.file; // Arquivo de mídia enviado no campo 'media'
 
-  if (!media) {
-    return res.status(400).json({ success: false, message: 'Arquivo de mídia é obrigatório.' });
-  }
-
   try {
-    // Upload da mídia para o Twitter
-    const mediaId = await twitterClient.v1.uploadMedia(media.buffer, {
-      mimeType: media.mimetype, // Tipo MIME do arquivo
-    });
+    let mediaId;
 
-    // Publicação do tweet com texto e mídia
-    const tweet = await twitterClient.v2.tweet({
-      text,
-      media: { media_ids: [mediaId] },
-    });
+    if (media) {
+        // Upload da mídia para o Twitter, se houver
+        mediaId = await twitterClient.v1.uploadMedia(media.buffer, {
+            mimeType: media.mimetype, // Tipo MIME do arquivo
+        });
+    }
+
+    // Publicação do tweet com ou sem mídia
+    const tweetOptions = { text };
+
+    if (mediaId) {
+        tweetOptions.media = { media_ids: [mediaId] };
+    }
+
+    const tweet = await twitterClient.v2.tweet(tweetOptions);
 
     res.json({ success: true, message: 'Tweet enviado com sucesso!', tweet });
   } catch (error) {
-    console.error('Erro ao postar tweet com mídia:', error);
-    res.status(500).json({ success: false, message: 'Erro ao postar o tweet: ' + error.message });
+      console.error('Erro ao postar tweet com mídia:', error);
+      res.status(500).json({ success: false, message: 'Erro ao postar o tweet: ' + error.message });
   }
 });
 

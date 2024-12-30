@@ -181,11 +181,6 @@
         return;
     }
 
-    if (!mediaFile) {
-        alert('Por favor, selecione um arquivo de mídia.');
-        return;
-    }
-
     const tweetText = `☝${mention}, ${messageText}
 
 
@@ -194,7 +189,10 @@
 
     const formData = new FormData();
     formData.append('text', tweetText);
-    formData.append('media', mediaFile);
+
+    if (mediaFile) {
+        formData.append('media', mediaFile); // Adicionar mídia somente se for enviada
+    }
 
     try {
         const response = await fetch('/tweet-media', {
