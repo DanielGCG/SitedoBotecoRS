@@ -82,136 +82,10 @@ function resetarValores() {
     localStorage.clear();
 }
 
-// Função para calcular multiplicador baseado no multiplicador
-function calcularMultiplicador(multiplicador) {
-    return 1 + multiplicador / 100;
-}
-
-// Função para calcular CPS médio (cliques por segundo)
-function calcularCpsMedia() {
-    const agora = Date.now();
-
-    // Filtra cliques dentro dos últimos 3 segundos
-    clickTimestamps = clickTimestamps.filter(timestamp => agora - timestamp <= CPS_INTERVAL);
-    if (clickTimestamps.length > 1000) {
-        clickTimestamps.splice(0, clickTimestamps.length - 1000);
-    }    
-
-    // Retorna a média de cliques por segundo
-    return clickTimestamps.length / (CPS_INTERVAL / 1000);
-}
-
-// Função para adicionar cookies automáticos ao total atual
-function adicionarCookiesAutomaticos() {
-    let totalCookies = cookiesPorSegundo * calcularMultiplicador(multiplicadorCookie);
-
-    quantidadeCookies += totalCookies; // Atualiza a quantidade atual de cookies
-    quantidadeTotalCookies += totalCookies;     // Atualiza a quantidade absoluta total de cookies
-    document.getElementById("mostrador-de-cookies").textContent = `Você tem ${quantidadeCookies.toFixed(0)} cookies!`;
-    localStorage.setItem("quantidadeCookies", Math.floor(quantidadeCookies));
-    localStorage.setItem("quantidadeTotalCookies", quantidadeTotalCookies);
-
-    // Verifica upgrades automaticamente ao exibir os cookies
-    if (!document.getElementById('lista-click').innerHTML) {
-        exibirOfertaClick();
-    }
-    if (!document.getElementById('lista-maquina').innerHTML) {
-        exibirOfertaMaquina();
-    }
-
-    exibirAnimacaoCookies(totalCookies);
-}
-
-// Função de anti-cheating
-function antiCheating(cpsMedio) {
-    const agora = Date.now();
-
-    // Ignora análise se o CPS médio é 1 ou menor (usuário AFK ou inativo)
-    if (cpsMedio <= 1) return;
-
-    // Outra condição de anticheat: CPS médio muito alto
-    if (cpsMedio >= 13) {
-        document.getElementById("popup-anticheating").style.display = "flex";
-        return
-    }
-
-    // Adiciona o CPS atual ao array e mantém o histórico apenas dos últimos 5 segundos
-    ultimosCps.push({ timestamp: agora, cps: cpsMedio });
-    ultimosCps = ultimosCps.filter(entry => agora - entry.timestamp <= 5000);
-
-    // Verifica a constância dos valores de CPS (analisamos apenas se há múltiplos registros)
-    if (ultimosCps.length > 500) {
-        const variacoes = ultimosCps.slice(1).map((entry, index) => 
-            Math.abs(entry.cps - ultimosCps[index].cps)
-        );
-
-        // Condição: todas as variações entre registros sucessivos são menores ou iguais a 0.5
-        const todasVariacoesBaixas = variacoes.every(variacao => variacao <= 0.5);
-
-        // Ativa o anticheat se as variações forem consistentemente pequenas
-        if (todasVariacoesBaixas) {
-            document.getElementById("popup-anticheating").style.display = "flex";
-            return;
-        }
-    }
-}
-
-// Função para atualizar o CPS (cookies por segundo)
-function atualizarCps() {
-    const cpsMediaClicks = calcularCpsMedia();
-    antiCheating(cpsMediaClicks);
-    const cpsTotal = cpsMediaClicks + cookiesPorSegundo * calcularMultiplicador(multiplicadorCookie); // Soma automática + média
-    document.getElementById("cps").textContent = `${cpsTotal.toFixed(1)} cookies/s`;
-}
-
 // Atualiza monitor de CPS a cada 100ms
 setInterval(() => {
     atualizarCps(); // Atualiza a exibição do CPS
 }, 100);
-
-// Função para atualizar o indicador de multiplicador
-function atualizarIndicadorMultiplicador() {
-    document.getElementById("indicador-multiplicador-cookies").textContent = `Multiplicador cookie: ${multiplicadorCookie + 100}%`;
-}
-
-// Função para atualizar o indicador de cookies por segundo
-function atualizarIndicadorMaquina() {
-    document.getElementById("indicador-maquina-cookies").textContent = `Máquina de cookies: ${cookiesPorSegundo.toFixed(1)} cookies/s`;
-}
-
-// Função para atualizar o preço do upgrade de click
-function atualizarPrecoClick(upgrade) {
-    return upgrade = upgrade * 1.75;
-}
-
-// Função para atualizar o preço do upgrade de maquina
-function atualizarPrecoMaquina(upgrade) {
-    return upgrade = upgrade * 2;
-}
-
-// Função para exibir a oferta de upgrade de click
-function exibirOfertaClick() {
-    const listaClicks = document.getElementById('lista-click');
-    const novoClick = document.createElement('div');
-    novoClick.classList.add('upgrade-item');
-    novoClick.innerHTML = `
-        <p>Aumentar multiplicador cookie em 20%!</p>
-        <button class="comprar-click">Comprar por ${precoClick.toFixed(2)} cookies</button>
-    `;
-    listaClicks.appendChild(novoClick);
-}
-
-// Função para exibir a oferta de upgrade de máquina
-function exibirOfertaMaquina() {
-    const listaMaquina = document.getElementById('lista-maquina');
-    const novaMaquina = document.createElement('div');
-    novaMaquina.classList.add('upgrade-item');
-    novaMaquina.innerHTML = `
-        <p>Aumentar máquina de cookies em 30%!</p>
-        <button class="comprar-maquina">Comprar por ${precoMaquina.toFixed(2)} cookies</button>
-    `;
-    listaMaquina.appendChild(novaMaquina);
-}
 
 // Função para exibir uma quantidade de imagens animadas
 function exibirAnimacaoCookies(quantidade) {
@@ -315,18 +189,6 @@ document.getElementById("cookie").addEventListener("click", () => {
         exibirOfertaMaquina();
     }
 });
-
-function botaoReset(){
-    document.getElementById("popup-reset").style.display = "flex";
-}
-
-function fecharPopupReset(){
-    document.getElementById("popup-reset").style.display = 'none';
-}
-
-function fecharPopupAnticheating(){
-    document.getElementById("popup-anticheating").style.display = 'none';
-}
 
 // Adiciona os cookies da máquina a cada segundo
 setInterval(() => {

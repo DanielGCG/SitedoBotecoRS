@@ -167,49 +167,59 @@
 
     // Lógica para envio de tweet
     document.getElementById('tweetButton').addEventListener('click', async () => {
-    if (validacaoUsuario !== true) {
-        alert("Usuário sem permissão para envio de tweet");
-        return false;
-    }
+        if (validacaoUsuario !== true) {
+            alert("Usuário sem permissão para envio de tweet");
+            return false;
+        }
 
-    const mention = mentionInput.value.trim();
-    const messageText = document.getElementById('messageText').value.trim();
-    const mediaFile = document.getElementById('mediaFile').files[0];
+        const mention = mentionInput.value.trim();
+        const messageText = document.getElementById('messageText').value.trim();
+        const mediaFile = document.getElementById('mediaFile').files[0];
 
-    if (!mention || !messageText) {
-        alert('Por favor, preencha ambos os campos.');
-        return;
-    }
+        if (!mention || !messageText) {
+            alert('Por favor, preencha ambos os campos.');
+            return;
+        }
 
-    const tweetText = `☝${mention}, ${messageText}
+        const tweetText = `☝${mention}, ${messageText}
 
 
 
 🔗https://www.boteco.live/cutucar`;
 
-    const formData = new FormData();
-    formData.append('text', tweetText);
+        const formData = new FormData();
+        formData.append('text', tweetText);
 
-    if (mediaFile) {
-        formData.append('media', mediaFile); // Adicionar mídia somente se for enviada
-    }
-
-    try {
-        const response = await fetch('/tweet-media', {
-            method: 'POST',
-            body: formData,
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            alert('Tweet enviado com sucesso!');
-            document.getElementById('messageText').value = '';
-            document.getElementById('mention').value = '';
-            document.getElementById('mediaFile').value = '';
-        } else {
-            alert('Erro ao enviar o tweet: ' + data.message);
+        if (mediaFile) {
+            formData.append('media', mediaFile); // Adicionar mídia somente se for enviada
         }
+
+        try {
+            const response = await fetch('/tweet-media', {
+                method: 'POST',
+                body: formData,
+            });
+            
+            const data = await response.json();
+
+            if (data.status === 429) {
+                alert('Limite de requisições atingido. Por favor, tente novamente mais tarde.');
+                return;
+            }
+
+            if (data.success) {
+                alert('Tweet enviado com sucesso!');
+                document.getElementById('messageText').value = '';
+                document.getElementById('mention').value = '';
+                document.getElementById('mediaFile').value = '';
+            } else {
+                if (data.message === 'Erro ao postar o tweet: Request failed with code 429' || data.message === 'Erro ao postar tweet:Request failed with code 429'){
+                    alert("Limite de Cutucadas por dia atingido! Espere para poder cutucar novamente.");
+                }
+                else{
+                    alert(data.message);
+                }
+            }
     } catch (error) {
         alert('Erro: ' + error.message);
     }

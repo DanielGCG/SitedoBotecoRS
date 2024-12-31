@@ -59,34 +59,72 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
+// Função para adicionar log no Firebase Storage
+async function appendLogToFirebaseStorage(content) {
+  const logFileRef = ref(storageFirebase, 'logs/tweet_logs.txt');
+  let existingLog = '';
+
+  try {
+    // Tenta baixar o arquivo de log existente
+    const logFileBuffer = await logFileRef.getBytes();
+    existingLog = logFileBuffer.toString('utf-8');
+  } catch (error) {
+    if (error.code !== 'storage/object-not-found') {
+      console.error('Erro ao ler o log:', error);
+      throw error;
+    }
+  }
+
+  // Adiciona o novo conteúdo ao log existente
+  const newLog = `${existingLog}${content}\n`;
+  const logBuffer = Buffer.from(newLog, 'utf-8');
+
+  try {
+    await uploadBytes(logFileRef, logBuffer);
+    console.log('Log atualizado com sucesso.');
+  } catch (uploadError) {
+    console.error('Erro ao atualizar o log:', uploadError);
+  }
+}
+
 // Rota para postar no Twitter com mídia
 app.post('/tweet-media', upload.single('media'), async (req, res) => {
-  const { text } = req.body; // Texto do tweet
-  const media = req.file; // Arquivo de mídia enviado no campo 'media'
+  const { text } = req.body;
+  const media = req.file;
+  const userIp = req.ip; // Obtém o IP do usuário
+  const currentDate = new Date().toISOString(); // Obtém a data atual
 
   try {
     let mediaId;
 
     if (media) {
-        // Upload da mídia para o Twitter, se houver
-        mediaId = await twitterClient.v1.uploadMedia(media.buffer, {
-            mimeType: media.mimetype, // Tipo MIME do arquivo
-        });
+      // Upload da mídia para o Twitter, se houver
+      mediaId = await twitterClient.v1.uploadMedia(media.buffer, {
+        mimeType: media.mimetype,
+      });
     }
 
     // Publicação do tweet com ou sem mídia
     const tweetOptions = { text };
 
     if (mediaId) {
-        tweetOptions.media = { media_ids: [mediaId] };
+      tweetOptions.media = { media_ids: [mediaId] };
     }
 
     const tweet = await twitterClient.v2.tweet(tweetOptions);
 
+    // Conteúdo do log
+    const logContent = media
+      ? `[${currentDate}] IP: ${userIp}, Texto: "${text}" (Tweet com mídia)`
+      : `[${currentDate}] IP: ${userIp}, Texto: "${text}"`;
+
+    // Adicionar ao log no Firebase Storage
+    await appendLogToFirebaseStorage(logContent);
+
     res.json({ success: true, message: 'Tweet enviado com sucesso!', tweet });
   } catch (error) {
-      console.error('Erro ao postar tweet com mídia:', error);
-      res.status(500).json({ success: false, message: 'Erro ao postar o tweet: ' + error.message });
+    console.error('Erro ao postar tweet:', error);
+    res.status(500).json({ success: false, message: 'Erro ao postar o tweet: ' + error.message });
   }
 });
 
