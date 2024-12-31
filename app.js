@@ -59,34 +59,6 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
-// Função para adicionar log no Firebase Storage
-async function appendLogToFirebaseStorage(content) {
-  const logFileRef = ref(storageFirebase, 'logs/tweet_logs.txt');
-  let existingLog = '';
-
-  try {
-    // Tenta baixar o arquivo de log existente
-    const logFileBuffer = await logFileRef.getBytes();
-    existingLog = logFileBuffer.toString('utf-8');
-  } catch (error) {
-    if (error.code !== 'storage/object-not-found') {
-      console.error('Erro ao ler o log:', error);
-      throw error;
-    }
-  }
-
-  // Adiciona o novo conteúdo ao log existente
-  const newLog = `${existingLog}${content}\n`;
-  const logBuffer = Buffer.from(newLog, 'utf-8');
-
-  try {
-    await uploadBytes(logFileRef, logBuffer);
-    console.log('Log atualizado com sucesso.');
-  } catch (uploadError) {
-    console.error('Erro ao atualizar o log:', uploadError);
-  }
-}
-
 // Rota para postar no Twitter com mídia
 app.post('/tweet-media', upload.single('media'), async (req, res) => {
   const { text } = req.body;
@@ -112,14 +84,6 @@ app.post('/tweet-media', upload.single('media'), async (req, res) => {
     }
 
     const tweet = await twitterClient.v2.tweet(tweetOptions);
-
-    // Conteúdo do log
-    const logContent = media
-      ? `[${currentDate}] IP: ${userIp}, Texto: "${text}" (Tweet com mídia)`
-      : `[${currentDate}] IP: ${userIp}, Texto: "${text}"`;
-
-    // Adicionar ao log no Firebase Storage
-    await appendLogToFirebaseStorage(logContent);
 
     res.json({ success: true, message: 'Tweet enviado com sucesso!', tweet });
   } catch (error) {
