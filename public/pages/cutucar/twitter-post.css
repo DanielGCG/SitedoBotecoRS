@@ -82,6 +82,17 @@
     top: 5px; /* Move apenas o ícone SVG para baixo */
 }
 
+@media (max-width: 768px) {
+    .twitter-draft-container {
+        width: 350px;
+        background-color: white;
+        border: 1px solid #e1e8ed;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+}
+
 .twitter-draft-footer {
     display: flex;
     justify-content: space-between;
