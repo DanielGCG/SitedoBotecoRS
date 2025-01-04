@@ -57,7 +57,6 @@ da página Filme da Galera, para o trabalho final de Algebra Linear.
 
 ## 📞 Contato
 
-Caso tenha dúvidas ou sugestões, entre em contato comigo:
 - **E-mail:** danielgcgoficial@gmail.com
 - **Discord:** @danielgcg
 - **GitHub:** [Daniel Goulart](https://github.com/danielgcg)
