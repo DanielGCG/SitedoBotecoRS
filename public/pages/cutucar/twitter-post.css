@@ -1,0 +1,109 @@
+.twitter-draft-container {
+    width: 440px;
+    background-color: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    }
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.username {
+    font-size: 14px;
+    color: #657786;
+}
+
+.tweet-input {
+    width: 100%;
+    height: 30px;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 16px;
+    resize: none;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji";
+    margin-bottom: 10px;
+}
+
+.tweet-input-grande {
+    width: 100%;
+    height: 140px;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 16px;
+    resize: none;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji";
+}
+
+.char-count {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    text-align: end;
+}
+
+#char-count-text {
+    font-weight: bold;
+}
+
+.media-preview img {
+    max-width: 100%;    /* Limita a largura ao tamanho máximo do contêiner */
+    margin-top: 10px;
+    border-radius: 8px;
+    width: auto;        /* Mantém as proporções originais */
+    height: auto;       /* Mantém as proporções originais */
+    object-fit: contain; /* Garante que a imagem se ajuste dentro do espaço sem distorcer */
+}
+
+.media-preview video {
+    max-width: 100%;    /* Limita a largura ao tamanho máximo do contêiner */
+    margin-top: 10px;
+    border-radius: 8px;
+    width: auto;        /* Mantém as proporções originais */
+    height: auto;       /* Mantém as proporções originais */
+    object-fit: contain; /* Garante que a imagem se ajuste dentro do espaço sem distorcer */
+}
+
+.upload-container svg {
+    position: relative;
+    top: 5px; /* Move apenas o ícone SVG para baixo */
+}
+
+.twitter-draft-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.twitter-draft-footer-midia {
+    display: flex;
+    justify-content: start;
+    gap: 10px;
+}
+
+.post-button {
+    background-color: #1da1f2;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.post-button:hover {
+    background-color: #0d8cd9;
+}

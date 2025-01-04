@@ -7,28 +7,79 @@
     </div>
 
     <div class="caixa-texto">
-        <!-- Campo de texto para o @mencionado -->
-        <input class="entrada-texto" type="text" id="mention" placeholder="Digite @marcado" autocomplete="off" />
-        <!-- Div para mostrar sugestões -->
-        <div id="suggestions" class="suggestions"></div>
-    
-        <!-- Campo de texto para escrever a mensagem -->
-        <textarea class="entrada-texto-grande" id="messageText" placeholder="Escreva o resto da mensagem..."></textarea>
+        <div class="twitter-draft-container">
+            <div class="header">
+                <img src="pages/cutucar/user-avatar.png" class="avatar">
+                <span class="username">@botdoboteco</span>
+            </div>
+            <!-- Campo de texto para o @mencionado -->
+            <input class="tweet-input" type="text" id="mention" placeholder="Digite @cutucado" autocomplete="off" />
 
-        <div class="upload-container">
-            <label for="mediaFile" class="branco">
-                <span>📤 Upload de Mídia</span>
-            </label>
-            <input type="file" id="mediaFile" accept="image/*,video/*" style="display: none;" />
-            <span id="fileName" class="file-name"></span>
+            <!-- Div para mostrar sugestões -->
+            <div id="suggestions" class="suggestions"></div>
+            
+            <!-- Campo de texto -->
+            <textarea class="tweet-input-grande" id="messageText" placeholder="resto da mensagem..." maxlength="220"></textarea>
+            <div id="char-count" class="char-count">
+                <span id="char-count-text">0/220</span>
+            </div>
+
+            <!-- Preview de Mídia -->
+            <div id="media-preview" class="media-preview"></div>
+
+            <div class="twitter-draft-footer">
+                <div class="twitter-draft-footer-midia">
+                    <!-- Botão para fazer upload de midia -->
+                    <div class="upload-container">
+                        <label for="mediaFile" style="cursor: url('/img/cursor-mao.png'), auto;">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg" 
+                                viewBox="0 0 24 24" 
+                                fill="#1D9BF0"
+                                width="24" 
+                                height="24"
+                                aria-hidden="false">
+                                <path d="M3 5.5C3 4.119 4.119 3 5.5 3h13C19.881 3 21 4.119 21 5.5v13c0 1.381-1.119 2.5-2.5 2.5h-13C4.119 21 3 19.881 3 18.5v-13zM5.5 5c-.276 0-.5.224-.5.5v9.086l3-3 3 3 5-5 3 3V5.5c0-.276-.224-.5-.5-.5h-13zM19 15.414l-3-3-5 5-3-3-3 3V18.5c0 .276.224.5.5.5h13c.276 0 .5-.224.5-.5v-3.086zM9.75 7C8.784 7 8 7.784 8 8.75s.784 1.75 1.75 1.75 1.75-.784 1.75-1.75S10.716 7 9.75 7z"></path>
+                            </svg>
+                        </label>
+                        <input type="file" id="mediaFile" accept="image/*,video/*" style="display: none;" onchange="previewMedia()" />
+                    </div>
+
+                    <!-- Botão para fazer upload de gif -->
+                    <div class="upload-container">
+                        <label for="selectGifButton" style="cursor: url('/img/cursor-mao.png'), auto;">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg" 
+                                viewBox="0 0 24 24" 
+                                fill="#1D9BF0"
+                                width="24" 
+                                height="24"
+                                aria-hidden="false">
+                                <path d="M3 5.5C3 4.119 4.12 3 5.5 3h13C19.88 3 21 4.119 21 5.5v13c0 1.381-1.12 2.5-2.5 2.5h-13C4.12 21 3 19.881 3 18.5v-13zM5.5 5c-.28 0-.5.224-.5.5v13c0 .276.22.5.5.5h13c.28 0 .5-.224.5-.5v-13c0-.276-.22-.5-.5-.5h-13zM18 10.711V9.25h-3.74v5.5h1.44v-1.719h1.7V11.57h-1.7v-.859H18zM11.79 9.25h1.44v5.5h-1.44v-5.5zm-3.07 1.375c.34 0 .77.172 1.02.43l1.03-.86c-.51-.601-1.28-.945-2.05-.945C7.19 9.25 6 10.453 6 12s1.19 2.75 2.72 2.75c.85 0 1.54-.344 2.05-.945v-2.149H8.38v1.032H9.4v.515c-.17.086-.42.172-.68.172-.76 0-1.36-.602-1.36-1.375 0-.688.6-1.375 1.36-1.375z"></path>
+                            </svg>
+                            <button id="selectGifButton" style="display: none;"></button>
+                        </label>
+                    </div>
+                </div>
+                <!-- Botão para enviar o tweet -->
+                <button id="tweetButton" class="post-button">Cutucar</button>
+            </div>
         </div>
-        
-    
-        <!-- Botão para enviar o tweet -->
-        <button id="tweetButton">Postar Tweet</button>
-    </div>     
+    </div>
 
-    <div class="post-twitter"></div>
+    <!-- Popup para exibir a imagem com fundo desfocado e botões -->
+    <div id="popup-gif" class="popup-gif" style="display: none;">
+        <div id="popup-gif-conteudo" class="popup-gif-conteudo">
+            <div id="popup-gif-gifs">
+            </div>
+        <div class="acoes">
+            <button class="branco" onclick="fecharPopup()">Fechar</button>
+        </div>
+    </div>
+
+    <div id="loading" style="display: none;">
+        <img src="/img/carregando.gif" alt="Carregando..." />
+    </div>
 
     <!-- Popup para exibir a imagem com fundo desfocado e botões -->
     <div id="popup-senha" class="popup">
@@ -46,7 +97,8 @@
 </main>
 
 <link rel="stylesheet" href="/geral/popup.css">
-<link rel="stylesheet" href="/pages/cutucar/style.css">
+<link rel="stylesheet" href="/pages/cutucar/cutucar.css">
+<link rel="stylesheet" href="/pages/cutucar/twitter-post.css">
 
 <script>
     const suggestionsList = [
@@ -79,6 +131,113 @@
         '@yuzzu_94'
     ];
 
+    const apiKey = 'EM9bJD4ixcjo1H4gqPgH6vJ4g3cp1PK6';
+    const giphyUrl = 'https://api.giphy.com/v1/gifs/search';
+
+    // Selecionar elementos
+    const selectGifButton = document.getElementById('selectGifButton');
+    const mediaFileInput = document.getElementById('mediaFile');
+    const popupGif = document.getElementById('popup-gif');
+    const popupGifContainer = document.getElementById('popup-gif-gifs');
+
+    // Exibir uma janela/modal para buscar GIFs
+    selectGifButton.addEventListener('click', async () => {
+        // Criação de uma caixa de pesquisa de GIFs
+        const searchTerm = prompt('Digite o termo para buscar GIFs:');
+        if (!searchTerm) return; // Se o termo for vazio, não faz nada
+
+        try {
+            // Fazer a requisição para a API do Giphy
+            const response = await fetch(`${giphyUrl}?api_key=${apiKey}&q=${searchTerm}&limit=8`);
+            const data = await response.json();
+
+            // Mostrar os GIFs encontrados
+            const gifs = data.data;
+            if (gifs.length > 0) {
+                popupGif.style.display = "";
+                const gifUrls = gifs.map(gif => gif.images.fixed_height.url); // URLs dos GIFs
+
+                // Exibir GIFs na interface
+                let gifHtml = '';
+                gifUrls.forEach(gifUrl => {
+                    gifHtml += `<img src="${gifUrl}" class="gif-preview" onclick="setGif('${gifUrl}')">`;
+                });
+                popupGifContainer.innerHTML = gifHtml;
+            } else {
+                alert('Nenhum GIF encontrado!');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar GIFs:', error);
+            alert('Erro ao buscar GIFs.');
+        }
+    });
+
+    // Função para baixar o GIF e tratá-lo como um arquivo
+    async function setGif(gifUrl) {
+        try {
+            // Baixar o conteúdo do GIF
+            const response = await fetch(gifUrl);
+            if (!response.ok) throw new Error('Falha ao baixar o GIF');
+            
+            // Obter o conteúdo como um Blob (binário)
+            const blob = await response.blob();
+            
+            // Criar um File a partir do Blob (usando o nome do arquivo original)
+            const mediaFile = new File([blob], 'gif.gif', { type: 'image/gif' });
+            
+            // Atualizar o input de arquivo com o novo arquivo
+            mediaFileInput.files = createFileList(mediaFile);
+            
+            // Atualizar o preview de mídia
+            popupGif.style.display = "none";
+            previewMedia();
+        } catch (error) {
+            console.error('Erro ao baixar o GIF:', error);
+            alert('Erro ao baixar o GIF.');
+        }
+    }
+
+    // Função para criar uma lista de arquivos a partir de um Blob
+    function createFileList(file) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        return dataTransfer.files;
+    }
+
+    // Função para pré-visualizar a mídia
+    function previewMedia() {
+        const fileInput = mediaFileInput;
+        const previewContainer = document.getElementById('media-preview');
+
+        // Limpa o preview anterior
+        previewContainer.innerHTML = '';
+
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const fileType = file.type;
+
+            // Verifica o tipo do arquivo
+            if (fileType.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                previewContainer.appendChild(img);
+            } else if (fileType.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.controls = true;
+                video.style.maxWidth = '80%';
+                video.style.height = 'auto';
+                previewContainer.appendChild(video);
+            } else {
+                previewContainer.textContent = 'Formato de arquivo não suportado.';
+            }
+        }
+    }
+
+    function fecharPopup(){
+        document.getElementById('popup-gif').style.display = "none";
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         validacaoUsuario = localStorage.getItem("validacaoUsuario");
         if (validacaoUsuario !== null) {
@@ -91,6 +250,19 @@
 
         if (validacaoUsuario === true){
             document.getElementById("popup-senha").style.display = "none";
+        }
+    });
+
+    document.getElementById("messageText").addEventListener("input", function() {
+        var maxLength = 220; // Limite de caracteres
+        var currentLength = this.value.length;
+
+        // Atualiza o contador para mostrar "x/220"
+        document.getElementById("char-count-text").textContent = `${currentLength}/${maxLength}`;
+
+        // Se o limite for alcançado, desabilitar mais entradas
+        if (currentLength >= maxLength) {
+            this.value = this.value.substring(0, maxLength); // Impede mais caracteres
         }
     });
 
@@ -158,13 +330,6 @@
         }
     });
 
-    document.getElementById('mediaFile').addEventListener('change', (event) => {
-        const fileNameSpan = document.getElementById('fileName');
-        const file = event.target.files[0];
-
-        fileNameSpan.textContent = file ? file.name : 'Nenhum arquivo selecionado';
-    });
-
     // Lógica para envio de tweet
     document.getElementById('tweetButton').addEventListener('click', async () => {
         if (validacaoUsuario !== true) {
@@ -172,6 +337,7 @@
             return false;
         }
 
+        document.getElementById("loading").style.display = "";
         const mention = mentionInput.value.trim();
         const messageText = document.getElementById('messageText').value.trim();
         const mediaFile = document.getElementById('mediaFile').files[0];
@@ -208,10 +374,12 @@
             }
 
             if (data.success) {
+                loadingPopup = document.getElementById("loading").style.display = "none";
                 alert('Tweet enviado com sucesso!');
                 document.getElementById('messageText').value = '';
                 document.getElementById('mention').value = '';
                 document.getElementById('mediaFile').value = '';
+                previewMedia();
             } else {
                 if (data.message === 'Erro ao postar o tweet: Request failed with code 429' || data.message === 'Erro ao postar tweet:Request failed with code 429'){
                     alert("Limite de Cutucadas por dia atingido! Espere para poder cutucar novamente.");
@@ -220,8 +388,35 @@
                     alert(data.message);
                 }
             }
-    } catch (error) {
-        alert('Erro: ' + error.message);
+        } catch (error) {
+            alert('Erro: ' + error.message);
+        }
+    });
+
+    function previewMedia() {
+        const fileInput = document.getElementById('mediaFile');
+        const previewContainer = document.getElementById('media-preview');
+
+        // Limpa o preview anterior
+        previewContainer.innerHTML = '';
+
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const fileType = file.type;
+
+            // Verifica o tipo do arquivo
+            if (fileType.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                previewContainer.appendChild(img);
+            } else if (fileType.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.controls = true;
+                previewContainer.appendChild(video);
+            } else {
+                previewContainer.textContent = 'Formato de arquivo não suportado.';
+            }
+        }
     }
-});
 </script>
