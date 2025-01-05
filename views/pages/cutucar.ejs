@@ -102,6 +102,7 @@
 <link rel="stylesheet" href="/pages/cutucar/twitter-post.css">
 
 <script>
+    let validacaoUsuario;
     const suggestionsList = [
         '@botdoboteco',
         '@Bagriieeel',
@@ -325,7 +326,7 @@
     // Verifica se o usuário já está autenticado
     document.addEventListener("DOMContentLoaded", () => {
         // Recupera o estado de validação do usuário
-        let validacaoUsuario = localStorage.getItem("validacaoUsuario");
+        validacaoUsuario = localStorage.getItem("validacaoUsuario");
         validacaoUsuario = validacaoUsuario === 'true'; // Garante que é um booleano
 
         console.log("Validação do Usuário:", validacaoUsuario);
