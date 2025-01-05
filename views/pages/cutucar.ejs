@@ -327,10 +327,12 @@
 
     function clearMidiaInput() {
         document.getElementById('mediaFile').value = '';
+        const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
         const previewContainer = document.getElementById('media-preview');
 
         // Limpa o preview anterior
         previewContainer.innerHTML = '';
+        mediaPreviewCloseBtn.innerHTML = '';
     }
 
     function clearMessageTextInput() {
