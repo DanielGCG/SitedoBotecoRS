@@ -29,7 +29,8 @@
             </div>
 
             <!-- Preview de Mídia -->
-            <div id="media-preview" class="media-preview"></div>
+            <div id="media-preview" class="media-preview">
+            </div>
 
             <div class="twitter-draft-footer">
                 <div class="twitter-draft-footer-midia">
@@ -234,6 +235,7 @@
 
         if (!mention || !messageText) {
             alert('Por favor, preencha ambos os campos.');
+            loadingPopup = document.getElementById("loading").style.display = "none";
             return;
         }
 
@@ -267,9 +269,9 @@
 
             if (data.success) {
                 alert('Tweet enviado com sucesso!');
-                document.getElementById('messageText').value = '';
-                document.getElementById('mention').value = '';
-                document.getElementById('mediaFile').value = '';
+                clearMessageTextInput();
+                clearMentionInput();
+                clearMidiaInput();
                 previewMedia();
             } else {
                 if (data.message === 'Erro ao postar o tweet: Request failed with code 429' || data.message === 'Erro ao postar tweet:Request failed with code 429'){
@@ -288,8 +290,20 @@
         const fileInput = document.getElementById('mediaFile');
         const previewContainer = document.getElementById('media-preview');
 
-        // Limpa o preview anterior
+        // Limpa o preview anterior e adiciona o botão de limpar input
         previewContainer.innerHTML = '';
+        previewContainer.innerHTML += `
+        <div id="media-preview-closebtn" class="media-preview-closebtn">
+            <label for="clearMidiaInput" style="cursor: url('/img/cursor-mao.png'), auto;">
+                <?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+                <svg width="36px" height="36px" viewBox="0 0 24 24" fill="#1D9BF0" xmlns="http://www.w3.org/2000/svg">
+                    <circle opacity="0.5" cx="12" cy="12" r="8" stroke="#1C274C" stroke-width="1.5"/>
+                    <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </label>
+            <button id="clearMidiaInput" style="display: none;" onclick="event.preventDefault(), clearMidiaInput()"></button>
+        </div>
+        `
 
         if (fileInput.files && fileInput.files[0]) {
             const file = fileInput.files[0];
@@ -309,6 +323,22 @@
                 previewContainer.textContent = 'Formato de arquivo não suportado.';
             }
         }
+    }
+
+    function clearMidiaInput() {
+        document.getElementById('mediaFile').value = '';
+        const previewContainer = document.getElementById('media-preview');
+
+        // Limpa o preview anterior
+        previewContainer.innerHTML = '';
+    }
+
+    function clearMessageTextInput() {
+        document.getElementById('messageText').value = '';
+    }
+
+    function clearMentionInput() {
+        document.getElementById('mention').value = '';
     }
 
     // Contador de caracteres do post
@@ -411,5 +441,8 @@
         if (document.getElementById("popup-senha")) {
             checkUserAutentication();
         }
+        clearMidiaInput();
+        clearMentionInput();
+        clearMessageTextInput();
     });
 </script>

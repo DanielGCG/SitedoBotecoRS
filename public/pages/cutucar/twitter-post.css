@@ -59,27 +59,42 @@
     font-weight: bold;
 }
 
+.media-preview {
+    position: relative;
+}
+
 .media-preview img {
-    max-width: 100%;    /* Limita a largura ao tamanho máximo do contêiner */
+    max-width: 100%;
     margin-top: 10px;
     border-radius: 8px;
-    width: auto;        /* Mantém as proporções originais */
-    height: auto;       /* Mantém as proporções originais */
-    object-fit: contain; /* Garante que a imagem se ajuste dentro do espaço sem distorcer */
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }
 
 .media-preview video {
-    max-width: 100%;    /* Limita a largura ao tamanho máximo do contêiner */
+    max-width: 100%;
     margin-top: 10px;
     border-radius: 8px;
-    width: auto;        /* Mantém as proporções originais */
-    height: auto;       /* Mantém as proporções originais */
-    object-fit: contain; /* Garante que a imagem se ajuste dentro do espaço sem distorcer */
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.media-preview-closebtn {
+    position: absolute;
+    top: 10px;
+    right: 0;
+    padding: 5px;
+}
+
+.media-preview-closebtn svg {
+    color: #0d8cd9;
 }
 
 .upload-container svg {
     position: relative;
-    top: 5px; /* Move apenas o ícone SVG para baixo */
+    top: 5px;
 }
 
 @media (max-width: 768px) {
