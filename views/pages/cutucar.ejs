@@ -6,10 +6,6 @@
         <h5>Use o @dapessoa e escreva uma mensagem ~anônima!~</h5>
     </div>
 
-    <div id="loading" style="display: none;">
-        <img src="/img/carregando.gif" alt="Carregando..." />
-    </div>
-
     <div class="caixa-texto">
         <div class="twitter-draft-container">
             <div class="header">
@@ -228,20 +224,17 @@
             return false;
         }
 
-        document.getElementById("loading").style.display = "";
+        
         const mention = mentionInput.value.trim();
         const messageText = document.getElementById('messageText').value.trim();
         const mediaFile = document.getElementById('mediaFile').files[0];
 
         if (!mention || !messageText) {
             alert('Por favor, preencha ambos os campos.');
-            loadingPopup = document.getElementById("loading").style.display = "none";
             return;
         }
 
         const tweetText = `☝${mention}, ${messageText}
-
-
 
 🔗https://www.botecors.me/cutucar`;
 
@@ -252,15 +245,15 @@
             formData.append('media', mediaFile); // Adicionar mídia somente se for enviada
         }
 
+        OnLoadingScreen();
+
         try {
-            const response = await fetch('/tweet-media', {
+            const response = await fetch('/tweet-mediaaa', {
                 method: 'POST',
                 body: formData,
             });
             
             const data = await response.json();
-
-            loadingPopup = document.getElementById("loading").style.display = "none";
 
             if (data.status === 429) {
                 alert('Limite de requisições atingido. Por favor, tente novamente mais tarde.');
@@ -273,17 +266,22 @@
                 clearMentionInput();
                 clearMidiaInput();
                 previewMedia();
+                OffLoadingScreen();
             } else {
                 if (data.message === 'Erro ao postar o tweet: Request failed with code 429' || data.message === 'Erro ao postar tweet:Request failed with code 429'){
+                    OffLoadingScreen();
                     alert("Limite de Cutucadas por dia atingido! Espere para poder cutucar novamente.");
                 }
                 else{
+                    OffLoadingScreen();
                     alert(data.message);
                 }
             }
         } catch (error) {
+            OffLoadingScreen();
             alert('Erro: ' + error.message);
         }
+        OffLoadingScreen();
     });
 
     function previewMedia() {
@@ -327,12 +325,16 @@
 
     function clearMidiaInput() {
         document.getElementById('mediaFile').value = '';
-        const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
-        const previewContainer = document.getElementById('media-preview');
+
+        if (document.getElementById('media-preview-closebtn') !== null){
+            const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
+            mediaPreviewCloseBtn.innerHTML = '';
+        }
 
         // Limpa o preview anterior
+        const previewContainer = document.getElementById('media-preview');
         previewContainer.innerHTML = '';
-        mediaPreviewCloseBtn.innerHTML = '';
+        
     }
 
     function clearMessageTextInput() {

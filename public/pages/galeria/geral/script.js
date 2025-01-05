@@ -3,6 +3,7 @@ let obrasLocais = [];
 // Carrega imagens
 async function carregarObrasFirebase(endereco) {
     try {
+        OnLoadingScreen();
         const response = await fetch(`/galeriaDownload/${endereco}`);
         const data = await response.json();
 
@@ -15,7 +16,9 @@ async function carregarObrasFirebase(endereco) {
         carregarObras();
     } catch (error) {
         console.error('Erro ao buscar obras do backend:', error);
+        OffLoadingScreen();
     }
+    OffLoadingScreen();
 }
 
 function adicionarItemLista(url, nome) {
@@ -42,9 +45,11 @@ async function confirmarRemocao() {
     const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
     const nomeObra = confirmarDelecaoBtn.getAttribute('data-nome-obra');
     
+    OnLoadingScreen();
     await removerObraNoFirebase(nomeObra);
     fecharConfirmacao();
     fecharPopup();
+    OffLoadingScreen();
 }
 
 function fecharConfirmacao() {
@@ -54,6 +59,7 @@ function fecharConfirmacao() {
 
 async function removerObraNoFirebase(nomeObra) {
     try {
+        OnLoadingScreen();
         const response = await fetch(`/galeriaDelete/${endereco}/${nomeObra}`, {
             method: 'POST', // Alinhe o método com o backend
         });
@@ -62,6 +68,7 @@ async function removerObraNoFirebase(nomeObra) {
         const result = await response.json();
 
         if (result.success) {
+            OffLoadingScreen();
             console.log(result.message);
             exibirMensagem('Obra removida com sucesso!', 'success');
 
@@ -70,11 +77,13 @@ async function removerObraNoFirebase(nomeObra) {
             carregarObras();
         } else {
             console.error('Erro:', result.message);
-            exibirMensagem('Erro ao remover a obra. Tente novamente.', 'error');
+            OffLoadingScreen();
+            alert('Erro ao remover a obra. Tente novamente.', 'error');
         }
     } catch (error) {
         console.error('Erro ao remover a obra no backend:', error);
-        exibirMensagem('Erro ao conectar com o servidor.', 'error');
+        alert('Erro ao conectar com o servidor.', 'error');
+        OffLoadingScreen();
     }
 }
 
@@ -100,7 +109,7 @@ async function uploadFile() {
     const nomeObra = nomeObraInput.value.trim();
 
     if (fileInput.files.length === 0) {
-        exibirMensagem('Por favor, selecione um arquivo!', 'error');
+        alert('Por favor, selecione um arquivo!', 'error');
         return;
     }
 
@@ -108,13 +117,14 @@ async function uploadFile() {
     if (!file.type.startsWith('image/')) {
         fecharPopup();
         alert("Por favor, selecione um arquivo de imagem válido!");
-        exibirMensagem('Por favor, selecione um arquivo de imagem válido!', 'error');
         return;
     }
 
     try {
         const formData = new FormData();
         formData.append('imagem', file);
+
+        OnLoadingScreen();
 
         const response = await fetch(`/galeriaUpload/${endereco}/${nomeObra}.png`, {
             method: 'POST',
@@ -124,20 +134,23 @@ async function uploadFile() {
         const data = await response.json();
 
         if (data.success) {
+            OffLoadingScreen();
             exibirMensagem('Arquivo enviado com sucesso!', 'success');
             // Adiciona a nova obra ao vetor de obrasLocais
             obrasLocais.push({ nome: nomeObra, url: data.downloadURL });
             carregarObras();  // Atualiza a galeria com a nova obra
         } else {
-            exibirMensagem(data.message || 'Erro desconhecido.', 'error');
+            alert(data.message || 'Erro desconhecido.', 'error');
+            OffLoadingScreen();
         }
 
         fecharPopup();
         fileInput.value = '';
         nomeObraInput.value = '';
     } catch (error) {
+        OffLoadingScreen();
         console.error('Erro ao enviar o arquivo:', error);
-        exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
+        alert('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
     }
 }
 
@@ -193,19 +206,21 @@ async function editarNomeObra(nomeAtual, url) {
     let novoNome = novoNomeInput.value.trim();
 
     if (!novoNome || novoNome === nomeAtual) {
-        exibirMensagem('Insira um novo nome para a imagem.', 'error');
+        alert('Insira um novo nome para a imagem.', 'error');
         return;
     }
 
     const invalidChars = /[<>:"/\\|?*~]/;
     if (invalidChars.test(novoNome)) {
-        exibirMensagem('O nome contém caracteres inválidos.', 'error');
+        alert('O nome contém caracteres inválidos.', 'error');
         return;
     }
 
     try {
         // Define o URL do backend para renomear o arquivo
         const apiUrl = `/galeriaEdit/${endereco}/${nomeAtual + ".png"}/${novoNome + ".png"}`;
+
+        OnLoadingScreen();
 
         // Faz a requisição POST ao backend
         const response = await fetch(apiUrl, {
@@ -227,8 +242,8 @@ async function editarNomeObra(nomeAtual, url) {
             }
 
             // Atualiza a galeria com o nome da obra alterado
+            OffLoadingScreen();
             carregarObras();
-
             exibirMensagem('Nome da obra atualizado com sucesso!', 'success');
             fecharPopup();
         } else {
@@ -236,7 +251,8 @@ async function editarNomeObra(nomeAtual, url) {
         }
     } catch (error) {
         console.error('Erro ao editar o nome da obra:', error);
-        exibirMensagem('Erro ao editar o nome da obra. Tente novamente.', 'error');
+        OffLoadingScreen();
+        alert('Erro ao editar o nome da obra. Tente novamente.', 'error');
     }
 }
 
