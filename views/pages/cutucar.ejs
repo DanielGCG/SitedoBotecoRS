@@ -68,6 +68,20 @@
     </div>
 
     <!-- Popup para exibir a imagem com fundo desfocado e botões -->
+    <div id="popup-senha" class="popup" style="display: none;">
+        <div id="popup-conteudo" class="popup-conteudo">
+            <div class="acoes">
+                <form id="passwordForm">
+                    <h2>Autenticação de Usuário</h2>
+                    <input type="password" id="password" placeholder="Digite a senha" />
+                    <button onclick="event.preventDefault(), checkPassword()">Verificar</button>
+                    <p class="message" id="message"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup para exibir a imagem com fundo desfocado e botões -->
     <div id="popup-gif" class="popup-gif" style="display: none;">
         <div id="popup-gif-conteudo" class="popup-gif-conteudo">
             <div id="popup-gif-gifs">
@@ -80,20 +94,7 @@
     <div id="loading" style="display: none;">
         <img src="/img/carregando.gif" alt="Carregando..." />
     </div>
-
-    <!-- Popup para exibir a imagem com fundo desfocado e botões -->
-    <div id="popup-senha" class="popup">
-        <div id="popup-conteudo" class="popup-conteudo">
-            <div class="acoes">
-                <form id="passwordForm">
-                    <h2>Autenticação de Usuário</h2>
-                    <input type="password" id="password" placeholder="Digite a senha" />
-                    <button onclick="event.preventDefault(), checkPassword()">Verificar</button>
-                    <p class="message" id="message"></p>
-                </form>
-            </div>
-        </div>
-    </div>
+    
 </main>
 
 <link rel="stylesheet" href="/geral/popup.css">
@@ -238,21 +239,6 @@
         document.getElementById('popup-gif').style.display = "none";
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        validacaoUsuario = localStorage.getItem("validacaoUsuario");
-        if (validacaoUsuario !== null) {
-            validacaoUsuario = JSON.parse(validacaoUsuario); // Converte para booleano ou outro tipo armazenado.
-        } else {
-            validacaoUsuario = false; // Valor padrão se não existir no localStorage.
-        }
-
-        console.log("Validação do Usuário:", validacaoUsuario);
-
-        if (validacaoUsuario === true){
-            document.getElementById("popup-senha").style.display = "none";
-        }
-    });
-
     document.getElementById("messageText").addEventListener("input", function() {
         var maxLength = 220; // Limite de caracteres
         var currentLength = this.value.length;
@@ -267,23 +253,29 @@
     });
 
     async function checkPassword() {
-        const senha = document.getElementById("password").value; // Obter senha do input
-        const response = await fetch('/verify-senha-cutucar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ senha }) // Enviar senha como JSON
-        });
+        const senha = document.getElementById("password").value.trim(); // Obter senha do input
 
-        const data = await response.json(); // Converter a resposta para JSON
+        try {
+            const response = await fetch('/verify-senha-cutucar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ senha }), // Enviar senha como JSON
+            });
 
-        if (data.success) {
-            validacaoUsuario = true;
-            localStorage.setItem("validacaoUsuario", validacaoUsuario = true);
-            document.getElementById("popup-senha").style.display = "none";
-        } else {
-            console.log("Senha incorreta");
+            const data = await response.json(); // Converter a resposta para JSON
+
+            if (data.success) {
+                // Marca o usuário como validado
+                localStorage.setItem("validacaoUsuario", 'true'); // Armazena como string
+                document.getElementById("popup-senha").style.display = "none"; // Esconde o popup
+            } else {
+                alert("Senha incorreta. Tente novamente.");
+            }
+        } catch (error) {
+            console.error("Erro ao verificar senha:", error);
+            alert("Erro ao verificar a senha. Tente novamente mais tarde.");
         }
     }
 
@@ -327,6 +319,19 @@
     document.addEventListener('click', event => {
         if (event.target !== mentionInput && event.target.parentNode !== suggestionsDiv) {
             suggestionsDiv.style.display = 'none';
+        }
+    });
+
+    // Verifica se o usuário já está autenticado
+    document.addEventListener("DOMContentLoaded", () => {
+        // Recupera o estado de validação do usuário
+        let validacaoUsuario = localStorage.getItem("validacaoUsuario");
+        validacaoUsuario = validacaoUsuario === 'true'; // Garante que é um booleano
+
+        console.log("Validação do Usuário:", validacaoUsuario);
+
+        if (!validacaoUsuario) {
+            document.getElementById("popup-senha").style.display = ""; // Mostra o popup
         }
     });
 
