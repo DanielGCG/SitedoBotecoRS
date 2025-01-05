@@ -13,7 +13,7 @@ principalmente com a questão de desing, que ainda sofro com o css.
 ## 🌐 Demonstração
 
 O site está disponível online no link:
-[Boteco do R$](https://www.boteco.live)
+[Boteco do R$](https://www.botecors.me)
 
 ---
 
