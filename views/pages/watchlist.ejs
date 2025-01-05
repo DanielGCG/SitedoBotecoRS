@@ -97,6 +97,7 @@ let obraslocais = [];
 document.addEventListener('DOMContentLoaded', () => carregarListaFirebase());
 
 async function carregarListaFirebase() {
+    OnLoadingScreen();
     try {
         const response = await fetch(`/watchlistDownload`);
         const data = await response.json();
@@ -112,6 +113,7 @@ async function carregarListaFirebase() {
     } catch (error) {
         console.error('Erro ao buscar obras do backend:', error);
     }
+    OffLoadingScreen();
 }
 
 async function deletarObraFireBase (nome) {
