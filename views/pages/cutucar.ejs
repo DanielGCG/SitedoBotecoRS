@@ -6,6 +6,10 @@
         <h5>Use o @dapessoa e escreva uma mensagem ~anônima!~</h5>
     </div>
 
+    <div id="loading" style="display: none;">
+        <img src="/img/carregando.gif" alt="Carregando..." />
+    </div>
+
     <div class="caixa-texto">
         <div class="twitter-draft-container">
             <div class="header">
@@ -89,10 +93,6 @@
         <div class="acoes">
             <button class="branco" onclick="fecharPopup()">Fechar</button>
         </div>
-    </div>
-
-    <div id="loading" style="display: none;">
-        <img src="/img/carregando.gif" alt="Carregando..." />
     </div>
     
 </main>
@@ -258,13 +258,14 @@
             
             const data = await response.json();
 
+            loadingPopup = document.getElementById("loading").style.display = "none";
+
             if (data.status === 429) {
                 alert('Limite de requisições atingido. Por favor, tente novamente mais tarde.');
                 return;
             }
 
             if (data.success) {
-                loadingPopup = document.getElementById("loading").style.display = "none";
                 alert('Tweet enviado com sucesso!');
                 document.getElementById('messageText').value = '';
                 document.getElementById('mention').value = '';
