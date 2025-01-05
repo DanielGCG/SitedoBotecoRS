@@ -102,7 +102,8 @@
 <link rel="stylesheet" href="/pages/cutucar/twitter-post.css">
 
 <script>
-    let validacaoUsuario;
+
+    /* ----- CONSTANTES E VARIÁVEIS ----- */
     const suggestionsList = [
         '@botdoboteco',
         '@Bagriieeel',
@@ -135,12 +136,16 @@
 
     const apiKey = 'EM9bJD4ixcjo1H4gqPgH6vJ4g3cp1PK6';
     const giphyUrl = 'https://api.giphy.com/v1/gifs/search';
-
-    // Selecionar elementos
     const selectGifButton = document.getElementById('selectGifButton');
     const mediaFileInput = document.getElementById('mediaFile');
     const popupGif = document.getElementById('popup-gif');
     const popupGifContainer = document.getElementById('popup-gif-gifs');
+    const mentionInput = document.getElementById('mention');
+    const suggestionsDiv = document.getElementById('suggestions');
+
+
+    /* ----- LÓGICA PARA OS GIFS ----- */
+
 
     // Exibir uma janela/modal para buscar GIFs
     selectGifButton.addEventListener('click', async () => {
@@ -206,139 +211,18 @@
         return dataTransfer.files;
     }
 
-    // Função para pré-visualizar a mídia
-    function previewMedia() {
-        const fileInput = mediaFileInput;
-        const previewContainer = document.getElementById('media-preview');
-
-        // Limpa o preview anterior
-        previewContainer.innerHTML = '';
-
-        if (fileInput.files && fileInput.files[0]) {
-            const file = fileInput.files[0];
-            const fileType = file.type;
-
-            // Verifica o tipo do arquivo
-            if (fileType.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                previewContainer.appendChild(img);
-            } else if (fileType.startsWith('video/')) {
-                const video = document.createElement('video');
-                video.src = URL.createObjectURL(file);
-                video.controls = true;
-                video.style.maxWidth = '80%';
-                video.style.height = 'auto';
-                previewContainer.appendChild(video);
-            } else {
-                previewContainer.textContent = 'Formato de arquivo não suportado.';
-            }
-        }
-    }
-
+    // Fechar popup de gifs
     function fecharPopup(){
         document.getElementById('popup-gif').style.display = "none";
     }
 
-    document.getElementById("messageText").addEventListener("input", function() {
-        var maxLength = 220; // Limite de caracteres
-        var currentLength = this.value.length;
 
-        // Atualiza o contador para mostrar "x/220"
-        document.getElementById("char-count-text").textContent = `${currentLength}/${maxLength}`;
+    /* ----- LÓGICA PARA O POST ----- */
 
-        // Se o limite for alcançado, desabilitar mais entradas
-        if (currentLength >= maxLength) {
-            this.value = this.value.substring(0, maxLength); // Impede mais caracteres
-        }
-    });
-
-    async function checkPassword() {
-        const senha = document.getElementById("password").value.trim(); // Obter senha do input
-
-        try {
-            const response = await fetch('/verify-senha-cutucar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ senha }), // Enviar senha como JSON
-            });
-
-            const data = await response.json(); // Converter a resposta para JSON
-
-            if (data.success) {
-                // Marca o usuário como validado
-                localStorage.setItem("validacaoUsuario", 'true'); // Armazena como string
-                document.getElementById("popup-senha").style.display = "none"; // Esconde o popup
-            } else {
-                alert("Senha incorreta. Tente novamente.");
-            }
-        } catch (error) {
-            console.error("Erro ao verificar senha:", error);
-            alert("Erro ao verificar a senha. Tente novamente mais tarde.");
-        }
-    }
-
-    const mentionInput = document.getElementById('mention');
-    const suggestionsDiv = document.getElementById('suggestions');
-
-    // Filtrar e mostrar sugestões
-    mentionInput.addEventListener('input', () => {
-        const query = mentionInput.value.toLowerCase();
-        suggestionsDiv.innerHTML = ''; // Limpar sugestões anteriores
-
-        if (query.startsWith('@')) {
-            const filteredSuggestions = suggestionsList.filter(item =>
-                item.toLowerCase().startsWith(query)
-            );
-
-            // Exibir sugestões, se houver correspondências
-            if (filteredSuggestions.length > 0) {
-                suggestionsDiv.style.display = 'block';
-                filteredSuggestions.forEach(suggestion => {
-                    const suggestionDiv = document.createElement('div');
-                    suggestionDiv.textContent = suggestion;
-
-                    // Selecionar a sugestão ao clicar
-                    suggestionDiv.addEventListener('click', () => {
-                        mentionInput.value = suggestion;
-                        suggestionsDiv.style.display = 'none'; // Esconde sugestões
-                    });
-
-                    suggestionsDiv.appendChild(suggestionDiv);
-                });
-            } else {
-                suggestionsDiv.style.display = 'none'; // Oculta se não houver sugestões
-            }
-        } else {
-            suggestionsDiv.style.display = 'none'; // Oculta se a entrada não começar com "@"
-        }
-    });
-
-    // Esconder sugestões ao clicar fora do campo de texto
-    document.addEventListener('click', event => {
-        if (event.target !== mentionInput && event.target.parentNode !== suggestionsDiv) {
-            suggestionsDiv.style.display = 'none';
-        }
-    });
-
-    // Verifica se o usuário já está autenticado
-    document.addEventListener("DOMContentLoaded", () => {
-        // Recupera o estado de validação do usuário
-        validacaoUsuario = localStorage.getItem("validacaoUsuario");
-        validacaoUsuario = validacaoUsuario === 'true'; // Garante que é um booleano
-
-        console.log("Validação do Usuário:", validacaoUsuario);
-
-        if (!validacaoUsuario) {
-            document.getElementById("popup-senha").style.display = ""; // Mostra o popup
-        }
-    });
 
     // Lógica para envio de tweet
     document.getElementById('tweetButton').addEventListener('click', async () => {
-        if (validacaoUsuario !== true) {
+        if (localStorage.getItem("validacaoUsuario") !== "true" && localStorage.getItem("validacaoUsuario") !== true) {
             alert("Usuário sem permissão para envio de tweet");
             return false;
         }
@@ -425,4 +309,106 @@
             }
         }
     }
+
+    // Contador de caracteres do post
+    document.getElementById("messageText").addEventListener("input", function() {
+        var maxLength = 220; // Limite de caracteres
+        var currentLength = this.value.length;
+
+        // Atualiza o contador para mostrar "x/220"
+        document.getElementById("char-count-text").textContent = `${currentLength}/${maxLength}`;
+
+        // Se o limite for alcançado, desabilitar mais entradas
+        if (currentLength >= maxLength) {
+            this.value = this.value.substring(0, maxLength); // Impede mais caracteres
+        }
+    });
+
+    // Filtrar e mostrar sugestões
+    mentionInput.addEventListener('input', () => {
+        const query = mentionInput.value.toLowerCase();
+        suggestionsDiv.innerHTML = ''; // Limpar sugestões anteriores
+
+        if (query.startsWith('@')) {
+            const filteredSuggestions = suggestionsList.filter(item =>
+                item.toLowerCase().startsWith(query)
+            );
+
+            // Exibir sugestões, se houver correspondências
+            if (filteredSuggestions.length > 0) {
+                suggestionsDiv.style.display = 'block';
+                filteredSuggestions.forEach(suggestion => {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.textContent = suggestion;
+
+                    // Selecionar a sugestão ao clicar
+                    suggestionDiv.addEventListener('click', () => {
+                        mentionInput.value = suggestion;
+                        suggestionsDiv.style.display = 'none'; // Esconde sugestões
+                    });
+
+                    suggestionsDiv.appendChild(suggestionDiv);
+                });
+            } else {
+                suggestionsDiv.style.display = 'none'; // Oculta se não houver sugestões
+            }
+        } else {
+            suggestionsDiv.style.display = 'none'; // Oculta se a entrada não começar com "@"
+        }
+    });
+
+    // Esconder sugestões ao clicar fora do campo de texto
+    document.addEventListener('click', event => {
+        if (event.target !== mentionInput && event.target.parentNode !== suggestionsDiv) {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
+
+
+    /* ----- LÓGICA PARA AUTENTICAÇÃO DO USUÁRIO ----- */
+
+    
+    // Verificar se a senha inserida está correta
+    async function checkPassword() {
+        const senha = document.getElementById("password").value.trim(); // Obter senha do input
+
+        try {
+            const response = await fetch('/verify-senha-cutucar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ senha }), // Enviar senha como JSON
+            });
+
+            const data = await response.json(); // Converter a resposta para JSON
+
+            if (data.success) {
+                // Marca o usuário como validado
+                localStorage.setItem("validacaoUsuario", "true");
+                console.log("Validação do Usuário:", localStorage.getItem("validacaoUsuario"));
+                document.getElementById("popup-senha").style.display = "none"; // Esconde o popup
+            } else {
+                alert("Senha incorreta. Tente novamente.");
+            }
+        } catch (error) {
+            console.error("Erro ao verificar senha:", error);
+            alert("Erro ao verificar a senha. Tente novamente mais tarde.");
+        }
+    }
+
+    function checkUserAutentication() {
+        const validacaoUsuario = (localStorage.getItem("validacaoUsuario") === "true" || localStorage.getItem("validacaoUsuario") === true);
+        console.log("Validação do Usuário:", validacaoUsuario);
+        if (!validacaoUsuario) {
+            document.getElementById("popup-senha").style.display = ""; // Mostra o popup
+        }
+    }
+
+    // Verificar se o usuário já está autenticado
+    document.addEventListener("DOMContentLoaded", () => {
+        if (document.getElementById("popup-senha")) {
+            checkUserAutentication();
+        }
+    });
 </script>
