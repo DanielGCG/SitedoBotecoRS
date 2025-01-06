@@ -117,6 +117,7 @@ async function carregarListaFirebase() {
 }
 
 async function deletarObraFireBase (nome) {
+    OnLoadingScreen();
     try {
         const response = await fetch(`/watchlistDelete/${nome}`, {
             method: 'POST',
@@ -131,10 +132,13 @@ async function deletarObraFireBase (nome) {
 
         obraslocais = obraslocais.filter(obra => obra.nome !== nome);
         console.log('Removemos obra com sucesso!');
+        OffLoadingScreen();
         listarObras();
     } catch (error) {
         console.error('Erro ao buscar obras do backend:', error);
+        OffLoadingScreen();
     }
+    OffLoadingScreen();
 }
 
 async function uploadObraFirebase() {
@@ -155,6 +159,8 @@ async function uploadObraFirebase() {
         return;
     }
 
+    OnLoadingScreen();
+
     try {
         const formData = new FormData();
         formData.append('imagem', file);
@@ -174,13 +180,17 @@ async function uploadObraFirebase() {
             exibirMensagem(data.message || 'Erro desconhecido.', 'error');
         }
 
+        OffLoadingScreen();
         fecharPopup();
         fileInput.value = '';
         nomeObraInput.value = '';
     } catch (error) {
         console.error('Erro ao enviar o arquivo:', error);
         exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
+        OffLoadingScreen();
     }
+
+    OffLoadingScreen();
 }
 
 function listarObras() {
