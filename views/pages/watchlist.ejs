@@ -56,6 +56,7 @@
 </style>
 
 <link rel="stylesheet" href="/geral/popup.css">
+<link rel="stylesheet" href="/pages/watchlist/pesquisa.css">
 
 <main>
     <h2 style="text-align: center; align-items: center;">WatchList do Boteco</h2>
@@ -77,6 +78,20 @@
         </div>
     </div>
 
+    <div id="popup-pesquisa" class="popup" style="display: none;">
+        <div id="popup-conteudo" class="popup-conteudo">
+            <h2>Enviar obra</h2>
+            <div id="search-form">
+                <input type="text" id="search-input" placeholder="Enter movie name">
+            </div>
+            <div class="acoes">
+                <button class="branco" onclick="fecharPopupPesquisa()">Fechar</button>
+            </div>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    
     <!-- Popup de confirmação de exclusão -->
     <div id="popup-confirmacao" class="popup" style="display: none;">
         <div id="popup-confirmacao-conteudo" class="popup-conteudo">
@@ -99,15 +114,17 @@ document.addEventListener('DOMContentLoaded', () => carregarListaFirebase());
 async function carregarListaFirebase() {
     OnLoadingScreen();
     try {
-        const response = await fetch(`/watchlistDownload`);
+        const response = await fetch(`/watchlistdownload-movies`);
         const data = await response.json();
 
-        if (!data.success) {
-            console.error('Erro ao carregar obras:', data.message);
+        // Verifique se a resposta é um array antes de atribuir a obraslocais
+        if (Array.isArray(data)) {
+            obraslocais = data;
+        } else {
+            console.error('Formato de dados inválido, esperado um array:', data);
             return;
         }
 
-        obraslocais = data.obras;
         console.log('Obras carregadas com sucesso!');
         listarObras();
     } catch (error) {
@@ -116,87 +133,32 @@ async function carregarListaFirebase() {
     OffLoadingScreen();
 }
 
-async function deletarObraFireBase (nome) {
+async function deleteMovie(id) {
     OnLoadingScreen();
     try {
-        const response = await fetch(`/watchlistDelete/${nome}`, {
-            method: 'POST',
-        });
-
-        const data = await response.json();
-
-        if (!data.success) {
-            console.error('Erro ao carregar obras:', data.message);
-            return;
-        }
-
-        obraslocais = obraslocais.filter(obra => obra.nome !== nome);
-        console.log('Removemos obra com sucesso!');
-        OffLoadingScreen();
-        listarObras();
-    } catch (error) {
-        console.error('Erro ao buscar obras do backend:', error);
-        OffLoadingScreen();
-    }
-    OffLoadingScreen();
-}
-
-async function uploadObraFirebase() {
-    const fileInput = document.getElementById('fileInput');
-    const nomeObraInput = document.getElementById('nomeObra');
-    const nomeObra = nomeObraInput.value.trim();
-
-    if (fileInput.files.length === 0) {
-        exibirMensagem('Por favor, selecione um arquivo!', 'error');
-        return;
-    }
-
-    const file = fileInput.files[0];
-    if (!file.type.startsWith('image/')) {
-        fecharPopup();
-        alert("Por favor, selecione um arquivo de imagem válido!");
-        exibirMensagem('Por favor, selecione um arquivo de imagem válido!', 'error');
-        return;
-    }
-
-    OnLoadingScreen();
-
-    try {
-        const formData = new FormData();
-        formData.append('imagem', file);
-
-        const response = await fetch(`/watchlistUpload/${nomeObra}`, {
-            method: 'POST',
-            body: formData,
-        });
-
+        // Fazendo a requisição DELETE para o backend
+        const response = await fetch(`/watchlistdelete-movie?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
         const data = await response.json();
 
         if (data.success) {
-            obraslocais.push({ nome: nomeObra, url: data.downloadURL });
+            // Remove a obra localmente
+            obraslocais = obraslocais.filter(obra => String(obra.id) !== String(id));
+
+            // Atualiza a interface
             listarObras();
-
+            OffLoadingScreen();
         } else {
-            exibirMensagem(data.message || 'Erro desconhecido.', 'error');
+            alert(data.message || 'Erro ao excluir a obra.');
+            OffLoadingScreen();
         }
-
-        OffLoadingScreen();
-        fecharPopup();
-        fileInput.value = '';
-        nomeObraInput.value = '';
     } catch (error) {
-        console.error('Erro ao enviar o arquivo:', error);
-        exibirMensagem('Erro ao enviar o arquivo. Verifique a conexão e tente novamente.', 'error');
+        console.error('Erro ao deletar obra:', error);
+        alert('Erro ao excluir a obra. Verifique a conexão.');
         OffLoadingScreen();
     }
-
-    OffLoadingScreen();
 }
 
 function listarObras() {
-    // Ordenar por ordem alfabética
-    obraslocais.sort((a, b) => a.nome.localeCompare(b.nome));
-
     // Seleciona a tabela onde as obras serão exibidas
     const tabela = document.querySelector('.tabela');
     tabela.innerHTML = ''; // Limpa o conteúdo existente
@@ -215,33 +177,28 @@ function listarObras() {
     obraslocais.forEach(obra => {
         const conteudo = document.createElement('div');
         conteudo.className = 'conteudo';
+        const posterPath = obra.poster_path ? `https://image.tmdb.org/t/p/w500${obra.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image';
 
-        conteudo.innerHTML = `
-            <img src="${obra.url}" class="capa" alt="Capa de ${obra.nome}" onclick="abrirPopup('${obra.url}', '${obra.nome}')">
-            <h1>${obra.nome}</h1>
+        if (!obra.name) {
+            conteudo.innerHTML = `
+            <img src="${posterPath}" class="capa" alt="Capa de ${obra.title}" onclick="abrirPopup('${posterPath}', '${obra.title}')">
+            <h1>${obra.title}</h1>
         `;
+        }
+        else{
+            conteudo.innerHTML = `
+            <img src="${posterPath}" class="capa" alt="Capa de ${obra.name}" onclick="abrirPopup('${posterPath}', '${obra.name}')">
+            <h1>${obra.name}</h1>
+        `;
+        }
 
         tabela.appendChild(conteudo);
     });
 }
 
 function abrirPopupAdicionar() {
-    const popup = document.getElementById('popup');
+    const popup = document.getElementById('popup-pesquisa');
     const popupConteudo = document.getElementById('popup-conteudo');
-    
-    popupConteudo.innerHTML = `
-        <h2>Enviar obra</h2>
-        <form id="formUpload" style="margin-top: 10px;">
-            <label for="nomeObra">Nome da Obra:</label>
-            <input type="text" id="nomeObra" placeholder="nome da obra" required>
-            <br><br>
-            <label for="fileInput">Escolha uma imagem:</label>
-            <input type="file" id="fileInput" accept="image/*" required>
-            <br><br>
-            <button type="button" class="branco" onclick="uploadObraFirebase()">Enviar</button>
-            <button type="button" class="branco" onclick="fecharPopup()">Fechar</button>
-        </form>
-    `;
 
     popup.style.display = 'flex';
     popupConteudo.style.display = 'block';
@@ -268,8 +225,14 @@ function abrirPopup(url, nome) {
 function abrirConfirmacaoDelecao(nome) {
     const popupConfirmacao = document.getElementById('popup-confirmacao');
     const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
-    confirmarDelecaoBtn.setAttribute('data-nome-obra', nome); // Passa o nome da obra
-    popupConfirmacao.style.display = 'flex';
+    const obra = obraslocais.find(o => o.name === nome || o.title === nome); // Encontrar a obra pelo nome
+
+    if (obra) {
+        confirmarDelecaoBtn.setAttribute('data-id-obra', obra.id); // Passar o ID da obra
+        popupConfirmacao.style.display = 'flex';
+    } else {
+        alert('Obra não encontrada!');
+    }
 }
 
 function fecharPopup(){
@@ -277,10 +240,17 @@ function fecharPopup(){
     popup.style.display = 'none';
 }
 
+function fecharPopupPesquisa(){
+    const popup = document.getElementById('popup-pesquisa');
+    popup.style.display = 'none';
+}
+
 // Confirmar a exclusão diretamente ao clicar no botão
-document.getElementById('confirmarDelecaoBtn').addEventListener('click', async function() {
-    const nomeObra = this.getAttribute('data-nome-obra');
-    await deletarObraFireBase(nomeObra);
+document.getElementById('confirmarDelecaoBtn').addEventListener('click', async function () {
+    const idObra = this.getAttribute('data-id-obra'); // Obter o ID da obra
+    if (idObra) {
+        await deleteMovie(idObra);
+    }
     fecharConfirmacao();
     fecharPopup();
 });
@@ -288,5 +258,108 @@ document.getElementById('confirmarDelecaoBtn').addEventListener('click', async f
 function fecharConfirmacao() {
     const popupConfirmacao = document.getElementById('popup-confirmacao');
     popupConfirmacao.style.display = 'none';
+}
+
+let lastQuery = '';
+
+document.getElementById('search-input').addEventListener('input', function() {
+    
+    const query = this.value;
+    console.log('Buscando por:', query); // Adicionando log
+
+    if (query.length < 3) {
+        document.getElementById('results').innerHTML = '';
+        return;
+    }
+
+    if (query.length !== lastQuery.length) {
+        searchMovies(query);
+    }
+});
+
+async function searchMovies(query) {
+    console.log('Procurando por:', query); // Log de consulta
+    lastQuery = query;
+
+    try {
+        const response = await fetch(`/watchlistsearch-movies?query=${encodeURIComponent(query)}&language='pt-BR'`);
+        const data = await response.json();
+
+        if (response.status !== 200) {
+            throw new Error(data.message || 'Erro ao buscar filmes.');
+        }
+
+        displayResults(data);
+    } catch (error) {
+        console.error('Error:', error);
+        // A função displayResults irá criar o elemento #results
+        const resultsContainer = document.getElementById('results');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = `<p>${error.message}</p>`;
+        }
+    }
+}
+
+function displayResults(items) {
+        const resultsContainer = document.getElementById('results');
+        resultsContainer.innerHTML = '';
+
+        items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'movie';
+
+            const posterPath = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image';
+            const itemType = item.media_type === 'movie' ? 'Filme' : item.media_type === 'tv' ? 'Série' : 'Outro';
+
+            itemElement.innerHTML = `
+                <img src="${posterPath}" alt="${item.title || item.name}">
+                <div class="movie-title">${item.title || item.name}</div>
+                <div class="media-type">${itemType}</div>
+            `;
+
+            itemElement.addEventListener('click', () => {
+                const shouldSave = confirm(`Deseja salvar "${item.title || item.name}" no Firebase Storage?`);
+                if (shouldSave) {
+                    saveMovieToFirebase(item);
+                }
+            });
+
+            resultsContainer.appendChild(itemElement);
+        });
+    }
+
+async function saveMovieToFirebase(movie) {
+    OnLoadingScreen();
+    try {
+        // Enviando o filme/série para o backend
+        const response = await fetch('/watchlistupload-movies', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(movie),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            // Adiciona o novo filme diretamente à lista local
+            obraslocais.push({
+                ...movie, // Dados do filme enviados
+                fileUrl: data.fileUrl, // URL pública retornada
+            });
+
+            // Atualiza a interface sem recarregar tudo
+            listarObras();
+            fecharPopupPesquisa();
+            OffLoadingScreen();
+        } else {
+            OffLoadingScreen();
+            alert('Erro ao salvar o filme/série.');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar filme/série:', error);
+        alert('Erro ao salvar o filme/série.');
+        OffLoadingScreen();
+    }
 }
 </script>

@@ -185,6 +185,14 @@ router.get('/teste', (req, res) => {
     res.render('pages/experimentais/teste', { locals: locals });
 });
 
+router.get('/teste3', (req, res) => {
+    const locals = {
+        title: "teste",
+        description: "testetesteteste"
+    }
+    res.render('pages/experimentais/teste3', { locals: locals });
+});
+
 /* ------ Página de TRABALHO DE ALA ------*/
 
 // Rota para página de recomendações

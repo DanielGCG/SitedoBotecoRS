@@ -1,0 +1,147 @@
+<style>
+    body {
+        text-align: center;
+    }
+
+    #search-form {
+        margin: 20px;
+    }
+
+    #search-form input {
+        padding: 10px;
+        width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    #search-form button {
+        padding: 10px 15px;
+        margin-left: 10px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #search-form button:hover {
+        background-color: #0056b3;
+    }
+
+    #results {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px;
+    }
+
+    .movie {
+        width: 200px;
+        text-align: center;
+    }
+
+    .movie img {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .movie-title {
+        margin-top: 10px;
+        font-size: 16px;
+    }
+</style>
+<body>
+    <section id="search-form">
+        <input type="text" id="search-input" placeholder="Enter movie name">
+    </section>
+
+    <section id="results"></section>
+</body>
+
+<script>
+    let lastQuery = '';
+
+    document.getElementById('search-input').addEventListener('input', function() {
+        const query = this.value;
+
+        if (query.length < 3) {
+            document.getElementById('results').innerHTML = '';
+            return;
+        }
+
+        if (query.length !== lastQuery.length) {
+            searchMovies(query);
+        }
+    });
+
+    async function searchMovies(query) {
+        lastQuery = query;
+
+        try {
+            const response = await fetch(`/watchlistsearch-movies?query=${encodeURIComponent(query)}&language='pt-BR'`);
+            const data = await response.json();
+
+            if (response.status !== 200) {
+                throw new Error(data.message || 'Erro ao buscar filmes.');
+            }
+
+            displayResults(data);
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('results').innerHTML = `<p>${error.message}</p>`;
+        }
+    }
+
+    function displayResults(items) {
+        const resultsContainer = document.getElementById('results');
+        resultsContainer.innerHTML = '';
+
+        items.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'movie';
+
+            const posterPath = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image';
+            const itemType = item.media_type === 'movie' ? 'Filme' : item.media_type === 'tv' ? 'Série' : 'Outro';
+
+            itemElement.innerHTML = `
+                <img src="${posterPath}" alt="${item.title || item.name}">
+                <div class="movie-title">${item.title || item.name}</div>
+                <div class="media-type">${itemType}</div>
+            `;
+
+            itemElement.addEventListener('click', () => {
+                const shouldSave = confirm(`Deseja salvar "${item.title || item.name}" no Firebase Storage?`);
+                if (shouldSave) {
+                    saveMovieToFirebase(item);
+                }
+            });
+
+            resultsContainer.appendChild(itemElement);
+        });
+    }
+
+    async function saveMovieToFirebase(movie) {
+        try {
+            // Exemplo de como você pode enviar o filme/série para o Firebase
+            const response = await fetch('/watchlistupload-movies', {  // Supondo que você tenha uma API no backend para salvar
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(movie)
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                alert(`Filme/série "${movie.title || movie.name}" salvo com sucesso!`);
+            } else {
+                alert('Erro ao salvar o filme/série.');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar filme/série:', error);
+            alert('Erro ao salvar o filme/série.');
+        }
+    }
+</script>
+</html>

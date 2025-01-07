@@ -127,60 +127,6 @@ app.get('/galeriaDownload/:endereco', async (req, res) => {
   }
 });
 
-// Rota para upload de imagens para o Firebase Storage
-app.post('/galeriaUpload/:endereco/:nome', upload.single('imagem'), async (req, res) => {
-  const endereco = req.params.endereco;
-  const nome = req.params.nome;
-  const imagem = req.file; // Aqui, `imagem` será o arquivo enviado pelo frontend via FormData
-
-  if (!imagem) {
-    return res.status(400).json({ success: false, message: 'Nenhum arquivo de imagem enviado.' });
-  }
-
-  if (endereco === "jogador"){
-    try {
-      const galeriaRef = ref(storageFirebase, `galeria/${endereco}/${nome}`);
-      
-      // Fazendo o upload do arquivo para o Firebase Storage
-      const snapshot = await uploadBytes(galeriaRef, imagem.buffer);
-  
-      // Obtém a URL de download do arquivo enviado
-      const downloadURL = await getDownloadURL(snapshot.ref);
-  
-      // Envia a resposta com a URL do arquivo enviado
-      res.json({ success: true, message: 'Arquivo enviado com sucesso!', downloadURL });
-    } catch (error) {
-      console.error('Erro ao fazer upload para o Firebase:', error);
-      res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
-    }
-  }
-  else{
-    try {
-      // Fazendo o tratamento da imagem antes do upload
-      const processedImageBuffer = await sharp(imagem.buffer)
-        .resize(1080, 720, { // Limita a imagem a 1080x720px, mantendo a proporção
-          fit: sharp.fit.inside,  // Ajusta para dentro do limite sem cortar
-          withoutEnlargement: true, // Não aumenta imagens pequenas
-        })
-        .toBuffer(); // Converte a imagem processada em buffer para o upload
-  
-      const galeriaRef = ref(storageFirebase, `galeria/${endereco}/${nome}`);
-      
-      // Fazendo o upload do arquivo para o Firebase Storage
-      const snapshot = await uploadBytes(galeriaRef, processedImageBuffer);
-  
-      // Obtém a URL de download do arquivo enviado
-      const downloadURL = await getDownloadURL(snapshot.ref);
-  
-      // Envia a resposta com a URL do arquivo enviado
-      res.json({ success: true, message: 'Arquivo enviado com sucesso!', downloadURL });
-    } catch (error) {
-      console.error('Erro ao fazer upload para o Firebase:', error);
-      res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
-    }
-  }
-});
-
 // Rota deleção de imagens do Firebase Storage
 app.post('/galeriaDelete/:endereco/:nome', upload.single('imagem'), async (req, res) => {
   const endereco = req.params.endereco;
@@ -242,25 +188,6 @@ app.post('/galeriaEdit/:endereco/:nome/:nomenovo', async (req, res) => {
   }
 });
 
-app.get('/watchlistDownload', async (req, res) => {
-  try {
-    const watchlistRef = ref(storageFirebase, `listaFilmes`);
-    const result = await listAll(watchlistRef);
-
-    const obras = await Promise.all(
-      result.items.map(async (itemRef) => {
-        const url = await getDownloadURL(itemRef);
-        const nome = itemRef.name.split('.').slice(0, -1).join('.'); // Remove a extensão
-        return { nome, url };
-      })
-    );
-
-    res.json({ success: true, obras });
-  } catch (error) {
-    console.error('Erro ao carregar obras:', error);
-    res.status(500).json({ success: false, message: 'Erro ao carregar obras.' });
-  }
-});
 
 app.post('/watchlistDelete/:nome', upload.single('imagem'), async (req, res) => {
   const nome = req.params.nome;
@@ -310,6 +237,143 @@ app.post('/watchlistUpload/:nome', upload.single('imagem'), async (req, res) => 
   } catch (error) {
     console.error('Erro ao fazer upload para o Firebase:', error);
     res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
+  }
+});
+
+app.get('/watchlistsearch-movies', async (req, res) => {
+  const query = req.query.query;
+  const BASE_URL = 'https://api.themoviedb.org/3';
+
+  if (!query || query.length < 3) {
+    return res.status(400).json({ message: 'Por favor, insira pelo menos 3 caracteres.' });
+  }
+
+  // Determinar o idioma, pode ser 'pt-BR' ou 'en-US'
+  const language = req.query.language || 'en-US';  // Se não houver 'language', usa 'pt-BR' por padrão
+
+  try {
+    // Normalizar texto para remover acentos e caracteres especiais
+    const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    // Fazer a busca na API do TMDb
+    const response = await fetch(`${BASE_URL}/search/multi?api_key=${process.env.TMDB_APIKEY}&query=${encodeURIComponent(normalizedQuery)}&language=${language}`);
+    const data = await response.json();
+
+    if (data.results.length === 0) {
+      return res.status(404).json({ message: 'No movies found.' });
+    }
+
+    // Filtrar apenas filmes e séries
+    const filteredResults = data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
+
+    // Limitar para os 6 primeiros resultados
+    const limitedResults = filteredResults.slice(0, 6);
+
+    res.json(limitedResults);  // Enviar apenas filmes e séries, limitados a 6
+  } catch (error) {
+    console.error('Error fetching movie data:', error);
+    res.status(500).json({ message: 'Erro ao buscar filmes.' });
+  }
+});
+
+app.post('/watchlistupload-movies', async (req, res) => {
+  const movie = req.body;  // Dados do filme/série enviados
+
+  try {
+      // Definindo o nome do arquivo
+      const fileName = `${movie.id}.json`;
+
+      // Caminho para o Firebase Storage
+      const filePath = `teste/${fileName}`;
+
+      // Convertendo os dados do filme para JSON
+      const movieDataBuffer = Buffer.from(JSON.stringify(movie));
+
+      // Referência ao arquivo no Firebase Storage
+      const fileRef = ref(storageFirebase, filePath);
+
+      // Fazendo o upload do arquivo JSON para o Firebase Storage
+      await uploadBytes(fileRef, movieDataBuffer);
+
+      // Retornando a URL pública do arquivo armazenado no Firebase Storage
+      const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${storageFirebase.app.options.storageBucket}/o/${encodeURIComponent(filePath)}?alt=media`;
+
+      res.json({ success: true, fileUrl });
+  } catch (error) {
+      console.error('Erro ao salvar filme/série:', error);
+      res.status(500).json({ success: false, message: 'Erro ao salvar filme/série.' });
+  }
+});
+
+app.delete('/watchlistdelete-movie', async (req, res) => {
+  const { id } = req.query; // Obtém o ID da query string
+
+  if (!id) {
+      return res.status(400).json({ success: false, message: 'ID do filme/série é obrigatório.' });
+  }
+
+  try {
+      // Caminho do arquivo baseado no ID
+      const filePath = `teste/${id}.json`;
+
+      // Referência ao arquivo no Firebase Storage
+      const fileRef = ref(storageFirebase, filePath);
+
+      // Deletando o arquivo do Firebase Storage
+      await deleteObject(fileRef);
+
+      res.json({ success: true, message: `Filme/série com ID ${id} foi deletado com sucesso.` });
+  } catch (error) {
+      console.error('Erro ao deletar filme/série:', error);
+
+      // Retorna mensagem mais clara com base no tipo de erro
+      if (error.code === 'storage/object-not-found') {
+          return res.status(404).json({ success: false, message: 'Filme/série não encontrado no servidor.' });
+      }
+
+      res.status(500).json({ success: false, message: 'Erro interno ao tentar excluir o filme/série.' });
+  }
+});
+
+app.get('/watchlistdownload-movies', async (req, res) => {
+  try {
+      // Referência à pasta onde os filmes/séries estão armazenados
+      const listRef = ref(storageFirebase, 'teste/');
+
+      // Obtendo a lista de todos os arquivos na pasta
+      const fileList = await listAll(listRef);
+
+      // Criando um array para armazenar os dados dos filmes
+      const movies = [];
+
+      // Iterando pelos arquivos para obter os URLs de download
+      for (const file of fileList.items) {
+          const fileUrl = await getDownloadURL(file);
+          
+          // Obtendo o nome do arquivo para adicionar aos dados
+          const fileName = file.name;
+
+          // Fazendo uma requisição para obter o conteúdo do arquivo JSON
+          const response = await fetch(fileUrl);
+          const movieData = await response.json();
+
+          // Adicionando o objeto de filme ao array
+          movies.push(movieData);
+      }
+
+      // Ordenando os filmes pela propriedade 'title' ou 'name' de forma alfabética
+      const sortedMovies = movies.sort((a, b) => {
+          const titleA = a.title || a.name;
+          const titleB = b.title || b.name;
+          return titleA.localeCompare(titleB);
+      });
+
+      // Retornando os filmes ordenados em formato JSON
+      res.json(sortedMovies);
+
+  } catch (error) {
+      console.error('Erro ao baixar a lista de filmes:', error);
+      res.status(500).json({ success: false, message: 'Erro ao baixar a lista de filmes.' });
   }
 });
 
