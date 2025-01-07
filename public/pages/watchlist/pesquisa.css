@@ -36,7 +36,7 @@ body {
 }
 
 .movie {
-    width: 100px;
+    max-width: 120px;
     text-align: center;
     cursor: url('/img/cursor-mao.png'), auto;
 }

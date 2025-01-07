@@ -16,7 +16,7 @@ function OnLoadingScreen() {
 
     // Adiciona o conteúdo HTML (a imagem de carregamento)
     novaDiv.innerHTML = `
-        <img src="/img/carregando.gif" alt="Carregando..." />
+        <img style="max-height: 300px; width: auto;" src="/img/carregando.gif" alt="Carregando..." />
     `;
 
     // Adiciona a nova div ao corpo da página

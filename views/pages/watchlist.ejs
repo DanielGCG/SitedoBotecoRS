@@ -243,6 +243,8 @@ function fecharPopup(){
 function fecharPopupPesquisa(){
     const popup = document.getElementById('popup-pesquisa');
     popup.style.display = 'none';
+    document.getElementById("search-input").value = '';
+    document.getElementById("results").innerHTML = '';
 }
 
 // Confirmar a exclusão diretamente ao clicar no botão
@@ -327,7 +329,7 @@ function displayResults(items) {
         });
     }
 
-async function saveMovieToFirebase(movie) {
+    async function saveMovieToFirebase(movie) {
     OnLoadingScreen();
     try {
         // Enviando o filme/série para o backend
@@ -341,11 +343,19 @@ async function saveMovieToFirebase(movie) {
 
         const data = await response.json();
         if (data.success) {
-            // Adiciona o novo filme diretamente à lista local
-            obraslocais.push({
-                ...movie, // Dados do filme enviados
-                fileUrl: data.fileUrl, // URL pública retornada
+            // Encontrar a posição correta para inserir o filme/série na ordem alfabética
+            const index = obraslocais.findIndex(item => {
+                const itemTitle = item.title || item.name || '';
+                const movieTitle = movie.title || movie.name || '';
+                return itemTitle.localeCompare(movieTitle, undefined, { sensitivity: 'base' }) > 0;
             });
+
+            // Adiciona o filme na posição correta
+            obraslocais.splice(
+                index === -1 ? obraslocais.length : index,
+                0,
+                { ...movie, fileUrl: data.fileUrl }
+            );
 
             // Atualiza a interface sem recarregar tudo
             listarObras();
