@@ -314,7 +314,6 @@ function displayResults(items) {
             itemElement.innerHTML = `
                 <img src="${posterPath}" alt="${item.title || item.name}">
                 <div class="movie-title">${item.title || item.name}</div>
-                <div class="media-type">${itemType}</div>
             `;
 
             itemElement.addEventListener('click', () => {

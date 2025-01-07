@@ -4,7 +4,6 @@ const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const cors = require('cors');
 const multer = require('multer');
-const sharp = require('sharp');
 const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
@@ -188,58 +187,6 @@ app.post('/galeriaEdit/:endereco/:nome/:nomenovo', async (req, res) => {
   }
 });
 
-
-app.post('/watchlistDelete/:nome', upload.single('imagem'), async (req, res) => {
-  const nome = req.params.nome;
-
-  try {
-    // Referência ao arquivo no Firebase Storage
-    const fileRef = ref(storageFirebase, `listaFilmes/${nome}.png`);
-
-    // Deleta o arquivo
-    await deleteObject(fileRef);
-
-    // Responde com sucesso
-    res.status(200).json({ success: true, message: 'Arquivo deletado com sucesso!' });
-  } catch (error) {
-    
-    // Trata o erro e responde ao cliente
-    res.status(500).json({ success: false, message: 'Erro ao deletar a imagem. Tente novamente.' });
-  }
-});
-
-app.post('/watchlistUpload/:nome', upload.single('imagem'), async (req, res) => {
-  const nome = req.params.nome;
-  const imagem = req.file; // Aqui, `imagem` será o arquivo enviado pelo frontend via FormData
-
-  if (!imagem) {
-    return res.status(400).json({ success: false, message: 'Nenhum arquivo de imagem enviado.' });
-  }
-  try {
-    // Fazendo o tratamento da imagem antes do upload
-    const processedImageBuffer = await sharp(imagem.buffer)
-      .resize(478, 641, { // Limita a imagem a 478x641px, mantendo a proporção
-        fit: sharp.fit.inside,  // Ajusta para dentro do limite sem cortar
-        withoutEnlargement: true, // Não aumenta imagens pequenas
-      })
-      .toBuffer(); // Converte a imagem processada em buffer para o upload
-
-    const galeriaRef = ref(storageFirebase, `listaFilmes/${nome}.png`);
-    
-    // Fazendo o upload do arquivo para o Firebase Storage
-    const snapshot = await uploadBytes(galeriaRef, processedImageBuffer);
-
-    // Obtém a URL de download do arquivo enviado
-    const downloadURL = await getDownloadURL(snapshot.ref);
-
-    // Envia a resposta com a URL do arquivo enviado
-    res.json({ success: true, message: 'Arquivo enviado com sucesso!', downloadURL });
-  } catch (error) {
-    console.error('Erro ao fazer upload para o Firebase:', error);
-    res.status(500).json({ success: false, message: 'Erro ao fazer upload para o Firebase.' });
-  }
-});
-
 app.get('/watchlistsearch-movies', async (req, res) => {
   const query = req.query.query;
   const BASE_URL = 'https://api.themoviedb.org/3';
@@ -249,7 +196,7 @@ app.get('/watchlistsearch-movies', async (req, res) => {
   }
 
   // Determinar o idioma, pode ser 'pt-BR' ou 'en-US'
-  const language = req.query.language || 'en-US';  // Se não houver 'language', usa 'pt-BR' por padrão
+  const language = 'pt-BR';  // Se não houver 'language', usa 'pt-BR' por padrão
 
   try {
     // Normalizar texto para remover acentos e caracteres especiais
@@ -267,7 +214,7 @@ app.get('/watchlistsearch-movies', async (req, res) => {
     const filteredResults = data.results.filter(item => item.media_type === 'movie' || item.media_type === 'tv');
 
     // Limitar para os 6 primeiros resultados
-    const limitedResults = filteredResults.slice(0, 6);
+    const limitedResults = filteredResults.slice(0, 8);
 
     res.json(limitedResults);  // Enviar apenas filmes e séries, limitados a 6
   } catch (error) {
@@ -284,7 +231,7 @@ app.post('/watchlistupload-movies', async (req, res) => {
       const fileName = `${movie.id}.json`;
 
       // Caminho para o Firebase Storage
-      const filePath = `teste/${fileName}`;
+      const filePath = `watchlist/${fileName}`;
 
       // Convertendo os dados do filme para JSON
       const movieDataBuffer = Buffer.from(JSON.stringify(movie));
@@ -314,7 +261,7 @@ app.delete('/watchlistdelete-movie', async (req, res) => {
 
   try {
       // Caminho do arquivo baseado no ID
-      const filePath = `teste/${id}.json`;
+      const filePath = `watchlist/${id}.json`;
 
       // Referência ao arquivo no Firebase Storage
       const fileRef = ref(storageFirebase, filePath);
@@ -338,7 +285,7 @@ app.delete('/watchlistdelete-movie', async (req, res) => {
 app.get('/watchlistdownload-movies', async (req, res) => {
   try {
       // Referência à pasta onde os filmes/séries estão armazenados
-      const listRef = ref(storageFirebase, 'teste/');
+      const listRef = ref(storageFirebase, 'watchlist/');
 
       // Obtendo a lista de todos os arquivos na pasta
       const fileList = await listAll(listRef);

@@ -20,7 +20,7 @@ body {
     background-color: #007bff;
     color: white;
     border-radius: 5px;
-    cursor: pointer;
+    cursor: url('/img/cursor-mao.png'), auto;
 }
 
 #search-form button:hover {
@@ -38,6 +38,7 @@ body {
 .movie {
     width: 100px;
     text-align: center;
+    cursor: url('/img/cursor-mao.png'), auto;
 }
 
 .movie img {
