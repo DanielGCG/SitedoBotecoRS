@@ -61,8 +61,13 @@ const twitterClient = new TwitterApi({
 // Função para enviar o log para o Firebase Storage
 async function enviarLog(text, userIp, currentDate) {
   try {
-    // Verifica se o IP é no formato IPv6 e, se for, converte para IPv4
+    // Verifica se o IP é no formato IPv6
     const fullIp = userIp;
+    
+    // Se o IP não for no formato IPv6, você pode forçar uma conversão ou notificar o erro
+    if (!isValidIPv6(fullIp)) {
+      console.warn('O IP não está no formato IPv6, é recomendado usar um IPv6 válido.');
+    }
 
     // Cria um arquivo de log com os dados
     const logData = `Data: ${currentDate} | IP: ${fullIp} \nTexto: ${text}\n`;
@@ -100,11 +105,18 @@ async function enviarLog(text, userIp, currentDate) {
   }
 }
 
+// Função auxiliar para validar se o IP é um endereço IPv6
+function isValidIPv6(ip) {
+  // Regex para verificar se é um endereço IPv6 válido
+  const ipv6Pattern = /(^|\s|:)(([0-9a-f]{1,4}:){7}[0-9a-f]{1,4})\s*$/i;
+  return ipv6Pattern.test(ip);
+}
+
 // Rota para postar no Twitter com mídia
 app.post('/tweet-media', upload.single('media'), async (req, res) => {
   const { text } = req.body;
   const media = req.file;
-  const userIp = req.ip; // Obtém o IP do usuário
+  const userIp = req.ip || req.headers['x-forwarded-for'] || ''; // Obtém o IP do usuário, garantindo que seja IPv6
   const currentDate = new Date().toISOString(); // Obtém a data atual
 
   try {
