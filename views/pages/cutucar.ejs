@@ -98,125 +98,15 @@
 <link rel="stylesheet" href="/pages/cutucar/cutucar.css">
 <link rel="stylesheet" href="/pages/cutucar/twitter-post.css">
 
+<!-- --- CONSTANTES --- -->
+<script src="/pages/cutucar/constants.js"></script>
+<!-- --- LÓGICA PARA OS GIFS --- -->
+<script src="/pages/cutucar/gifs.js" defer></script>
+<!-- --- LÓGICA PARA AUTENTICAÇÃO DO USUÁRIO --- -->
+<script src="/pages/cutucar/autentication.js" defer></script>
+
 <script>
-
-    /* ----- CONSTANTES E VARIÁVEIS ----- */
-    const suggestionsList = [
-        '@botdoboteco',
-        '@Bagriieeel',
-        '@carollssssssss',
-        '@chammittoo',
-        '@Darksols_',
-        '@elonmusk',
-        '@f3rnandesz',
-        '@GabrielXoxota',
-        '@Gb_santos1811',
-        '@gcg_daniel',
-        '@giapropria',
-        '@girlon_tv',
-        '@i2camacho',
-        '@jairbolsonaro',
-        '@JYPETWICE',
-        '@jogadorStick',
-        '@lbbhangelita',
-        '@Liraotrem',
-        '@LulaOficial',
-        '@oleonamjoao',
-        '@palettelilith',
-        '@Regis_trado18',
-        '@snake_sorrel',
-        '@Tal_Lento',
-        '@taylorswift13',
-        '@whoisnenes',
-        '@yuzzu_94'
-    ];
-
-    const apiKey = 'EM9bJD4ixcjo1H4gqPgH6vJ4g3cp1PK6';
-    const giphyUrl = 'https://api.giphy.com/v1/gifs/search';
-    const selectGifButton = document.getElementById('selectGifButton');
-    const mediaFileInput = document.getElementById('mediaFile');
-    const popupGif = document.getElementById('popup-gif');
-    const popupGifContainer = document.getElementById('popup-gif-gifs');
-    const mentionInput = document.getElementById('mention');
-    const suggestionsDiv = document.getElementById('suggestions');
-
-
-    /* ----- LÓGICA PARA OS GIFS ----- */
-
-
-    // Exibir uma janela/modal para buscar GIFs
-    selectGifButton.addEventListener('click', async () => {
-        // Criação de uma caixa de pesquisa de GIFs
-        const searchTerm = prompt('Digite o termo para buscar GIFs:');
-        if (!searchTerm) return; // Se o termo for vazio, não faz nada
-
-        try {
-            // Fazer a requisição para a API do Giphy
-            const response = await fetch(`${giphyUrl}?api_key=${apiKey}&q=${searchTerm}&limit=8`);
-            const data = await response.json();
-
-            // Mostrar os GIFs encontrados
-            const gifs = data.data;
-            if (gifs.length > 0) {
-                popupGif.style.display = "";
-                const gifUrls = gifs.map(gif => gif.images.fixed_height.url); // URLs dos GIFs
-
-                // Exibir GIFs na interface
-                let gifHtml = '';
-                gifUrls.forEach(gifUrl => {
-                    gifHtml += `<img src="${gifUrl}" class="gif-preview" onclick="setGif('${gifUrl}')">`;
-                });
-                popupGifContainer.innerHTML = gifHtml;
-            } else {
-                alert('Nenhum GIF encontrado!');
-            }
-        } catch (error) {
-            console.error('Erro ao buscar GIFs:', error);
-            alert('Erro ao buscar GIFs.');
-        }
-    });
-
-    // Função para baixar o GIF e tratá-lo como um arquivo
-    async function setGif(gifUrl) {
-        try {
-            // Baixar o conteúdo do GIF
-            const response = await fetch(gifUrl);
-            if (!response.ok) throw new Error('Falha ao baixar o GIF');
-            
-            // Obter o conteúdo como um Blob (binário)
-            const blob = await response.blob();
-            
-            // Criar um File a partir do Blob (usando o nome do arquivo original)
-            const mediaFile = new File([blob], 'gif.gif', { type: 'image/gif' });
-            
-            // Atualizar o input de arquivo com o novo arquivo
-            mediaFileInput.files = createFileList(mediaFile);
-            
-            // Atualizar o preview de mídia
-            popupGif.style.display = "none";
-            previewMedia();
-        } catch (error) {
-            console.error('Erro ao baixar o GIF:', error);
-            alert('Erro ao baixar o GIF.');
-        }
-    }
-
-    // Função para criar uma lista de arquivos a partir de um Blob
-    function createFileList(file) {
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        return dataTransfer.files;
-    }
-
-    // Fechar popup de gifs
-    function fecharPopup(){
-        document.getElementById('popup-gif').style.display = "none";
-    }
-
-
     /* ----- LÓGICA PARA O POST ----- */
-
-
     // Lógica para envio de tweet
     document.getElementById('tweetButton').addEventListener('click', async () => {
         if (localStorage.getItem("validacaoUsuario") !== "true" && localStorage.getItem("validacaoUsuario") !== true) {
@@ -224,6 +114,10 @@
             return false;
         }
 
+        if (!checkUserLastCutucadaTime()){
+            alert("Calma calabreso! Está cutucando muito rápido!");
+            return false;
+        }
         
         const mention = mentionInput.value.trim();
         const messageText = document.getElementById('messageText').value.trim();
@@ -233,6 +127,9 @@
             alert('Por favor, preencha ambos os campos.');
             return;
         }
+
+        // Marcamos quando tentamos uma cutucada
+        setLastCutucadaTime();
 
         const tweetText = `☝${mention}, ${messageText}
 
@@ -248,7 +145,7 @@
         OnLoadingScreen();
 
         try {
-            const response = await fetch('/tweet-media', {
+            const response = await fetch('/tweet-mediaa', {
                 method: 'POST',
                 body: formData,
             });
@@ -397,56 +294,5 @@
         if (event.target !== mentionInput && event.target.parentNode !== suggestionsDiv) {
             suggestionsDiv.style.display = 'none';
         }
-    });
-
-
-    /* ----- LÓGICA PARA AUTENTICAÇÃO DO USUÁRIO ----- */
-
-    
-    // Verificar se a senha inserida está correta
-    async function checkPassword() {
-        const senha = document.getElementById("password").value.trim(); // Obter senha do input
-
-        try {
-            const response = await fetch('/verify-senha-cutucar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ senha }), // Enviar senha como JSON
-            });
-
-            const data = await response.json(); // Converter a resposta para JSON
-
-            if (data.success) {
-                // Marca o usuário como validado
-                localStorage.setItem("validacaoUsuario", "true");
-                console.log("Validação do Usuário:", localStorage.getItem("validacaoUsuario"));
-                document.getElementById("popup-senha").style.display = "none"; // Esconde o popup
-            } else {
-                alert("Senha incorreta. Tente novamente.");
-            }
-        } catch (error) {
-            console.error("Erro ao verificar senha:", error);
-            alert("Erro ao verificar a senha. Tente novamente mais tarde.");
-        }
-    }
-
-    function checkUserAutentication() {
-        const validacaoUsuario = (localStorage.getItem("validacaoUsuario") === "true" || localStorage.getItem("validacaoUsuario") === true);
-        console.log("Validação do Usuário:", validacaoUsuario);
-        if (!validacaoUsuario) {
-            document.getElementById("popup-senha").style.display = ""; // Mostra o popup
-        }
-    }
-
-    // Verificar se o usuário já está autenticado
-    document.addEventListener("DOMContentLoaded", () => {
-        if (document.getElementById("popup-senha")) {
-            checkUserAutentication();
-        }
-        clearMidiaInput();
-        clearMentionInput();
-        clearMessageTextInput();
-    });
+    }); 
 </script>
