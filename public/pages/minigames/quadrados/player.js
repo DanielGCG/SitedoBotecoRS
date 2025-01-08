@@ -33,7 +33,7 @@ function checkCollision() {
 
     // Se o elemento encontrado for quadrado vermelho (classe "block")
     if (block && block.classList.contains("block")) {
-        stopGame();
-        resetScore();
+        deathGame();
+        playDeathSound();
     }
 }

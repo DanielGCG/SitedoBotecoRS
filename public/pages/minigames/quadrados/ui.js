@@ -49,10 +49,38 @@ function playScreen() {
 
         // Adiciona texto ou outros elementos à div
         playDiv.innerHTML = '<p>▶</p>';
-        playDiv.innerHTML += '<p>aperte esc</p>'
+        playDiv.innerHTML += '<p>aperte enter</p>'
 
         // Adiciona a nova div como filho de gameplay-area
         document.getElementById("gameplay-area").appendChild(playDiv);
+    }
+}
+
+function deathScreen() {
+    // Verifica se a div de death já existe antes de criar uma nova
+    if (!document.getElementById("death-screen")) {
+        // Cria uma nova div
+        const deathDiv = document.createElement("div");
+        deathDiv.id = "death-screen";
+
+        deathDiv.style.position = "absolute";
+        deathDiv.style.top = "0";
+        deathDiv.style.left = "0";
+        deathDiv.style.width = "100%";
+        deathDiv.style.height = "100%";
+        deathDiv.style.backgroundColor = "rgba(255, 0, 0, 0.12)";
+        deathDiv.style.color = "rgba(255, 255, 255, 0.2)";
+        deathDiv.style.display = "flex";
+        deathDiv.style.justifyContent = "center";
+        deathDiv.style.alignItems = "center";
+        deathDiv.style.fontSize = "50px";
+        deathDiv.style.zIndex = "10";
+
+        // Adiciona texto ou outros elementos à div
+        deathDiv.innerHTML = '<p>Você morreu >:D</p>';
+
+        // Adiciona a nova div como filho de gameplay-area
+        document.getElementById("gameplay-area").appendChild(deathDiv);
     }
 }
 
@@ -64,9 +92,16 @@ function removePauseScreen() {
 }
 
 function removePlayScreen() {
-    const playDiv = document.getElementById("play-screen");
-    if (playDiv) {
-        playDiv.remove(); // Remove a div de play
+    const deathDiv = document.getElementById("play-screen");
+    if (deathDiv) {
+        deathDiv.remove(); // Remove a div de death
+    }
+}
+
+function removeDeathScreen() {
+    const pauseDiv = document.getElementById("death-screen");
+    if (pauseDiv) {
+        pauseDiv.remove(); // Remove a div de pausa
     }
 }
 
