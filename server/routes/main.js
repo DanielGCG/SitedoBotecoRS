@@ -81,6 +81,14 @@ router.get('/minigames/setinha', (req, res) => {
     res.render('pages/minigames/setinha', { locals: locals });
 });
 
+router.get('/minigames/quadrados', (req, res) => {
+    const locals = {
+        title: "quadrados!",
+        description: "⬜"
+    }
+    res.render('pages/minigames/quadrados', { locals: locals });
+});
+
 /* ------ SOBRE ------*/
 
 router.get('/about', (req, res) => {

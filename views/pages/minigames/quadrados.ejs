@@ -1,0 +1,59 @@
+<link rel="stylesheet" href="/pages/minigames/quadrados/quadrados.css">
+
+<main>
+    <div class="Pontuação">
+        <h1 style="color: white; text-align: center;">Quadrados</h1>
+        <h2 style="color: white; text-align: center;" id="score">0</h2>
+    </div>
+
+    <div class="gameplay-area" id="gameplay-area">
+        <div class="mouse-cursor" id="mouse-cursor"></div>
+    </div>
+
+    <div class="controls">
+        <label for="interval-slider" style="color: white; display: block; text-align: center;">Espera para spawn</label>
+        <input type="range" id="interval-slider" min="1" max="200" value="50" step="1" style="width: 100%; margin: 20px;">
+        <p id="slider-value" style="text-align: center; color: white;">50 ms</p>
+    </div>    
+    
+</main>
+
+<script src="/pages/minigames/quadrados/rules.js"></script>
+<script src="/pages/minigames/quadrados/ui.js" defer></script>
+<script src="/pages/minigames/quadrados/player.js" defer></script>
+<script src="/pages/minigames/quadrados/blockfactory.js" defer></script>
+<script src="/pages/minigames/quadrados/moviment.js" defer></script>
+
+
+<script>
+    const gameplayArea = document.getElementById("gameplay-area");
+    let gameIntervalTime = 200;
+    let pontos = 0;
+    let gameInterval = null;
+    let checkColisionInterval = null;
+    let gamePaused = false;
+    let forbidenToUnpause = false;
+
+    function toggleGamePause() {
+        if (gamePaused) {
+            startGame();
+            gamePaused = false;
+        } else {
+            stopGame();
+            gamePaused = true;
+        }
+    }
+
+    // Detectar quando a tecla Esc é pressionada
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !forbidenToUnpause) { // Verifica se a tecla pressionada é "Esc"
+            toggleGamePause();
+            removePlayScreen();
+        }
+    });
+
+    // Iniciar o jogo quando a página for carregada
+    document.addEventListener("DOMContentLoaded", () => {
+        playScreen(); // Mostrar tela de "play" inicialmente
+    });
+</script>

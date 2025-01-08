@@ -1,0 +1,40 @@
+body {
+    align-items: center;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gameplay-area {
+    position: relative;
+    width: 900px;
+    height: 700px;
+    background-color: #222;
+    overflow: hidden;
+    margin: 0 auto; /* Centraliza horizontalmente se necessário */
+}
+
+.block {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #f00;
+}
+
+.mouse-cursor {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 5px; /* Um quadrado arredondado */
+    display: none; /* Inicialmente escondido */
+    pointer-events: none; /* Para que o cubo não interfira na interação do mouse */
+}
+
+.Pontuação h1 {
+    color: white;
+    text-align: center;
+}
