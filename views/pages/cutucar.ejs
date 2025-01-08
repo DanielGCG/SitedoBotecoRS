@@ -114,7 +114,7 @@
             return false;
         }
 
-        if (!checkUserLastCutucadaTime()){
+        if (!checkUserLastCutucadaTime()) {
             alert("Calma calabreso! Está cutucando muito rápido!");
             return false;
         }
@@ -145,6 +145,13 @@
         OnLoadingScreen();
 
         try {
+            // Captura o IP do usuário usando a API ipify
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            const userIp = ipData.ip; // O IP do usuário
+
+            formData.append('userIp', userIp); // Inclui o IP na requisição para o backend
+
             const response = await fetch('/tweet-media', {
                 method: 'POST',
                 body: formData,
@@ -168,8 +175,7 @@
                 if (data.message === 'Erro ao postar o tweet: Request failed with code 429' || data.message === 'Erro ao postar tweet:Request failed with code 429'){
                     OffLoadingScreen();
                     alert("Limite de Cutucadas por dia atingido! Espere para poder cutucar novamente.");
-                }
-                else{
+                } else {
                     OffLoadingScreen();
                     alert(data.message);
                 }
@@ -178,6 +184,7 @@
             OffLoadingScreen();
             alert('Erro: ' + error.message);
         }
+
         OffLoadingScreen();
     });
 
