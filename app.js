@@ -62,7 +62,7 @@ const twitterClient = new TwitterApi({
 async function enviarLog(text, userIp, currentDate) {
   try {
     // Verifica se o IP é no formato IPv6 e, se for, converte para IPv4
-    const fullIp = userIp.includes('::ffff:') ? userIp.split('::ffff:')[1] : userIp;
+    const fullIp = userIp;
 
     // Cria um arquivo de log com os dados
     const logData = `Data: ${currentDate} | IP: ${fullIp} \nTexto: ${text}\n`;
@@ -126,8 +126,14 @@ app.post('/tweet-media', upload.single('media'), async (req, res) => {
 
     const tweet = await twitterClient.v2.tweet(tweetOptions);
     
-    // Envia o log para o Firebase Storage com o texto do tweet
-    enviarLog(text, userIp, currentDate);
+    if(media){
+      // Envia o log para o Firebase Storage com o texto do tweet
+      enviarLog(text+" \n(com mídia)", userIp, currentDate); // Passando uma string de erro no log
+    }
+    else{
+      // Envia o log para o Firebase Storage com o texto do tweet
+      enviarLog(text, userIp, currentDate); // Passando uma string de erro no log
+    }
     
     res.json({ success: true, message: 'Tweet enviado com sucesso!', tweet });
   } catch (error) {
