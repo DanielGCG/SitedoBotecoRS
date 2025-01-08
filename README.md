@@ -19,19 +19,21 @@ O site está disponível online no link:
 
 ## 📋 Funcionalidades
 
-- Imagem do dia (todo dia o bot procura uma imagem para dispor na tela inicial do site e no bot do Twitter
-- Uma galeria de imagens que podem ser enviadas, editadas e removidas por qualquer usuário
+- Imagem do dia (todo dia o bot procura uma imagem para dispor na tela inicial do site e no bot do Twitter)
+- Galeria de imagens que podem ser enviadas, editadas e removidas por qualquer usuário
 - Sistema de Match cinematográfico com Algebra Linear (distância entre vetores)
+- WatchList com uso de API do TMDB para encontrar os filmes
 - Uso de API do twitter para envio de mensagens com BOT
-- Minigames:
+- Minigames (não finalizado):
   - Cookie Cliker
+  - Jogo de setinhas
 
 ---
 
 ## 👨‍🏭 A melhorar
 
-- Segurânça de chaves de API
-- Melhorar organização dos diretórios
+- Segurânça de chaves de API (80%)
+- Melhorar organização dos diretórios 
 - Modularizar de forma mais escalonável o html / JavaScript / css
 
 ---
@@ -43,7 +45,8 @@ O site está disponível online no link:
 - **Serviços**:
   - Firebase (Storage)
   - Heroku (Hospedagem)
-  - API do Twitter
+  - API do Twitter ([X API](https://developer.x.com/en/docs/x-api))
+  - API do The Movie Database ([TMDB](https://www.themoviedb.org/))
 
 ---
 
