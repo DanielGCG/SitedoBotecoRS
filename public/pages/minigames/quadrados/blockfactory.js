@@ -8,7 +8,7 @@ function createBlock() {
     block.style.left = `${startX}px`;
     block.style.top = `${startY}px`;
 
-    gameplayArea.appendChild(block);
+    blockArea.appendChild(block);
 
     // Iniciar o movimento do bloco
     moveBlock(block, directionX, directionY, speed);

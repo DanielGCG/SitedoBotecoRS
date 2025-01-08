@@ -9,10 +9,10 @@
 
     <div class="gameplay-area" id="gameplay-area">
         <div class="mouse-cursor" id="mouse-cursor"></div>
+        <div class="block-area" id="block-area"></div>
     </div>
 
     <div class="controls">
-        <label for="interval-slider" style="color: white; display: block; text-align: center;">Espera para spawn</label>
         <input type="range" id="interval-slider" min="1" max="100" value="40" step="1" style="width: 100%; margin: 20px;">
         <p id="slider-value" style="text-align: center; color: white;">40 ms</p>
     </div>
@@ -30,6 +30,7 @@
 
 <script>
     const gameplayArea = document.getElementById("gameplay-area");
+    const blockArea = document.getElementById("block-area");
     let gameIntervalTime = 200;
     let score = 0;
     let highscore = 0;
@@ -45,7 +46,7 @@
         }
 
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Enter"){
+            if (event.key === "Enter" && document.getElementById("play-screen")){
                 // Tocar o som 'death.mp3' para desbloquear o áudio
                 enableAudio(); // Habilitar o estado de áudio
                 playAudio('/pages/minigames/quadrados/sounds/play1.mp3', 0.5);
@@ -81,14 +82,14 @@
 
     // Detectar quando a tecla Esc é pressionada
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !forbidenToUnpause && document.getElementById("death-screen")) { // Verifica se a tecla pressionada é "Esc"
+        if (event.key === "Escape" && !forbidenToUnpause && document.getElementById("death-screen") && !document.getElementById("play-screen")) { // Verifica se a tecla pressionada é "Esc"
             playPlaySound();
             removeDeathScreen();
             animationClearDeathScreen();
             playScreen();
         }
         else{
-            if (event.key === "Escape" && !forbidenToUnpause) { // Verifica se a tecla pressionada é "Esc"
+            if (event.key === "Escape" && !forbidenToUnpause && !document.getElementById("play-screen")) { // Verifica se a tecla pressionada é "Esc"
                 playPauseSound();
                 toggleGamePause();
                 removePlayScreen();

@@ -77,7 +77,7 @@ function deathScreen() {
         deathDiv.style.zIndex = "10";
 
         // Adiciona texto ou outros elementos à div
-        deathDiv.innerHTML = '<p>Você morreu >:D</p>';
+        deathDiv.innerHTML = '<p>Você morreu >:D (esc)</p>';
 
         // Adiciona a nova div como filho de gameplay-area
         document.getElementById("gameplay-area").appendChild(deathDiv);
