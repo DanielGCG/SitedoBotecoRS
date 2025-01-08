@@ -71,13 +71,20 @@ function removePlayScreen() {
 }
 
 function addToScore() {
-    pontos++;
-    document.getElementById("score").innerHTML = pontos;
+    score++;
+    document.getElementById("score").innerHTML = score;
 }
 
 function resetScore() {
-    pontos = 0;
-    document.getElementById("score").innerHTML = pontos;
+    score = 0;
+    document.getElementById("score").innerHTML = score;
+}
+
+function setHighscore() {
+    if (score > highscore){
+        highscore = score;
+        document.getElementById("highscore").innerHTML = "Highscore: " + highscore;
+    }
 }
 
 // Obtém o controle da barra
@@ -101,5 +108,5 @@ intervalSlider.addEventListener("input", (event) => {
 
 // Deixar o slider no default
 document.addEventListener("DOMContentLoaded", () => {
-    intervalSlider.value = 50;
+    intervalSlider.value = 40;
 });

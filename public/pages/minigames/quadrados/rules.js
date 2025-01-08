@@ -24,6 +24,7 @@ function stopGame() {
         gameInterval = null;
         checkColisionInterval = null;
         pauseScreen();
+        setHighscore();
         console.log("Jogo pausado");
     }
 }

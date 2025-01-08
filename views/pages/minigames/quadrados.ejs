@@ -3,7 +3,8 @@
 <main>
     <div class="Pontuação">
         <h1 style="color: white; text-align: center;">Quadrados</h1>
-        <h2 style="color: white; text-align: center;" id="score">0</h2>
+        <h2 style="color: rgba(255, 235, 54, 0.842); text-align: center;" id="highscore">Highscore: 0</h2>
+        <h2 style="color: white; text-align: center;" id="score">Score: 0</h2>
     </div>
 
     <div class="gameplay-area" id="gameplay-area">
@@ -12,8 +13,8 @@
 
     <div class="controls">
         <label for="interval-slider" style="color: white; display: block; text-align: center;">Espera para spawn</label>
-        <input type="range" id="interval-slider" min="1" max="200" value="50" step="1" style="width: 100%; margin: 20px;">
-        <p id="slider-value" style="text-align: center; color: white;">50 ms</p>
+        <input type="range" id="interval-slider" min="1" max="100" value="40" step="1" style="width: 100%; margin: 20px;">
+        <p id="slider-value" style="text-align: center; color: white;">40 ms</p>
     </div>    
     
 </main>
@@ -28,7 +29,8 @@
 <script>
     const gameplayArea = document.getElementById("gameplay-area");
     let gameIntervalTime = 200;
-    let pontos = 0;
+    let score = 0;
+    let highscore = 0;
     let gameInterval = null;
     let checkColisionInterval = null;
     let gamePaused = false;
