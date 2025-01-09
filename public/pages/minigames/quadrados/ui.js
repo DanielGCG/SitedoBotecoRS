@@ -121,27 +121,3 @@ function setHighscore() {
         document.getElementById("highscore").innerHTML = "Highscore: " + highscore;
     }
 }
-
-// Obtém o controle da barra
-const intervalSlider = document.getElementById("interval-slider");
-const sliderValueText = document.getElementById("slider-value");
-
-// Atualiza o valor de gameIntervalTime conforme o slider é movido
-intervalSlider.addEventListener("input", (event) => {
-    gameIntervalTime = event.target.value;
-    sliderValueText.textContent = `${gameIntervalTime} ms`;
-    
-    // Se o jogo estiver em andamento, reinicia o intervalo com a nova velocidade
-    if (gameInterval) {
-        clearInterval(gameInterval);
-        gameInterval = setInterval(() => {
-            createBlock();
-            checkCollision(); // Verifica colisões a cada intervalo
-        }, gameIntervalTime);
-    }
-});
-
-// Deixar o slider no default
-document.addEventListener("DOMContentLoaded", () => {
-    intervalSlider.value = 40;
-});

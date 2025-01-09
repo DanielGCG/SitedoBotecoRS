@@ -6,13 +6,13 @@
         <div class="coluna-1">
             <div class="game-mode">
                 <h1 style="color: white; text-align: center; white-space: nowrap;">Modo de jogo</h1>
-                <button class="game-mode-btn" id="game-mode-btn-hard">
+                <button class="game-mode-btn" id="game-mode-btn-hard" onclick="setGameInterval('hard')">
                     <span>Difícil</span>
                 </button>
-                <button class="game-mode-btn" id="game-mode-btn-medium">
+                <button class="game-mode-btn" id="game-mode-btn-medium" onclick="setGameInterval('medium')">
                     <span>Médio</span>
                 </button>
-                <button class="game-mode-btn" id="game-mode-btn-easy">
+                <button class="game-mode-btn" id="game-mode-btn-easy" onclick="setGameInterval('easy')">
                     <span>Fácil</span>
                 </button>
             </div>
@@ -29,15 +29,11 @@
                 <div class="mouse-cursor" id="mouse-cursor"></div>
                 <div class="block-area" id="block-area"></div>
             </div>
-        
-            <div class="controls">
-                <input type="range" id="interval-slider" min="1" max="100" value="40" step="1" style="width: 100%; margin: 20px;">
-                <p id="slider-value" style="text-align: center; color: white;">40 ms</p>
-            </div>
         </div>
         <div class="coluna-3">
             <div class="tabela-lideres">
                 <h1 style="color: white; text-align: center; white-space: nowrap;">Tabela de Líderes</h1>
+                <h2 style="color: rgba(255, 235, 54, 0.842); text-align: center; white-space: nowrap;">Em construção.</h2>
             </div>
         </div>
     </div>
@@ -57,7 +53,7 @@
 <script>
     const gameplayArea = document.getElementById("gameplay-area");
     const blockArea = document.getElementById("block-area");
-    let gameIntervalTime = 200;
+    let gameIntervalTime = 40;
     let score = 0;
     let highscore = 0;
     let gameInterval = null;
@@ -101,7 +97,7 @@
             startGame();
             gamePaused = false;
         } else {
-            stopGame();
+            pauseGame();
             gamePaused = true;
         }
     }

@@ -17,7 +17,7 @@ document.addEventListener("mousemove", (event) => {
     } else {
         mouseCursor.style.display = "none"; // Esconde o cubo quando sai da área
         forbidenToUnpause = true;
-        stopGame();
+        pauseGame();
     }
 
     // Verifica colisão com o quadrado vermelho

@@ -19,6 +19,18 @@ function startGame() {
     }
 }
 
+function setGameInterval(gamemode) {
+    if (gamemode === "hard"){
+        gameIntervalTime = 5;
+    }
+    if(gamemode === "medium"){
+        gameIntervalTime = 20;
+    }
+    if(gamemode === "easy"){
+        gameIntervalTime = 40;
+    }
+}
+
 function pauseGame() {
     gamePaused = true;
     if (gameInterval) {

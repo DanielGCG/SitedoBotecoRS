@@ -15,8 +15,6 @@ main {
 }
 
 .coluna-1, .coluna-2, .coluna-3 {
-    background-color: #1a1a1a; /* Cor de fundo para visualização */
-    border: 1px solid #333; /* Borda para separar as colunas */
 }
 
 .gameplay-area {
