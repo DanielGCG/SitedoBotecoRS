@@ -64,8 +64,20 @@ async function enviarLog(text, userIp, currentDate) {
     // Verifica se o IP é no formato IPv6 e, se for, converte para IPv4
     const fullIp = userIp.includes('::ffff:') ? userIp.split('::ffff:')[1] : userIp;
 
+    // Formata a data para o formato legível
+    const dateObject = new Date(currentDate);
+    const formattedDate = dateObject.toLocaleString('pt-BR', {
+      timeZone: 'UTC',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+
     // Cria um arquivo de log com os dados
-    const logData = `Data: ${currentDate} | IP: ${fullIp} \nTexto: ${text}\n`;
+    const logData = `Data: ${formattedDate} | IP: ${fullIp} \nTexto: ${text}\n`;
 
     // Inicializa o Firebase Storage
     const storage = getStorage();
