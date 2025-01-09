@@ -19,13 +19,13 @@ const suggestionsList = [
     '@lbbhangelita',
     '@Liraotrem',
     '@LulaOficial',
+    '@nenesz_',
     '@oleonamjoao',
     '@palettelilith',
     '@Regis_trado18',
     '@snake_sorrel',
     '@Tal_Lento',
     '@taylorswift13',
-    '@whoisnenes',
     '@yuzzu_94'
 ];
 
