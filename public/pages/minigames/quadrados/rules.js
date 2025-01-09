@@ -19,7 +19,7 @@ function startGame() {
     }
 }
 
-function stopGame() {
+function pauseGame() {
     gamePaused = true;
     if (gameInterval) {
         clearInterval(gameInterval);
@@ -27,7 +27,6 @@ function stopGame() {
         gameInterval = null;
         checkColisionInterval = null;
         pauseScreen();
-        setHighscore();
         console.log("Jogo pausado");
     }
 }
@@ -42,6 +41,6 @@ function deathGame() {
         deathScreen();
         setHighscore();
         resetScore();
-        console.log("Jogo pausado");
+        console.log("Morreu");
     }
 }
