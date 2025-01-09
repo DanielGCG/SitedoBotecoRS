@@ -4,8 +4,9 @@
 
     <div class="colunas">
         <div class="coluna-1">
+            <h1 style="color: white; text-align: center; white-space: nowrap;">Modo de jogo</h1>
             <div class="game-mode">
-                <h1 style="color: white; text-align: center; white-space: nowrap;">Modo de jogo</h1>
+                
                 <button class="game-mode-btn" id="game-mode-btn-hard" onclick="setGameInterval('hard')">
                     <span>Difícil</span>
                 </button>
@@ -18,8 +19,8 @@
             </div>
         </div>        
         <div class="coluna-2">
+            <h1 style="color: white; text-align: center;">Quadrados</h1>
             <div class="Pontuação">
-                <h1 style="color: white; text-align: center;">Quadrados</h1>
                 <h2 style="color: rgba(255, 235, 54, 0.842); text-align: center;" id="highscore">Highscore: 0</h2>
                 <h2 style="color: white; text-align: center;" id="score">Score: 0</h2>
             </div>
@@ -31,8 +32,8 @@
             </div>
         </div>
         <div class="coluna-3">
+            <h1 style="color: white; text-align: center; white-space: nowrap;">Tabela de Líderes</h1>
             <div class="tabela-lideres">
-                <h1 style="color: white; text-align: center; white-space: nowrap;">Tabela de Líderes</h1>
                 <h2 style="color: rgba(255, 235, 54, 0.842); text-align: center; white-space: nowrap;">Em construção.</h2>
             </div>
         </div>
@@ -53,7 +54,7 @@
 <script>
     const gameplayArea = document.getElementById("gameplay-area");
     const blockArea = document.getElementById("block-area");
-    let gameIntervalTime = 40;
+    let gameIntervalTime = 50;
     let score = 0;
     let highscore = 0;
     let gameInterval = null;
@@ -62,60 +63,47 @@
     let forbidenToUnpause = false;
     let isAudioEnabled = false;
 
-        function enableAudio() {
-            isAudioEnabled = true;
-            console.log("Áudio habilitado! Agora todos os sons podem ser reproduzidos.");
-        }
-
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" && document.getElementById("play-screen")){
-                // Tocar o som 'death.mp3' para desbloquear o áudio
-                enableAudio(); // Habilitar o estado de áudio
-                playAudio('/pages/minigames/quadrados/sounds/play1.mp3', 0.5);
-                toggleGamePause();
-                removePlayScreen();
-            }
-        });
-
-        // Função genérica para reproduzir áudio
-        function playAudio(soundPath, volume = 1.0) {
-            if (!isAudioEnabled) {
-                return;
-            }
-
-            const audio = new Audio(soundPath);
-            audio.volume = volume;
-            audio.play().then(() => {
-                console.log(`Som reproduzido com sucesso: ${soundPath}`);
-            }).catch(error => {
-                console.error("Erro ao tentar reproduzir o som:", error);
-            });
-        }
+    function enableAudio() {
+        isAudioEnabled = true;
+        console.log("Áudio habilitado! Agora todos os sons podem ser reproduzidos.");
+    }
 
     function toggleGamePause() {
         if (gamePaused) {
-            startGame();
-            gamePaused = false;
+            resumeGame();
+            console.log("toggleGamePause()");
+            console.log("resumeGame()");
         } else {
             pauseGame();
-            gamePaused = true;
+            console.log("toggleGamePause()");
+            console.log("pauseGame()");
         }
     }
 
+    // Detectar quando a tecla Enter é pressionada
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && document.getElementById("play-screen")){
+            enableAudio();
+            playPlaySound1();
+            startGame();
+            console.log("startGame()");
+        }
+    });
+
     // Detectar quando a tecla Esc é pressionada
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !forbidenToUnpause && document.getElementById("death-screen") && !document.getElementById("play-screen")) { // Verifica se a tecla pressionada é "Esc"
-            playPlaySound();
+        // Quando o usuário perde e joga de novo
+        if (event.key === "Escape" && document.getElementById("death-screen") && !document.getElementById("play-screen")) {
             removeDeathScreen();
-            animationClearDeathScreen();
+            clearBlockArea();
             playScreen();
+            playPlaySound();
+            console.log("clearBlockArea e playScreen");
         }
-        else{
-            if (event.key === "Escape" && !forbidenToUnpause && !document.getElementById("play-screen")) { // Verifica se a tecla pressionada é "Esc"
-                playPauseSound();
-                toggleGamePause();
-                removePlayScreen();
-            }
+
+        // Quando queremos apenas pausar/despausar
+        if (event.key === "Escape" && !forbidenToUnpause && !document.getElementById("play-screen") && !document.getElementById("death-screen")) {
+            toggleGamePause();
         }
     });
 

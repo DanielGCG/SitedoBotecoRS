@@ -17,7 +17,9 @@ document.addEventListener("mousemove", (event) => {
     } else {
         mouseCursor.style.display = "none"; // Esconde o cubo quando sai da área
         forbidenToUnpause = true;
-        pauseGame();
+        if (!document.getElementById("pause-screen") && !document.getElementById("play-screen") && !document.getElementById("death-screen")){
+            pauseGame();
+        }
     }
 
     // Verifica colisão com o quadrado vermelho
@@ -34,6 +36,5 @@ function checkCollision() {
     // Se o elemento encontrado for quadrado vermelho (classe "block")
     if (block && block.classList.contains("block")) {
         deathGame();
-        playDeathSound();
     }
 }

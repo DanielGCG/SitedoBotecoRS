@@ -1,29 +1,45 @@
+// Função genérica para reproduzir áudio
+function playAudio(soundPath, volume) {
+    if (!isAudioEnabled) {
+        return;
+    }
+
+    const audio = new Audio(soundPath);
+    audio.volume = volume;
+    audio.play().then(() => {
+    }).catch(error => {
+        console.error("Erro ao tentar reproduzir o som:", error);
+    });
+}
+
 function playDeathSound() {
     if(isAudioEnabled){
-        const DeathSound = new Audio('/pages/minigames/quadrados/sounds/death.mp3'); // Substitua pelo caminho do seu arquivo de som
-        DeathSound.volume = 0.15; // Ajuste o volume de 0.0 a 1.0
-        DeathSound.play();
+        playAudio('/pages/minigames/quadrados/sounds/death.mp3', 0.1);
     }
 }
 
 function playPlaySound() {
     if(isAudioEnabled){
-        const PlaySound = new Audio('/pages/minigames/quadrados/sounds/play2.mp3'); // Substitua pelo caminho do seu arquivo de som
-        PlaySound.volume = 0.55; // Ajuste o volume de 0.0 a 1.0
-        PlaySound.play();
+        playAudio('/pages/minigames/quadrados/sounds/play2.mp3', 0.55);
+    }
+}
+
+function playPlaySound1() {
+    if(isAudioEnabled){
+        playAudio('/pages/minigames/quadrados/sounds/play1.mp3', 0.55);
     }
 }
 
 function playPauseSound() {
     if(isAudioEnabled){
-        const PauseSound = new Audio('/pages/minigames/quadrados/sounds/bell.mp3'); // Substitua pelo caminho do seu arquivo de som
-        PauseSound.volume = 0.15; // Ajuste o volume de 0.0 a 1.0
-        PauseSound.play();
+        playAudio('/pages/minigames/quadrados/sounds/bell.mp3', 0.11);
     }
 }
 
 function playResumeSound() {
-    
+    if(isAudioEnabled){
+        playAudio('/pages/minigames/quadrados/sounds/lleb.mp3', 0.11);
+    }
 }
 
 function playBackgroundMusic() {

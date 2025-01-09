@@ -19,8 +19,7 @@ function pauseScreen() {
         pauseDiv.style.zIndex = "10";
 
         // Adiciona texto ou outros elementos à div
-        pauseDiv.innerHTML = '<p>⏸︎</p>';
-        pauseDiv.innerHTML += '<p>aperte esc</p>'
+        pauseDiv.innerHTML = '<p>⏸︎ esc</p>';
 
         // Adiciona a nova div como filho de gameplay-area
         document.getElementById("gameplay-area").appendChild(pauseDiv);
@@ -48,8 +47,7 @@ function playScreen() {
         playDiv.style.zIndex = "10";
 
         // Adiciona texto ou outros elementos à div
-        playDiv.innerHTML = '<p>▶</p>';
-        playDiv.innerHTML += '<p>aperte enter</p>'
+        playDiv.innerHTML = '<p>▶ enter</p>';
 
         // Adiciona a nova div como filho de gameplay-area
         document.getElementById("gameplay-area").appendChild(playDiv);
@@ -77,7 +75,7 @@ function deathScreen() {
         deathDiv.style.zIndex = "10";
 
         // Adiciona texto ou outros elementos à div
-        deathDiv.innerHTML = '<p>Você morreu >:D (esc)</p>';
+        deathDiv.innerHTML = '<p>💀 esc</p>';
 
         // Adiciona a nova div como filho de gameplay-area
         document.getElementById("gameplay-area").appendChild(deathDiv);
@@ -87,22 +85,27 @@ function deathScreen() {
 function removePauseScreen() {
     const pauseDiv = document.getElementById("pause-screen");
     if (pauseDiv) {
-        pauseDiv.remove(); // Remove a div de pausa
+        pauseDiv.remove();
     }
 }
 
 function removePlayScreen() {
     const deathDiv = document.getElementById("play-screen");
     if (deathDiv) {
-        deathDiv.remove(); // Remove a div de death
+        deathDiv.remove();
     }
 }
 
 function removeDeathScreen() {
     const pauseDiv = document.getElementById("death-screen");
     if (pauseDiv) {
-        pauseDiv.remove(); // Remove a div de pausa
+        pauseDiv.remove();
     }
+}
+
+function clearBlockArea() {
+    const BlockAreaDiv = document.getElementById("block-area");
+    BlockAreaDiv.innerHTML = '';
 }
 
 function addToScore() {

@@ -17,6 +17,29 @@ main {
 .coluna-1, .coluna-2, .coluna-3 {
 }
 
+.game-mode {
+    display: grid;
+    gap: 10px; /* Espaçamento entre os botões */
+    margin-top: 60px; /* Move os botões mais para baixo */
+    justify-content: center; /* Centraliza os botões horizontalmente */
+}
+
+.game-mode-btn {
+    height: 50px;
+    width: 200px;
+    font-size: 32px;
+    border: none;
+    background-color: #444;
+    color: white;
+    cursor: url('/img/cursor-mao.png'), auto;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.game-mode-btn:hover {
+    background-color: #555; /* Cor ao passar o mouse */
+}
+
 .gameplay-area {
     position: relative;
     width: 900px;
@@ -24,6 +47,7 @@ main {
     background-color: #222;
     overflow: hidden;
     margin: 0 auto; /* Centraliza horizontalmente se necessário */
+    cursor: auto;
 }
 
 .block {
