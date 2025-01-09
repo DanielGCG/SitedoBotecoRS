@@ -160,11 +160,11 @@ app.post('/tweet-media', upload.single('media'), async (req, res) => {
   }
   if(media){
     // Envia o log para o Firebase Storage com o texto do tweet
-    enviarLog(text+" \n(erro ao enviar arquivo com mídia)", userIp, currentDate); // Passando uma string de erro no log
+    enviarLog(text+" \n(erro ao enviar cutucada com mídia)", userIp, currentDate); // Passando uma string de erro no log
   }
   else{
     // Envia o log para o Firebase Storage com o texto do tweet
-    enviarLog(text+" \n(erro ao enviar arquivo)", userIp, currentDate); // Passando uma string de erro no log
+    enviarLog(text+" \n(erro ao enviar)", userIp, currentDate); // Passando uma string de erro no log
   }
 });
 
