@@ -8,6 +8,17 @@ main {
     align-items: center;
 }
 
+.colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* Três colunas com tamanhos iguais */
+    height: 100vh; /* Altura total da tela */
+}
+
+.coluna-1, .coluna-2, .coluna-3 {
+    background-color: #1a1a1a; /* Cor de fundo para visualização */
+    border: 1px solid #333; /* Borda para separar as colunas */
+}
+
 .gameplay-area {
     position: relative;
     width: 900px;

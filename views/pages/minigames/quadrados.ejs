@@ -1,21 +1,47 @@
 <link rel="stylesheet" href="/pages/minigames/quadrados/quadrados.css">
 
 <main>
-    <div class="Pontuação">
-        <h1 style="color: white; text-align: center;">Quadrados</h1>
-        <h2 style="color: rgba(255, 235, 54, 0.842); text-align: center;" id="highscore">Highscore: 0</h2>
-        <h2 style="color: white; text-align: center;" id="score">Score: 0</h2>
-    </div>
 
-    <div class="gameplay-area" id="gameplay-area">
-        <div class="mouse-cursor" id="mouse-cursor"></div>
-        <div class="block-area" id="block-area"></div>
-    </div>
+    <div class="colunas">
+        <div class="coluna-1">
+            <div class="game-mode">
+                <h1 style="color: white; text-align: center; white-space: nowrap;">Modo de jogo</h1>
+                <button class="game-mode-btn" id="game-mode-btn-hard">
+                    <span>Difícil</span>
+                </button>
+                <button class="game-mode-btn" id="game-mode-btn-medium">
+                    <span>Médio</span>
+                </button>
+                <button class="game-mode-btn" id="game-mode-btn-easy">
+                    <span>Fácil</span>
+                </button>
+            </div>
+        </div>        
+        <div class="coluna-2">
+            <div class="Pontuação">
+                <h1 style="color: white; text-align: center;">Quadrados</h1>
+                <h2 style="color: rgba(255, 235, 54, 0.842); text-align: center;" id="highscore">Highscore: 0</h2>
+                <h2 style="color: white; text-align: center;" id="score">Score: 0</h2>
+            </div>
 
-    <div class="controls">
-        <input type="range" id="interval-slider" min="1" max="100" value="40" step="1" style="width: 100%; margin: 20px;">
-        <p id="slider-value" style="text-align: center; color: white;">40 ms</p>
+            
+            <div class="gameplay-area" id="gameplay-area">
+                <div class="mouse-cursor" id="mouse-cursor"></div>
+                <div class="block-area" id="block-area"></div>
+            </div>
+        
+            <div class="controls">
+                <input type="range" id="interval-slider" min="1" max="100" value="40" step="1" style="width: 100%; margin: 20px;">
+                <p id="slider-value" style="text-align: center; color: white;">40 ms</p>
+            </div>
+        </div>
+        <div class="coluna-3">
+            <div class="tabela-lideres">
+                <h1 style="color: white; text-align: center; white-space: nowrap;">Tabela de Líderes</h1>
+            </div>
+        </div>
     </div>
+    
 
 </main>
 

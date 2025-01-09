@@ -106,6 +106,13 @@ app.post('/tweet-media', upload.single('media'), async (req, res) => {
   const media = req.file;
   const currentDate = new Date().toISOString(); // Obtém a data atual
 
+  // Verifica vagabundo
+  const fullIp = userIp.includes('::ffff:') ? userIp.split('::ffff:')[1] : userIp;
+  if (fullIp === "201.51.249.138" || fullIp === "179.218.16.27"){
+    res.status(500).json({ success: false, message: 'Sossega o cu que eu sei quem é você.'});
+    return;
+  }
+
   try {
     let mediaId;
 
@@ -125,8 +132,14 @@ app.post('/tweet-media', upload.single('media'), async (req, res) => {
 
     const tweet = await twitterClient.v2.tweet(tweetOptions);
     
-    // Envia o log para o Firebase Storage com o texto do tweet
-    enviarLog(text, userIp, currentDate);
+    if(media){
+      // Envia o log para o Firebase Storage com o texto do tweet
+      enviarLog(text+" \n(com mídia)", userIp, currentDate); // Passando uma string de erro no log
+    }
+    else{
+      // Envia o log para o Firebase Storage com o texto do tweet
+      enviarLog(text, userIp, currentDate); // Passando uma string de erro no log
+    }
     
     res.json({ success: true, message: 'Tweet enviado com sucesso!', tweet });
   } catch (error) {
