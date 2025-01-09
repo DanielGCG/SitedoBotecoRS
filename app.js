@@ -108,7 +108,7 @@ app.post('/tweet-media', upload.single('media'), async (req, res) => {
 
   // Verifica vagabundo
   const fullIp = userIp.includes('::ffff:') ? userIp.split('::ffff:')[1] : userIp;
-  if (fullIp === "201.51.249.138" || fullIp === "179.218.16.27"){
+  if (fullIp === "179.218.16.27"){
     res.status(500).json({ success: false, message: 'Sossega o cu que eu sei quem é você.'});
     return;
   }
