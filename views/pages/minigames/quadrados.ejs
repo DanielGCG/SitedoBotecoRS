@@ -7,13 +7,13 @@
             <h1 style="color: white; text-align: center; white-space: nowrap;">Modo de jogo</h1>
             <div class="game-mode">
                 
-                <button class="game-mode-btn" id="game-mode-btn-hard" onclick="setGameInterval('hard')">
+                <button class="game-mode-btn" id="game-mode-btn-hard" onclick="setGamemode('hard')">
                     <span>Difícil</span>
                 </button>
-                <button class="game-mode-btn" id="game-mode-btn-medium" onclick="setGameInterval('medium')">
+                <button class="game-mode-btn" id="game-mode-btn-medium" onclick="setGamemode('medium')">
                     <span>Médio</span>
                 </button>
-                <button class="game-mode-btn" id="game-mode-btn-easy" onclick="setGameInterval('easy')">
+                <button class="game-mode-btn" id="game-mode-btn-easy" onclick="setGamemode('easy')">
                     <span>Fácil</span>
                 </button>
             </div>
@@ -47,6 +47,8 @@
 <script src="/pages/minigames/quadrados/animations.js" defer></script>
 <script src="/pages/minigames/quadrados/ui.js" defer></script>
 <script src="/pages/minigames/quadrados/player.js" defer></script>
+<script src="/pages/minigames/quadrados/blockClycles.js" defer></script>
+<script src="/pages/minigames/quadrados/blockType.js" defer></script>
 <script src="/pages/minigames/quadrados/blockfactory.js" defer></script>
 <script src="/pages/minigames/quadrados/moviment.js" defer></script>
 
@@ -54,7 +56,8 @@
 <script>
     const gameplayArea = document.getElementById("gameplay-area");
     const blockArea = document.getElementById("block-area");
-    let gameIntervalTime = 50;
+    let gameIntervalTime = 0;
+    let speedModifier = 1;
     let score = 0;
     let highscore = 0;
     let gameInterval = null;
@@ -109,6 +112,7 @@
 
     // Iniciar o jogo quando a página for carregada
     document.addEventListener("DOMContentLoaded", () => {
-        playScreen(); // Mostrar tela de "play" inicialmente
+        playScreen();
+        setGamemode('easy');
     });
 </script>

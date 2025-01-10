@@ -1,3 +1,11 @@
+function gameMainLoop() {
+    blockCreationControler();
+
+    checkColisionInterval = setInterval(() => {
+        checkCollision(); // Verifica colisões a cada intervalo
+    }, 5);
+}
+
 function setGameInterval(gamemode) {
     if (gamemode === "hard"){
         gameIntervalTime = 5;
@@ -19,15 +27,7 @@ function startGame() {
     if(document.getElementById("play-screen")){
         removePlayScreen();
     }
-    gameInterval = setInterval(() => {
-        createBlock();
-        checkCollision(); // Verifica colisões a cada intervalo
-    }, gameIntervalTime);
-
-    checkColisionInterval = setInterval(() => {
-        checkCollision(); // Verifica colisões a cada intervalo
-    }, 5);
-
+    gameMainLoop();
 }
 
 function pauseGame() {
@@ -51,14 +51,7 @@ function resumeGame() {
         removePauseScreen();
     }
     if (!gameInterval) {
-        gameInterval = setInterval(() => {
-            createBlock();
-            checkCollision();
-        }, gameIntervalTime);
-
-        checkColisionInterval = setInterval(() => {
-            checkCollision();
-        }, 5);
+        gameMainLoop();
     }
     playResumeSound();
 }

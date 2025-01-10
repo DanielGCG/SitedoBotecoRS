@@ -124,3 +124,24 @@ function setHighscore() {
         document.getElementById("highscore").innerHTML = "Highscore: " + highscore;
     }
 }
+
+function setGamemode(gamemode) {
+    if (gamemode === "hard"){
+        document.getElementById("game-mode-btn-hard").style = "background-color: #cfcfcf;";
+        document.getElementById("game-mode-btn-medium").style = "";
+        document.getElementById("game-mode-btn-easy").style = "";
+        setGameInterval(gamemode);
+    }
+    if (gamemode === "medium"){
+        document.getElementById("game-mode-btn-hard").style = "";
+        document.getElementById("game-mode-btn-medium").style = "background-color: #cfcfcf;";
+        document.getElementById("game-mode-btn-easy").style = "";
+        setGameInterval(gamemode);
+    }
+    if (gamemode === "easy"){
+        document.getElementById("game-mode-btn-hard").style = "";
+        document.getElementById("game-mode-btn-medium").style = "";
+        document.getElementById("game-mode-btn-easy").style = "background-color: #cfcfcf;";
+        setGameInterval(gamemode);
+    }
+}

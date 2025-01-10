@@ -9,12 +9,17 @@ main {
 }
 
 .colunas {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr; /* Três colunas com tamanhos iguais */
+    display: flex;
     height: 100vh; /* Altura total da tela */
+    gap: 40px;
 }
 
-.coluna-1, .coluna-2, .coluna-3 {
+.coluna-1, .coluna-3 {
+    height: 100px;
+    width: 300px;
+}
+
+.coluna-2{
 }
 
 .game-mode {

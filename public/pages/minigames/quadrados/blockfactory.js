@@ -1,59 +1,76 @@
-function createBlock() {
+function createBlock(type, position) {
     const block = document.createElement("div");
     block.classList.add("block");
 
-    // Configurar posição e direção iniciais
-    const { startX, startY, directionX, directionY, speed } = getInitialPositionAndDirection();
+    // Variáveis para configurar posição e direção iniciais
+    let startX, startY, directionX, directionY, speed;
 
+    switch (type) {
+        case "fuzy":
+            ({ startX, startY, directionX, directionY, speed } = createFuzy());
+            break;
+
+        case "bottomVerticalLine":
+            ({ startX, startY, directionX, directionY, speed } = createBottomVerticalLine(position));
+            break;
+        
+        case "topVerticalLine":
+            ({ startX, startY, directionX, directionY, speed } = createTopVerticalLine(position));
+            break;
+
+        case "leftHorizontalLine":
+            ({ startX, startY, directionX, directionY, speed } = createLeftHorizontalLine(position));
+            break;
+
+        case "rightHorizontalLine":
+            ({ startX, startY, directionX, directionY, speed } = createRightHorizontalLine(position));
+            break;
+                    
+
+        default:
+            console.error("Tipo desconhecido:", type);
+            return; // Encerra a função se o tipo for desconhecido
+    }
+
+    // Configurar estilo do bloco e adicioná-lo ao jogo
     block.style.left = `${startX}px`;
     block.style.top = `${startY}px`;
-
     blockArea.appendChild(block);
 
     // Iniciar o movimento do bloco
     moveBlock(block, directionX, directionY, speed);
 }
 
-function getInitialPositionAndDirection() {
-    const randomCase = Math.floor(Math.random() * 4) + 1; // Gera valores inteiros entre 1 e 4
-    let startX = 0, startY = 0, directionX = 0, directionY = 0, speed = (Math.floor(Math.random() * 2) + 1);
+function startBlockCreation(type, blockLimitTime, position) {
+    // Inicia o intervalo para criar blocos
+    gameInterval = setInterval(() => {
+        createBlock(type, position);
+    }, 100);
 
-    switch (randomCase) {
-        case 1:
-            // Inicia na parede esquerda
-            startX = 0;
-            startY = Math.random() * gameplayArea.offsetHeight;
-            directionX = 1;
-            directionY = Math.random() < 0.5 ? -1 : 1;
-            break;
-
-        case 2:
-            // Inicia na parede direita
-            startX = gameplayArea.offsetWidth;
-            startY = Math.random() * gameplayArea.offsetHeight;
-            directionX = -1;
-            directionY = Math.random() < 0.5 ? -1 : 1;
-            break;
-
-        case 3:
-            // Inicia no teto
-            startX = Math.random() * gameplayArea.offsetWidth;
-            startY = 0;
-            directionX = Math.random() < 0.5 ? -1 : 1;
-            directionY = 1;
-            break;
-
-        case 4:
-            // Inicia no piso
-            startX = Math.random() * gameplayArea.offsetWidth;
-            startY = gameplayArea.offsetHeight;
-            directionX = Math.random() < 0.5 ? -1 : 1;
-            directionY = -1;
-            break;
-
-        default:
-            console.error("Valor inesperado no switch");
-    }
-
-    return { startX, startY, directionX, directionY, speed };
+    // Define um timeout para parar a criação de blocos após o limite de tempo
+    blockCreationTimeout = setTimeout(() => {
+        clearInterval(gameInterval); // Para o intervalo de criação de blocos
+        console.log("Limite de tempo atingido. Parando criação de blocos.");
+    }, blockLimitTime);
 }
+
+/*  PRECISO ARRUMAR ISSO AQUI 
+
+function startBlockCreation(type, ticks, blockLimitTime) {
+    const interval = setInterval(() => {
+        createBlock(type);
+    }, gameIntervalTime*ticks);
+
+    // Limitar o tempo de criação de blocos
+    setTimeout(() => {
+        clearInterval(interval); // Para o intervalo após o tempo limite
+        console.log(`${type} creation stopped.`);
+    }, blockLimitTime);
+}
+*/
+
+
+function blockCreationControler() {
+    ciclo1();
+}
+
