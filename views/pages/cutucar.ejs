@@ -166,9 +166,9 @@
 
             if (data.success) {
                 alert('Tweet enviado com sucesso!');
+                clearMidiaInput();
                 clearMessageTextInput();
                 clearMentionInput();
-                clearMidiaInput();
                 previewMedia();
                 OffLoadingScreen();
             } else {
@@ -233,6 +233,7 @@
         if (document.getElementById('media-preview-closebtn') !== null){
             const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
             mediaPreviewCloseBtn.innerHTML = '';
+            document.getElementById('clearMidiaInput').style.display = "none";
         }
 
         // Limpa o preview anterior

@@ -7,6 +7,9 @@ const multer = require('multer');
 const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } = require('firebase/auth');
+const { getDatabase, ref: dbRef, set, get } = require('firebase/database');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +23,9 @@ app.use(cors());
 
 // Middleware para entender o corpo da requisição como JSON
 app.use(express.json());
+
+// Adicionando o middleware cookie-parser
+app.use(cookieParser());
 
 // Middleware para redirecionar para o domínio correto
 app.use((req, res, next) => {
@@ -48,7 +54,9 @@ const firebaseConfig = {
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
 const storageFirebase = getStorage(firebaseApp);
+const database = getDatabase(firebaseApp);
 
 // Configuração do Twitter API
 const twitterClient = new TwitterApi({
@@ -56,6 +64,103 @@ const twitterClient = new TwitterApi({
   appSecret: process.env.TWITTER_APP_SECRET,
   accessToken: process.env.TWITTER_ACCESS_TOKEN,
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
+});
+
+// Rota de login
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    if (user.emailVerified) {
+      const idToken = await user.getIdToken();
+
+      // Log para verificar o idToken gerado após o login
+      console.log('ID Token gerado no login:', idToken);
+
+      // Define o cookie HttpOnly
+      res.cookie('idToken', idToken, {
+        httpOnly: true, // Impede que o cookie seja acessado via JavaScript
+        secure: process.env.NODE_ENV === 'production', // Só envia o cookie via HTTPS em produção
+        maxAge: 60 * 60 * 1000, // Tempo de expiração do cookie em milissegundos (1 hora)
+        sameSite: 'Strict', // Evita que o cookie seja enviado em requisições de outros domínios
+      });      
+
+      res.status(200).json({
+        message: 'Login efetuado com sucesso.',
+        userData: { email: user.email, displayName: user.displayName },
+      });
+    } else {
+      res.status(400).json({ error: 'Por favor, verifique seu e-mail antes de continuar.' });
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Rota de cadastro de usuário
+app.post('/register', async (req, res) => {
+  const { exibitionName, userTag, email, password } = req.body;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Enviar e-mail de verificação
+    await sendEmailVerification(user);
+
+    // Criar um novo usuário no Realtime Database
+    const userRef = dbRef(database, `users/${email.replace('.', ',')}`);
+    await set(userRef, {
+      exibitionName: exibitionName,
+      userTag: userTag,
+      email: user.email,
+      followersList: null,
+      followersAmount: 0,
+      followingList: null,
+      followingAmount: 0,
+      friendList: null,
+      friendAmount: 0,
+      postList: null,
+      postAmount: 0,
+      pinList: null,
+      pinAmount: 0,
+      cargo: 0,
+      timedOut: false,
+      lastTimeOut: null,
+      createdAt: new Date().toISOString(),
+      // Outros dados do usuário podem ser adicionados aqui
+    });
+
+    res.status(201).json({
+      message: 'Usuário cadastrado com sucesso. Um e-mail de verificação foi enviado.'
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Rota para verificar se o e-mail foi verificado
+app.post('/verify-email', async (req, res) => {
+  const { idToken } = req.body;
+  try {
+    const userCredential = await auth.verifyIdToken(idToken);
+    const user = userCredential.user;
+
+    if (user.emailVerified) {
+      res.status(200).json({ message: 'Email verificado com sucesso.' });
+    } else {
+      res.status(400).json({ error: 'O e-mail ainda não foi verificado.' });
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Rota de logout
+app.post('/logout', (req, res) => {
+  res.clearCookie('idToken'); // Limpa o cookie de autenticação
+  res.status(200).json({ message: 'Usuário deslogado com sucesso.' });
 });
 
 // Função para enviar o log para o Firebase Storage

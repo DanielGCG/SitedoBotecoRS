@@ -1,0 +1,76 @@
+.userpage-userbox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-image: url("/pages/forum/img/banner.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.userpage-userinfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 200px;
+    height: 100px;
+    font-size: 14px;
+    margin-left: 1rem;
+}
+.userpage-userinfo img{
+    width: 80px;
+    height: 80px;
+    border-radius: 25%;
+}
+.userpage-userbox-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 1rem;
+}
+#follow-button, #edit-button {
+    background: linear-gradient(90deg, var(--cor-marrom), #feb47b);
+    border: none;
+    border-radius: 15px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px 16px;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+}
+#follow-button:hover, #edit-button:hover {
+    background: linear-gradient(90deg, #feb47b, var(--cor-marrom));
+    transform: scale(1.05);
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3);
+}
+#follow-button:active, #edit-button:active {
+    transform: scale(0.95);
+    box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.2);
+}
+#edit-button {
+    background: #00000000;
+}
+#edit-button:hover {
+    background: #00000048;
+}
+.userpage-main-layout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.userpage-main-right {
+    width: 60%;
+}
+.userpage-main-left{
+    width: 35%;
+}
+.biografia {
+    width: 100%;
+    background-color: var(--cor-fundo-caixa-texto);
+    border-radius: 15px;
+    padding: 16px;
+}

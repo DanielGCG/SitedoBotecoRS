@@ -1,0 +1,153 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+.layout {
+    display: flex;
+    flex-wrap: nowrap;
+    min-height: 100vh;
+}
+.sidebar, .right-sidebar {
+    width: 175px;
+    background-color: var(--cor-fundo-caixa-texto);
+    padding: 1rem;
+    overflow-y: auto; /* Adiciona barra de rolagem vertical */
+    max-height: 100vh; /* Limita a altura ao tamanho da tela */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1); /* Opcional: adiciona um leve efeito de borda interna */
+}
+.sidebar h2, .right-sidebar h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+.sidebar a, .right-sidebar a {
+    text-decoration: none;
+    color: #3d3d3d;
+    display: block;
+    margin: 0.5rem 0;
+}
+.main-content {
+    flex: 1;
+    padding: 1rem;
+}
+.forum-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.forum-header input {
+    flex: 1;
+    min-width: 150px;
+    margin-right: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.forum-header button {
+    padding: 0.5rem 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.threads {
+    margin-bottom: 2rem;
+}
+.thread {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+.thread-title a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+.thread-title a:hover {
+    color: #4CAF50;
+}
+.thread-info {
+    font-size: 0.9rem;
+    color: #777;
+}
+.divisoria-sidebar {
+    border: 0;
+    height: 1px;
+    background-color: #3d3d3d;
+    margin: 1rem 0;
+}
+.user-box {
+    text-align: center;
+}
+.user-box-picture img {
+    width: 80px;
+    height: 80px;
+    border-radius: 25%;
+    transition: opacity 0.5s ease-in-out; /* Adiciona uma transição suave */
+}
+.user-box-picture img:hover {
+    width: 80px;
+    height: 80px;
+    border-radius: 25%;
+    content: url('/pages/forum/img/changeprofilepic.png'); /* Altere para o caminho da nova imagem */
+    opacity: 1;
+    cursor: url('/img/cursor-mao.png'), auto;
+}
+.user-box-nickname {
+    color: #3d3d3d;
+    margin-bottom: 1rem;
+}
+.user-box-info {
+    text-align: start;
+    font-size: 14px;
+}
+.user-box-action {
+    text-align: start;
+    font-size: 14px;
+}
+
+/* Estilos responsivos */
+@media (max-width: 468px) {
+    .layout {
+        flex-direction: column;
+    }
+    .sidebar, .right-sidebar {
+        width: 100%;
+        max-width: none;
+        margin-bottom: 1rem;
+        border: none;
+        padding: 1rem 0;
+    }
+    .main-content {
+        padding: 1rem;
+    }
+    .forum-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .forum-header input, .forum-header button {
+        width: 100%;
+        margin: 0;
+    }
+    .thread {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .forum-header input, .forum-header button {
+        font-size: 1rem;
+    }
+    .sidebar h2, .right-sidebar h2 {
+        font-size: 1rem;
+    }
+}

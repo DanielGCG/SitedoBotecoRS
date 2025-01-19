@@ -1,73 +1,87 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste de Áudio</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
+<html>
+<script>
 
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
+// url Async requesting function
+function httpGetAsync(theUrl, callback)
+{
+    // create the request object
+    var xmlHttp = new XMLHttpRequest();
 
-        button:hover {
-            background-color: #45a049;
+    // set the state change callback to capture when the response comes in
+    xmlHttp.onreadystatechange = function()
+    {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+        {
+            callback(xmlHttp.responseText);
         }
-    </style>
-</head>
+    }
+
+    // open as a GET call, pass in the url and set async = True
+    xmlHttp.open("GET", theUrl, true);
+
+    // call send with no params as they were passed in on the url string
+    xmlHttp.send(null);
+
+    return;
+}
+
+// callback for the top 8 GIFs of search
+function tenorCallback_search(responsetext)
+{
+    // Parse the JSON response
+    var response_objects = JSON.parse(responsetext);
+
+    top_10_gifs = response_objects["results"];
+
+    // load the GIFs -- for our example we will load the first GIFs preview size (nanogif) and share size (gif)
+
+    document.getElementById("preview_gif").src = top_10_gifs[0]["media_formats"]["nanogif"]["url"];
+
+    document.getElementById("share_gif").src = top_10_gifs[0]["media_formats"]["gif"]["url"];
+
+    return;
+
+}
+
+
+// function to call the trending and category endpoints
+function grab_data()
+{
+    // set the apikey and limit
+    var apikey = "API_KEY";
+    var clientkey = "my_test_app";
+    var lmt = 8;
+
+    // test search term
+    var search_term = "excited";
+
+    // using default locale of en_US
+    var search_url = "https://tenor.googleapis.com/v2/search?q=" + search_term + "&key=" +
+            apikey +"&client_key=" + clientkey +  "&limit=" + lmt;
+
+    httpGetAsync(search_url,tenorCallback_search);
+
+    // data will be loaded by each call's callback
+    return;
+}
+
+
+// SUPPORT FUNCTIONS ABOVE
+// MAIN BELOW
+
+// start the flow
+grab_data();
+
+</script>
+
 <body>
-    <h1>Teste de Reprodução de Áudio</h1>
-    <p>Clique no botão abaixo para habilitar o áudio. Após isso, o som será reproduzido automaticamente sem interação.</p>
-    <button id="enableAudioButton">Habilitar Áudio</button>
 
-    <script>
-        let isAudioEnabled = false;
+<h2># 1 GIF loaded - preview image</h2>
+<img id="preview_gif" src="" alt="" style="width:220px;height:164px;">
 
-        function enableAudio() {
-            isAudioEnabled = true;
-            console.log("Áudio habilitado! Agora todos os sons podem ser reproduzidos.");
-            
-            // Tocar um som automaticamente após o áudio ser habilitado
-            setTimeout(() => {
-                if (isAudioEnabled) {
-                    console.log("Tentando tocar um som automaticamente sem interação do usuário...");
-                    playAudio('/pages/minigames/quadrados/sounds/play2.mp3', 0.5);
-                }
-            }, 2000); // 2 segundos após o áudio ser habilitado
-        }
+<h2># 1 GIF loaded - share image</h2>
+<img id="share_gif" src="" alt="" style="width:498px;height:372px;">
 
-        document.getElementById('enableAudioButton').addEventListener('click', () => {
-            // Tocar o som 'death.mp3' para desbloquear o áudio
-            playAudio('/pages/minigames/quadrados/sounds/death.mp3', 0.5);
-            enableAudio(); // Habilitar o estado de áudio
-        });
-
-        // Função genérica para reproduzir áudio
-        function playAudio(soundPath, volume = 1.0) {
-            if (!isAudioEnabled) {
-                console.error("Áudio ainda não foi habilitado pelo usuário.");
-                return;
-            }
-
-            const audio = new Audio(soundPath);
-            audio.volume = volume;
-            audio.play().then(() => {
-                console.log(`Som reproduzido com sucesso: ${soundPath}`);
-            }).catch(error => {
-                console.error("Erro ao tentar reproduzir o som:", error);
-            });
-        }
-    </script>
 </body>
 </html>

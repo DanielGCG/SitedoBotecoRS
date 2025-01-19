@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "atualiza": "node server/node_scripts/atualizaImagemdoDia.js"
+    "atualiza": "node server/node_scripts/atualizaImagemdoDia.js",
+    "forum": "nodemon forum.js"
   },
   "keywords": [],
   "author": "",

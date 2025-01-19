@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciamento de Usuários</title>
+  <style>
+  </style>
+</head>
+<body>
+  <h2>Cadastro</h2>
+  <input type="text" id="registerExibitionName" placeholder="Nome de exibição" required>
+  <input type="text" id="registerUserTag" placeholder="@doUsuário" required>
+  <input type="email" id="registerEmail" placeholder="Email" required>
+  <input type="password" id="registerPassword" placeholder="Senha" required>
+  <button id="register">Cadastrar</button>
+
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email" required>
+  <input type="password" id="loginPassword" placeholder="Senha" required>
+  <button id="login">Login</button>
+  <button id="logout">Logout</button>
+
+  <p id="statusMessage"></p>
+</body>
+
+<script>
+// Base URL do servidor
+const baseUrl = 'http://localhost:3000'; 
+let currentIdToken = null;
+
+// Função para exibir mensagens
+function displayStatusMessage(message) {
+  document.getElementById('statusMessage').innerText = message;
+}
+
+// Cadastro de usuário
+document.getElementById('register').addEventListener('click', async () => {
+    const exibitionName = document.getElementById('registerExibitionName').value;
+    const userTag = document.getElementById('registerUserTag').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+
+    const response = await fetch(`${baseUrl}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exibitionName, userTag, email, password }),
+    });
+
+    const result = await response.json();
+    displayStatusMessage(result.message || result.error );
+});
+
+// Login de usuário
+document.getElementById('login').addEventListener('click', async () => {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+
+  const response = await fetch(`${baseUrl}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+    credentials: 'include', // Certifique-se de enviar o cookie com a requisição
+  });
+
+  const result = await response.json();
+  displayStatusMessage(result.message || result.error);
+});
+
+// Logout de usuário
+document.getElementById('logout').addEventListener('click', async () => {
+  const response = await fetch(`${baseUrl}/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+
+  const result = await response.json();
+  displayStatusMessage(result.message);
+});
+
+</script>
+</html>

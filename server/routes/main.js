@@ -201,6 +201,40 @@ router.get('/teste3', (req, res) => {
     res.render('pages/experimentais/teste3', { locals: locals });
 });
 
+router.get('/autentication', (req, res) => {
+    const locals = {
+        title: "teste",
+        description: "testetesteteste"
+    }
+    res.render('pages/experimentais/autentication', { locals: locals });
+});
+
+/* ------ FORUM ------*/
+
+router.get('/forum', (req, res) => {
+    const locals = {
+        title: "forum",
+        description: "forumforumforum"
+    }
+    res.render('pages/forum/forum', { locals: locals });
+});
+
+router.get('/forum/usuario', (req, res) => {
+    const locals = {
+        title: "forum",
+        description: "forumforumforum"
+    }
+    res.render('pages/forum/usuario', { locals: locals });
+});
+
+router.get('/forum/post', (req, res) => {
+    const locals = {
+        title: "forum",
+        description: "forumforumforum"
+    }
+    res.render('pages/forum/post', { locals: locals });
+});
+
 /* ------ Página de TRABALHO DE ALA ------*/
 
 // Rota para página de recomendações

@@ -1,0 +1,81 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fórum Escalonável</title>
+  <link rel="stylesheet" href="/pages/forum/style/forum.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar Esquerdo -->
+    <aside class="sidebar">
+      <div class="categorias">
+        <h2>Categorias</h2>
+        <a href="/forum">Destaques</a>
+        <a href="#">Computaria</a>
+        <a href="#">Fofoca</a>
+        <a href="#">BSMP</a>
+        <a href="#">RPG</a>
+      </div>
+      <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+      <div class="links-uteis">
+        <h2>Links Úteis</h2>
+        <p><a href="#">Como usar o fórum</a></p>
+        <p><a href="#">Políticas de uso</a></p>
+        <p><a href="#">Fale conosco</a></p>
+      </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+      <h2 style="text-align: center; margin-bottom: 1rem;">Fórum do Boteco</h2>
+      <section class="forum-header">
+        <input type="text" placeholder="Buscar tópicos ou categorias...">
+        <button>Nova Discussão</button>
+      </section>
+
+      <section class="threads">
+        <div class="thread">
+          <div>
+            <h3 class="thread-title"><a href="/forum/post">Dúvidas sobre JavaScript</a></h3>
+            <p class="thread-info">Por <strong>Daniel</strong> - 2 horas atrás</p>
+          </div>
+          <div>
+            <p class="thread-info">15 respostas</p>
+          </div>
+        </div>
+        <div class="thread">
+          <div>
+            <h3 class="thread-title"><a href="/forum/post">Melhores filmes de 2024</a></h3>
+            <p class="thread-info">Por <strong>Maria</strong> - 1 dia atrás</p>
+          </div>
+          <div>
+            <p class="thread-info">20 respostas</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Sidebar Direito -->
+    <aside class="right-sidebar">
+      <div class="user-box">
+        <div class="user-box-picture">
+          <img src="/img/icon-192x192.png">
+        </div>
+        <div class="user-box-nickname">
+          <a href="/forum/usuario">@gabizinha_</a>
+        </div>        
+        <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+        <div class="user-box-info">
+          <p>🗣️ 2 discussões</p>
+          <p>👥 0 amigos</p>
+          <p>📌 0 pins</p>
+        </div>
+        <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+        <div class="user-box-action">
+          <p>📝 editar usuário</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
