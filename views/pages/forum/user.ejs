@@ -72,20 +72,21 @@ function renderUserBox(user) {
     userpageUserbox.style.backgroundImage = `url(${user.bannerImage})`;
 }
 
-function renderBiografia (user) {
-  if (user.biography){
-    document.getElementById("biografia").innerHTML = `
-    <div class="biografia-text">
-        <p>${user.biography}</p>
-    </div>`
-  }
-  else{
-    document.getElementById("biografia").innerHTML = `
-    <div class="biografia-text">
-        <p>Tenho preguiça demais para escrever uma biografia :P</p>
-    </div>`
-  }
+function renderBiografia(user) {
+  const biografiaContainer = document.getElementById("biografia");
 
+  if (user.biography) {
+    const formattedBiography = user.biography.replace(/\n/g, '<br>');
+    biografiaContainer.innerHTML = `
+      <div class="biografia-text">
+          <p>${formattedBiography}</p>
+      </div>`;
+  } else {
+    biografiaContainer.innerHTML = `
+      <div class="biografia-text">
+          <p>Tenho preguiça demais para escrever uma biografia :P</p>
+      </div>`;
+  }
 }
 
 function renderDiscussoes(discussoes) {

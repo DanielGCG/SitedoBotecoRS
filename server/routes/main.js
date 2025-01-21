@@ -251,6 +251,7 @@ router.get('/forum/editar', (req, res) => {
     };
 
     res.render('pages/forum/editarperfil', {
+        layout: 'layouts/forum-esq',
         locals: locals
     });
 });

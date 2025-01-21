@@ -83,7 +83,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       if (localStorage.getItem('autenticationUserTag')) {
-        window.location.href = "/forum?categoria=Destaques"; // Redireciona para a nova página
+        window.history.back();
       }
     });
   </script>

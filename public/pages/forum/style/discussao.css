@@ -26,13 +26,6 @@
     margin-bottom: 0.5rem;
     margin-top: 0.5rem;
 }
-#back-button {
-    background: none;
-    border: none;
-    padding: 0;
-    margin-right: 10px;
-    cursor: pointer;
-}
 #autor {
     width: 25%;
 }

@@ -105,6 +105,13 @@ body {
     text-align: start;
     font-size: 14px;
 }
+#back-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-right: 10px;
+    cursor: pointer;
+}
 
 /* Estilos responsivos */
 @media (max-width: 468px) {
