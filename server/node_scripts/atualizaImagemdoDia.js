@@ -133,7 +133,7 @@ async function processarImagemDoDia() {
 ${nomeImagemLimpo}
 
 
-https://www.boteco.live
+https://www.botecors.me
 #ImagemDoDia`;
     console.log(`Texto do tweet: ${textoDoTweet}`);
 
