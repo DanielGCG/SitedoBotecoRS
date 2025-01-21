@@ -5,7 +5,9 @@
     justify-content: space-between;
     background-image: none;
     background-repeat: no-repeat;
+    background-position: center;
     background-size: cover;
+    height: 130px;
 }
 .userpage-userinfo {
     display: flex;
@@ -13,9 +15,11 @@
     justify-content: space-between;
     align-items: center;
     width: 200px;
-    height: 130px;
     font-size: 14px;
     margin-left: 1rem;
+    background-color: #f9f9f95b;
+    padding: 5px;
+    border-radius: 15px;
 }
 .userpage-userinfo img{
     width: 80px;

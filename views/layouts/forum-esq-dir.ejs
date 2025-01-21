@@ -33,7 +33,6 @@
     <body>
         <%- include('../partials/header.ejs')  %>
         <div class="layout">
-            <!-- Sidebar Esquerdo -->
             <%- include('../partials/forum-sidebar-esquerda.ejs')  %>
             <!-- Conteúdo Principal -->
             <main class="main-content">
@@ -43,12 +42,15 @@
             <%- include('../partials/forum-sidebar-direita.ejs')  %>
         </div>
     </body>
-</html>
+
 
 <script>
+
+
 document.addEventListener('DOMContentLoaded', function() {
-    if (!localStorage.getItem('AutenticationUserTag')) {
-    window.location.href = "/forum/autenticacao"; // Redireciona para a nova página
+    if (!localStorage.getItem('autenticationUserTag')) {
+    window.location.href = "/forum/autenticacao";
     }
 });
 </script>
+</html>

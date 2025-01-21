@@ -1,21 +1,61 @@
-<!-- Sidebar Direito -->
-<aside class="right-sidebar">
-    <div class="user-box">
+<aside class="right-sidebar" id="right-sidebar">
+</aside>
+
+<script>
+searchUserDataForSidebar(localStorage.getItem('autenticationUserTag'));
+
+function renderSidebarDireita(userDataForSidebar) {
+    document.getElementById("right-sidebar").innerHTML =
+    `<div class="user-box">
         <div class="user-box-picture">
-        <img src="/img/icon-192x192.png">
+        <a href="/forum/user?userTag=${userDataForSidebar.userTag}"><img src="${userDataForSidebar.profileImage}"></a>
         </div>
         <div class="user-box-nickname">
-        <a href="/forum/user">@gabizinha_</a>
+        <a href="/forum/user?userTag=${userDataForSidebar.userTag}">${userDataForSidebar.userTag}</a>
         </div>        
         <hr class="divisoria-sidebar"> <!-- Linha divisória -->
         <div class="user-box-info">
-        <p>🗣️ 2 discussões</p>
-        <p>👥 0 amigos</p>
-        <p>📌 0 pins</p>
+        <p>🗣️ ${userDataForSidebar.discussaoAmount} discussões</p>
+        <p>👥 ${userDataForSidebar.friendAmount} amigos</p>
+        <p>📌 ${userDataForSidebar.pinAmount} pins</p>
         </div>
         <hr class="divisoria-sidebar"> <!-- Linha divisória -->
         <div class="user-box-action">
-        <p>📝 editar usuário</p>
+        <p>📝 editar perfil</p>
+        <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+        <button style="none" onclick="logout()"><p>💡logout</p></button>
         </div>
-    </div>
-</aside>
+        
+    </div>`;
+}
+
+function logout () {
+    localStorage.removeItem("autenticationUserTag");
+    window.location.href = "/forum/autenticacao";
+}
+
+function searchUserDataForSidebar(userTag) {
+    if (!userTag) {
+        console.error('precisamos do userTag do usuário para localiza-lo.');
+        alert('precisamos do email do usuário para localiza-lo.');
+        return;
+    }
+
+    // Conectar ao servidor de mensagens com parâmetros na URL
+    const eventSource = new EventSource(`/stream-user?userTag=${userTag}`);
+
+    eventSource.onmessage = (event) => {
+        try {
+            userDataForSidebar = JSON.parse(event.data);
+            renderSidebarDireita(userDataForSidebar);
+        } catch (error) {
+            console.error('Erro ao processar os dados recebidos:', error);
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        console.error('Erro na conexão com o servidor:', error);
+        eventSource.close();
+    };
+}
+</script>

@@ -13,49 +13,6 @@
 </section>
 
 <script>
-function renderPosts(posts) {
-  const messagesDiv = document.getElementById('mensagens');
-  messagesDiv.innerHTML = ''; // Limpa os posts existentes
-
-  if (posts.length === 0) {
-    messagesDiv.innerHTML = '<div class="mensagem">Nenhuma mensagem publicada ainda.</div>';
-    return;
-  }
-
-  posts.forEach(post => {
-    const postDiv = document.createElement('div');
-    postDiv.classList.add('mensagem');
-    postDiv.textContent = `${post.autor}: ${post.text}`;
-    messagesDiv.appendChild(postDiv);
-  });
-}
-
-// Conectar ao servidor de mensagens
-function listenForPosts(codigoCategoria, codigoDiscussao) {
-    if (!codigoCategoria || !codigoDiscussao) {
-        console.error('Código de categoria e discussão são necessários para escutar mensagens.');
-        document.getElementById('statusMessage').textContent = 'Categoria ou discussão não especificada.';
-        return;
-    }
-
-    // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`${baseUrl}/stream-posts?categoria=${categoria}&discussao=${discussao}`);
-
-    eventSource.onmessage = (event) => {
-        try {
-        const posts = JSON.parse(event.data);
-        renderPosts(posts); // Renderizar as mensagens no frontend
-        } catch (error) {
-        console.error('Erro ao processar os dados recebidos:', error);
-        }
-    };
-
-    eventSource.onerror = (error) => {
-        eventSource.close();
-    };
-}
-
-
 function renderDiscussoes(discussoes) {
     const threadsDiv = document.getElementById('threads');
     threadsDiv.innerHTML = '';
@@ -96,7 +53,6 @@ function renderDiscussoes(discussoes) {
 function listenForDiscussoes(categoria) {
     if (!categoria) {
         console.error('Código de categoria é necessário para escutar mensagens.');
-        alert('Categoria ou discussão não especificada.');
         return;
     }
 
@@ -125,6 +81,7 @@ window.onload = () => {
     // Recuperando os parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
     categoria = urlParams.get('categoria');
+    console.log(categoria);
 
     // Atribuindo os valores recuperados nas variáveis globais
     listenForDiscussoes(categoria);

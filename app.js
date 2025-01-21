@@ -66,6 +66,39 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
+app.post('/update-profile', async (req, res) => {
+  const { userTag, bannerImage, biography, exibitionName, profileImage, pronouns, socialMediaLinks } = req.body;
+
+  // Validação dos dados recebidos
+  if (!userTag) {
+    return res.status(400).json({ error: 'O campo userTag é obrigatório para atualizar o perfil.' });
+  }
+
+  try {
+    // Referência para o nó do usuário no Firebase Realtime Database
+    const userRef = dbRef(database, `users/${userTag}`);
+
+    // Dados atualizados do perfil
+    const updatedProfileData = {
+      bannerImage: bannerImage || null,
+      biography: biography || null,
+      exibitionName: exibitionName || null,
+      profileImage: profileImage || null,
+      pronouns: pronouns || null,
+      socialMediaLinks: socialMediaLinks || null,
+    };
+
+    // Atualiza os dados no Firebase
+    await update(userRef, updatedProfileData);
+
+    // Retorna sucesso
+    res.status(200).json({ success: true, message: 'Perfil atualizado com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao atualizar o perfil no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
 app.post('/posts', async (req, res) => {
   const { userTag, categoria, discussao, text, media = null } = req.body;
 
@@ -88,9 +121,24 @@ app.post('/posts', async (req, res) => {
       timestamp: Date.now(),
     });
 
-    // Atualiza o tempo do último post da discussão
+    // Referência para o nó da discussão
     const discussaoRef = dbRef(database, `forum/${categoria}/headerDiscussoes/${discussao}`);
-    await update(discussaoRef, { ultimoUpdate: Date.now(), postAmount: increment(1) });
+
+    // Incremento seguro do `postAmount`
+    const discussaoSnapshot = await get(discussaoRef);
+    if (discussaoSnapshot.exists()) {
+      const currentPostAmount = discussaoSnapshot.val().postAmount || 0;
+      await update(discussaoRef, {
+        ultimoUpdate: Date.now(),
+        postAmount: currentPostAmount + 1,
+      });
+    } else {
+      // Inicializa o valor caso a discussão não exista (cenário improvável)
+      await set(discussaoRef, {
+        ultimoUpdate: Date.now(),
+        postAmount: 1,
+      });
+    }
 
     // Retorna sucesso se tudo ocorreu bem
     res.status(201).json({ message: 'Post criado com sucesso e tempo da discussão atualizado.' });
@@ -100,12 +148,13 @@ app.post('/posts', async (req, res) => {
   }
 });
 
-app.post('/criardiscussao', (req, res) => {
-  const { exibitionName, userTag, categoria, discussao } = req.body;
+app.post('/criardiscussao', async (req, res) => {
+  const { userTag, categoria, discussao } = req.body;
 
   const postAmount = 0;
 
-  if (!exibitionName || !userTag || !categoria || !discussao) {
+  // Validação dos dados de entrada
+  if (!userTag || !categoria || !discussao) {
     return res.status(400).json({ error: 'O conteúdo precisa de autor, categoria e discussão.' });
   }
 
@@ -113,11 +162,10 @@ app.post('/criardiscussao', (req, res) => {
   const discussaoRef = dbRef(database, `forum/${categoria}/headerDiscussoes/${discussao}`);
 
   // Referência para o nó do usuário
-  const userRef = dbRef(database, `users/${userTag}/discussoes/${categoria}`);
+  const userRef = dbRef(database, `users/${userTag}`);
 
   // Dados da discussão
   const discussaoData = {
-    exibitionName,
     userTag,
     categoria,
     discussao,
@@ -125,16 +173,27 @@ app.post('/criardiscussao', (req, res) => {
     ultimoUpdate: Date.now(),
   };
 
-  // Cria uma nova discussão e atualiza o nó do usuário
-  Promise.all([
-    set(discussaoRef, discussaoData),
-    update(userRef, { discussaoAmount: increment(1) }) // Adiciona ou atualiza a discussão no nó do usuário
-  ])
-    .then(() => res.status(201).json({ message: 'Discussão criada com sucesso e associada ao usuário.' }))
-    .catch(error => {
-      console.error('Erro ao salvar no Firebase:', error);
-      res.status(500).json({ error: 'Erro interno do servidor.' });
-    });
+  try {
+    // Criação da nova discussão
+    await set(discussaoRef, discussaoData);
+
+    // Incremento seguro do `discussaoAmount`
+    const userSnapshot = await get(userRef);
+
+    if (userSnapshot.exists()) {
+      // Incrementa o valor existente
+      console.log(userSnapshot.val().discussaoAmount);
+      await update(userRef, { discussaoAmount: (userSnapshot.val().discussaoAmount || 0) + 1 });
+    } else {
+      // Inicializa o valor se o nó não existir
+      await set(userRef, { discussaoAmount: 1 });
+    }
+
+    res.status(201).json({ message: 'Discussão criada com sucesso e associada ao usuário.' });
+  } catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
 });
 
 app.get('/stream-posts', (req, res) => {
@@ -360,7 +419,7 @@ app.post('/register', async (req, res) => {
       biography: '',
       pronouns: '',
       bannerImage: '/pages/forum/img/banner.png',
-      profileImage: '',
+      profileImage: '/pages/forum/img/semfoto.png',
       socialMediaLinks: '',
       followersList: '',
       followersAmount: 0,

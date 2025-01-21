@@ -32,8 +32,6 @@
 <body>
     <h2>Nova Discussão</h2>
     <input type="text" id="discussao" placeholder="nome da discussão" style="width: 80%;" required>
-    <input type="text" id="exibitionName" placeholder="nome de exibição autor" style="width: 80%;" required>
-    <input type="text" id="userTag" placeholder="@doAutor" style="width: 80%;" required>
 
     <select id="categoria" style="width: 80%;" required>
         <option value="" disabled selected>Selecione uma categoria</option>
@@ -54,12 +52,11 @@
     document.getElementById('post').addEventListener('click', async () => {
         const categoria = document.getElementById('categoria').value;
         const discussao = document.getElementById('discussao').value.trim();
-        const exibitionName = document.getElementById('exibitionName').value;
-        const userTag = document.getElementById('userTag').value;
+        const userTag = localStorage.getItem("autenticationUserTag");
 
-        console.log (`[${categoria}, ${discussao}, ${exibitionName}, ${userTag}]`);
+        console.log (`[${categoria}, ${discussao}, ${userTag}]`);
 
-        if (!discussao || !userTag || !exibitionName || !categoria) {
+        if (!discussao || !userTag || !categoria) {
             document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem discussao e/ou autor e/ou categoria.';
             return;
         }
@@ -68,15 +65,13 @@
             const response = await fetch(`/criardiscussao`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ exibitionName, userTag, categoria, discussao }),
+            body: JSON.stringify({ userTag, categoria, discussao }),
             });
 
             const responseData = await response.json();
             if (response.ok) {
                 document.getElementById('statusMessage').textContent = 'Mensagem publicada com sucesso.';
                 document.getElementById('discussao').value = ''; // Limpar o campo de entrada
-                document.getElementById('userTag').value = ''; // Limpar o campo de entrada
-                document.getElementById('exibitionName').value = ''; // Limpar o campo de entrada
                 document.getElementById('categoria').value = ''; // Limpar o campo de entrada
             } else {
             document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
@@ -84,11 +79,10 @@
         } catch (error) {
             document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
         }
+        window.location.href = `/forum/discussao?categoria=${categoria}&discussao=${discussao}`;
     });
     window.onload = function() {
         document.getElementById('discussao').value = ''; // Limpar o campo de entrada
-        document.getElementById('userTag').value = ''; // Limpar o campo de entrada
-        document.getElementById('exibitionName').value = ''; // Limpar o campo de entrada
         document.getElementById('categoria').value = ''; // Limpar o campo de entrada
     };
 </script>

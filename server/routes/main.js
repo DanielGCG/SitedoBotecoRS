@@ -244,17 +244,20 @@ router.get('/forum/user', (req, res) => {
     });
 });
 
-router.get('/forum/post', (req, res) => {
+router.get('/forum/editar', (req, res) => {
     const locals = {
-        title: "forum",
+        title: "Editar Perfil",
         description: "forumforumforum"
-    }
-    res.render('pages/forum/post', { locals: locals });
+    };
+
+    res.render('pages/forum/editarperfil', {
+        locals: locals
+    });
 });
 
 router.get('/forum/discussao', (req, res) => {
     const locals = {
-        title: "forum",
+        title: "Discussão",
         description: "forumforumforum"
     };
 
@@ -266,7 +269,7 @@ router.get('/forum/discussao', (req, res) => {
 
 router.get('/forum/novadiscussao', (req, res) => {
     const locals = {
-        title: "forum",
+        title: "Nova Discussão",
         description: "forumforumforum"
     }
     res.render('pages/forum/novadiscussao', { locals: locals });

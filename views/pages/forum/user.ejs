@@ -1,7 +1,4 @@
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fórum Escalonável</title>
     <link rel="stylesheet" href="/pages/forum/style/forum.css">
     <link rel="stylesheet" href="/pages/forum/style/user.css">
 </head>
@@ -31,34 +28,64 @@
 <script>
 function renderUserBox(user) {
     const userpageUserbox = document.getElementById("userpage-userbox");
-    userpageUserbox.innerHTML =
-  `<div class="userpage-userinfo">
-            <div class="userpage-userinfo-image">
-              <img src="${user.profileImage}">
-            </div>
-            <div class="userpage-userinfo-name">
-              <h3>${user.exibitionName}</h3>
-              <p>${user.userTag}</p>
-            </div>
+    if(user.userTag === localStorage.getItem("autenticationUserTag")){
+      userpageUserbox.innerHTML =
+      `<div class="userpage-userinfo">
+          <div class="userpage-userinfo-image">
+            <img src="${user.profileImage}">
           </div>
-          <div class="userpage-userbox-actions">
-            <div class="userpage-userbox-actions">
-              <button id="edit-button">Editar</button>
-              <button id="follow-button">Follow</button>
-            </div>          
+          <div class="userpage-userinfo-name">
+            <h3>${user.exibitionName}</h3>
+            <p>${user.userTag}</p>
           </div>
         </div>
-    `;
+        <div class="userpage-userbox-actions">
+          <div class="userpage-userbox-actions">
+            <button id="edit-button" onclick="window.location.href='/forum/editar'">Editar</button>
+          </div>          
+        </div>
+      </div>
+      `;
+    }
+    else{
+      userpageUserbox.innerHTML =
+      `<div class="userpage-userinfo">
+          <div class="userpage-userinfo-image">
+            <img src="${user.profileImage}">
+          </div>
+          <div class="userpage-userinfo-name">
+            <h3>${user.exibitionName}</h3>
+            <p>${user.userTag}</p>
+          </div>
+        </div>
+        <div class="userpage-userbox-actions">
+          <div class="userpage-userbox-actions">
+            <button id="follow-button">Follow</button>
+          </div>          
+        </div>
+      </div>
+      `;
+    }
+    
 
     // Definindo o background-image corretamente
     userpageUserbox.style.backgroundImage = `url(${user.bannerImage})`;
 }
 
 function renderBiografia (user) {
-  document.getElementById("biografia").innerHTML = `
-  <div class="biografia-text">
-      <p>${user.biography}</p>
-  </div>`
+  if (user.biography){
+    document.getElementById("biografia").innerHTML = `
+    <div class="biografia-text">
+        <p>${user.biography}</p>
+    </div>`
+  }
+  else{
+    document.getElementById("biografia").innerHTML = `
+    <div class="biografia-text">
+        <p>Tenho preguiça demais para escrever uma biografia :P</p>
+    </div>`
+  }
+
 }
 
 function renderDiscussoes(discussoes) {
@@ -69,7 +96,7 @@ function renderDiscussoes(discussoes) {
     if (!Array.isArray(discussoes) || discussoes.length === 0) {
         threadsDiv.innerHTML = `
             <div>
-                <h2>Ainda não postou nada! D:<</h2>
+                <h3 style="text-align: center;">Ainda criou uma discussão! D:<</h3>
             </div>
         `;
         return;
@@ -161,5 +188,4 @@ window.onload = () => {
     searchUserData();
     searchUserDiscussoes();
 }
-
 </script>

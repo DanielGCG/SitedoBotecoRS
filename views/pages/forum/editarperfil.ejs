@@ -1,0 +1,157 @@
+<head>
+    <link rel="stylesheet" href="/pages/forum/style/forum.css">
+    <style>
+        .profile-editor-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .profile-editor-table th, .profile-editor-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .profile-editor-table th {
+            background-color: #f4f4f4;
+            text-align: left;
+        }
+
+        .profile-editor-table input, .profile-editor-table select, .profile-editor-table textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .save-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .save-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edição de Perfil</h1>
+    <table class="profile-editor-table">
+        <tr>
+            <th>Campo</th>
+            <th>Valor</th>
+        </tr>
+        <tr>
+            <td>Banner Image (link)</td>
+            <td><input type="text" id="bannerImage" placeholder="Link para a imagem do banner"></td>
+        </tr>
+        <tr>
+            <td>Biography</td>
+            <td><textarea id="biography" rows="4" placeholder="Escreva sua biografia"></textarea></td>
+        </tr>
+        <tr>
+            <td>Exibition Name</td>
+            <td><input type="text" id="exibitionName" placeholder="Nome de exibição"></td>
+        </tr>
+        <tr>
+            <td>Profile Image (link)</td>
+            <td><input type="text" id="profileImage" placeholder="Link para a imagem do perfil"></td>
+        </tr>
+        <tr>
+            <td>Pronouns</td>
+            <td>
+                <select id="pronouns">
+                    <option value="ele/dele">ele/dele</option>
+                    <option value="ela/dela">ela/dela</option>
+                    <option value="elu/delu">elu/delu</option>
+                    <option value="ele/dela">ele/dela</option>
+                    <option value="ela/dele">ela/dele</option>
+                    <option value="ele/delu">ele/delu</option>
+                    <option value="ela/delu">ela/delu</option>
+                    <option value="todos">todos</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Social Media Links</td>
+            <td><textarea id="socialMediaLinks" rows="3" placeholder="Links de redes sociais separados por vírgula"></textarea></td>
+        </tr>
+    </table>
+    <button class="save-button" onclick="saveProfile()">Salvar Alterações</button>
+
+    <script>
+        let UserDataForProfileEditor = {};
+
+        searchUserDataForProfileEditor(localStorage.getItem("autenticationUserTag"));
+
+        function searchUserDataForProfileEditor(userTag) {
+            if (!userTag) {
+                console.error('precisamos do userTag do usuário para localiza-lo.');
+                alert('precisamos do email do usuário para localiza-lo.');
+                return;
+            }
+
+            // Conectar ao servidor de mensagens com parâmetros na URL
+            const eventSource = new EventSource(`/stream-user?userTag=${userTag}`);
+
+            eventSource.onmessage = (event) => {
+                try {
+                    UserDataForProfileEditor = JSON.parse(event.data);
+                    populateFields(UserDataForProfileEditor);
+                } catch (error) {
+                    console.error('Erro ao processar os dados recebidos:', error);
+                }
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('Erro na conexão com o servidor:', error);
+                eventSource.close();
+            };
+        }
+
+        function populateFields(data) {
+            document.getElementById("bannerImage").value = data.bannerImage || "";
+            document.getElementById("biography").value = data.biography || "";
+            document.getElementById("exibitionName").value = data.exibitionName || "";
+            document.getElementById("profileImage").value = data.profileImage || "";
+            document.getElementById("pronouns").value = data.pronouns || "he/him";
+            document.getElementById("socialMediaLinks").value = data.socialMediaLinks || "";
+        }
+
+        function saveProfile() {
+            const updatedData = {
+                userTag: localStorage.getItem("autenticationUserTag"),
+                bannerImage: document.getElementById("bannerImage").value,
+                biography: document.getElementById("biography").value,
+                exibitionName: document.getElementById("exibitionName").value,
+                profileImage: document.getElementById("profileImage").value,
+                pronouns: document.getElementById("pronouns").value,
+                socialMediaLinks: document.getElementById("socialMediaLinks").value,
+            };
+
+            console.log("Enviando dados atualizados para o servidor:", updatedData);
+
+            fetch('/update-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `/forum/user?userTag=${localStorage.getItem("autenticationUserTag")}`;
+                } else {
+                    alert('Erro ao atualizar o perfil.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar os dados:', error);
+                alert('Erro ao atualizar o perfil.');
+            });
+        }
+    </script>
+</body>

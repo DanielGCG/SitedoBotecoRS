@@ -34,7 +34,23 @@
         <%- include('../partials/header.ejs')  %>
         <div class="layout">
             <!-- Sidebar Esquerdo -->
-            <%- include('../partials/forum-sidebar-esquerda.ejs')  %>
+            <aside class="sidebar">
+                <div class="categorias">
+                    <h2>Categorias</h2>
+                    <a href="/forum?categoria=Destaques" id="Destaques">Destaques</a>
+                    <a href="/forum?categoria=Computaria" id="Computaria">Computaria</a>
+                    <a href="/forum?categoria=Fofoca" id="Fofoca">Fofoca</a>
+                    <a href="/forum?categoria=BSMP" id="BSMP">BSMP</a>
+                    <a href="/forum?categoria=RPG" id="RPG">RPG</a>
+                </div>
+                <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+                <div class="links-uteis">
+                    <h2>Links Úteis</h2>
+                    <p><a href="#">Como usar o fórum</a></p>
+                    <p><a href="#">Políticas de uso</a></p>
+                    <p><a href="#">Fale conosco</a></p>
+                </div>
+            </aside>
             <!-- Conteúdo Principal -->
             <main class="main-content">
                 <%- body %>
@@ -44,9 +60,21 @@
 </html>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!localStorage.getItem('AutenticationUserTag')) {
-        window.location.href = "/forum/autenticacao"; // Redireciona para a nova página
-        }
-    });
+// Recuperando os parâmetros da URL
+const urlParamsSidebar = new URLSearchParams(window.location.search);
+const categoriaSidebar = urlParamsSidebar.get('categoria');
+
+// Se a categoria existir, aplicar estilo ao link correspondente
+if (categoriaSidebar) {
+    const link = document.getElementById(categoriaSidebar);
+    if (link) {
+        link.style.fontWeight = "bold"; // Torna o texto em negrito para destaque adicional
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (!localStorage.getItem('autenticationUserTag')) {
+    window.location.href = "/forum/autenticacao";
+    }
+});
 </script>

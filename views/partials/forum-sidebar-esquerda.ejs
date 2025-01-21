@@ -2,11 +2,11 @@
 <aside class="sidebar">
     <div class="categorias">
         <h2>Categorias</h2>
-        <a href="/forum?categoria=Destaques">Destaques</a>
-        <a href="/forum?categoria=Computaria">Computaria</a>
-        <a href="/forum?categoria=Fofoca">Fofoca</a>
-        <a href="/forum?categoria=BSMP">BSMP</a>
-        <a href="/forum?categoria=RPG">RPG</a>
+        <a href="/forum?categoria=Destaques" id="Destaques">Destaques</a>
+        <a href="/forum?categoria=Computaria" id="Computaria">Computaria</a>
+        <a href="/forum?categoria=Fofoca" id="Fofoca">Fofoca</a>
+        <a href="/forum?categoria=BSMP" id="BSMP">BSMP</a>
+        <a href="/forum?categoria=RPG" id="RPG">RPG</a>
     </div>
     <hr class="divisoria-sidebar"> <!-- Linha divisória -->
     <div class="links-uteis">
@@ -16,3 +16,17 @@
         <p><a href="#">Fale conosco</a></p>
     </div>
 </aside>
+
+<script>
+// Recuperando os parâmetros da URL
+const urlParamsSidebar = new URLSearchParams(window.location.search);
+const categoriaSidebar = urlParamsSidebar.get('categoria');
+
+// Se a categoria existir, aplicar estilo ao link correspondente
+if (categoriaSidebar) {
+    const link = document.getElementById(categoriaSidebar);
+    if (link) {
+        link.style.fontWeight = "bold"; // Torna o texto em negrito para destaque adicional
+    }
+}
+</script>
