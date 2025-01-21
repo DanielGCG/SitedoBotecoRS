@@ -1,0 +1,38 @@
+.send-messagearea {
+}
+.forum-header input {
+    margin-right: 0;
+}
+.postarea {
+    max-height: 500px;
+    overflow-y: auto;
+}
+.post {
+    padding: 10px;
+    background-color: var(--cor-fundo-caixa-texto);
+    margin-bottom: 10px;
+}
+.post-info {
+    font-size: 10px;
+    color: #777;
+}
+#writePost, #autor {
+    width: 100%;
+    height: 30px;
+    min-width: 150px;
+    margin-right: 1rem;
+    padding: 0.5rem;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+}
+#back-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-right: 10px;
+    cursor: pointer;
+}
+#autor {
+    width: 25%;
+}

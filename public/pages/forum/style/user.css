@@ -3,7 +3,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background-image: url("/pages/forum/img/banner.png");
+    background-image: none;
     background-repeat: no-repeat;
     background-size: cover;
 }
@@ -13,7 +13,7 @@
     justify-content: space-between;
     align-items: center;
     width: 200px;
-    height: 100px;
+    height: 130px;
     font-size: 14px;
     margin-left: 1rem;
 }

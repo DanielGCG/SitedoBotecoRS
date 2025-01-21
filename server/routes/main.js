@@ -201,30 +201,47 @@ router.get('/teste3', (req, res) => {
     res.render('pages/experimentais/teste3', { locals: locals });
 });
 
-router.get('/autentication', (req, res) => {
+router.get('/mensages', (req, res) => {
     const locals = {
         title: "teste",
         description: "testetesteteste"
     }
-    res.render('pages/experimentais/autentication', { locals: locals });
+    res.render('pages/experimentais/mensages', { locals: locals });
 });
 
 /* ------ FORUM ------*/
+
+router.get('/forum/autenticacao', (req, res) => {
+    const locals = {
+        title: "Autenticação",
+        description: "forumforumforum"
+    }
+    res.render('pages/forum/autenticacao', { locals: locals });
+});
+
 
 router.get('/forum', (req, res) => {
     const locals = {
         title: "forum",
         description: "forumforumforum"
-    }
-    res.render('pages/forum/forum', { locals: locals });
+    };
+
+    res.render('pages/forum/forum', {
+        layout: 'layouts/forum-esq-dir',
+        locals: locals
+    });
 });
 
-router.get('/forum/usuario', (req, res) => {
+router.get('/forum/user', (req, res) => {
     const locals = {
-        title: "forum",
+        title: "Usuário",
         description: "forumforumforum"
-    }
-    res.render('pages/forum/usuario', { locals: locals });
+    };
+
+    res.render('pages/forum/user', {
+        layout: 'layouts/forum-esq',
+        locals: locals
+    });
 });
 
 router.get('/forum/post', (req, res) => {
@@ -233,6 +250,26 @@ router.get('/forum/post', (req, res) => {
         description: "forumforumforum"
     }
     res.render('pages/forum/post', { locals: locals });
+});
+
+router.get('/forum/discussao', (req, res) => {
+    const locals = {
+        title: "forum",
+        description: "forumforumforum"
+    };
+
+    res.render('pages/forum/discussao', {
+        layout: 'layouts/forum-esq-dir',
+        locals: locals
+    });
+});
+
+router.get('/forum/novadiscussao', (req, res) => {
+    const locals = {
+        title: "forum",
+        description: "forumforumforum"
+    }
+    res.render('pages/forum/novadiscussao', { locals: locals });
 });
 
 /* ------ Página de TRABALHO DE ALA ------*/

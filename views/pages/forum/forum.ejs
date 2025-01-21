@@ -1,81 +1,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fórum Escalonável</title>
   <link rel="stylesheet" href="/pages/forum/style/forum.css">
 </head>
-<body>
-  <div class="layout">
-    <!-- Sidebar Esquerdo -->
-    <aside class="sidebar">
-      <div class="categorias">
-        <h2>Categorias</h2>
-        <a href="/forum">Destaques</a>
-        <a href="#">Computaria</a>
-        <a href="#">Fofoca</a>
-        <a href="#">BSMP</a>
-        <a href="#">RPG</a>
-      </div>
-      <hr class="divisoria-sidebar"> <!-- Linha divisória -->
-      <div class="links-uteis">
-        <h2>Links Úteis</h2>
-        <p><a href="#">Como usar o fórum</a></p>
-        <p><a href="#">Políticas de uso</a></p>
-        <p><a href="#">Fale conosco</a></p>
-      </div>
-    </aside>
 
-    <!-- Conteúdo Principal -->
-    <main class="main-content">
-      <h2 style="text-align: center; margin-bottom: 1rem;">Fórum do Boteco</h2>
-      <section class="forum-header">
-        <input type="text" placeholder="Buscar tópicos ou categorias...">
-        <button>Nova Discussão</button>
-      </section>
+<div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"></div>
+<section class="forum-header">
+  <input type="text" placeholder="Buscar tópicos ou categorias...">
+  <button id="nova-discussao">Nova Discussão</button>
+</section>
+<section class="threads" id="threads">
+</section>
 
-      <section class="threads">
-        <div class="thread">
-          <div>
-            <h3 class="thread-title"><a href="/forum/post">Dúvidas sobre JavaScript</a></h3>
-            <p class="thread-info">Por <strong>Daniel</strong> - 2 horas atrás</p>
-          </div>
-          <div>
-            <p class="thread-info">15 respostas</p>
-          </div>
-        </div>
-        <div class="thread">
-          <div>
-            <h3 class="thread-title"><a href="/forum/post">Melhores filmes de 2024</a></h3>
-            <p class="thread-info">Por <strong>Maria</strong> - 1 dia atrás</p>
-          </div>
-          <div>
-            <p class="thread-info">20 respostas</p>
-          </div>
-        </div>
-      </section>
-    </main>
+<script>
+function renderPosts(posts) {
+  const messagesDiv = document.getElementById('mensagens');
+  messagesDiv.innerHTML = ''; // Limpa os posts existentes
 
-    <!-- Sidebar Direito -->
-    <aside class="right-sidebar">
-      <div class="user-box">
-        <div class="user-box-picture">
-          <img src="/img/icon-192x192.png">
+  if (posts.length === 0) {
+    messagesDiv.innerHTML = '<div class="mensagem">Nenhuma mensagem publicada ainda.</div>';
+    return;
+  }
+
+  posts.forEach(post => {
+    const postDiv = document.createElement('div');
+    postDiv.classList.add('mensagem');
+    postDiv.textContent = `${post.autor}: ${post.text}`;
+    messagesDiv.appendChild(postDiv);
+  });
+}
+
+// Conectar ao servidor de mensagens
+function listenForPosts(codigoCategoria, codigoDiscussao) {
+    if (!codigoCategoria || !codigoDiscussao) {
+        console.error('Código de categoria e discussão são necessários para escutar mensagens.');
+        document.getElementById('statusMessage').textContent = 'Categoria ou discussão não especificada.';
+        return;
+    }
+
+    // Conectar ao servidor de mensagens com parâmetros na URL
+    const eventSource = new EventSource(`${baseUrl}/stream-posts?categoria=${categoria}&discussao=${discussao}`);
+
+    eventSource.onmessage = (event) => {
+        try {
+        const posts = JSON.parse(event.data);
+        renderPosts(posts); // Renderizar as mensagens no frontend
+        } catch (error) {
+        console.error('Erro ao processar os dados recebidos:', error);
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        eventSource.close();
+    };
+}
+
+
+function renderDiscussoes(discussoes) {
+    const threadsDiv = document.getElementById('threads');
+    threadsDiv.innerHTML = '';
+
+    if (discussoes.length === 0) {
+      threadsDiv.innerHTML = `
+        <div>
+          <h2>Não há discussões ainda</h2>
         </div>
-        <div class="user-box-nickname">
-          <a href="/forum/usuario">@gabizinha_</a>
-        </div>        
-        <hr class="divisoria-sidebar"> <!-- Linha divisória -->
-        <div class="user-box-info">
-          <p>🗣️ 2 discussões</p>
-          <p>👥 0 amigos</p>
-          <p>📌 0 pins</p>
+      `;
+      return;
+    }
+
+    discussoes.forEach(discussao => {
+      // Criando a div para cada discussão
+      const threadDiv = document.createElement('div');
+      threadDiv.classList.add('thread');
+
+      // Formatando a data de última atualização, caso seja necessário
+      const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
+      const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
+
+      threadDiv.innerHTML = `
+        <div>
+          <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
+          <p class="thread-info">Por <a href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
-        <hr class="divisoria-sidebar"> <!-- Linha divisória -->
-        <div class="user-box-action">
-          <p>📝 editar usuário</p>
+        <div>
+          <p class="thread-info">último post ${tempoFormatado}</p>
         </div>
-      </div>
-    </aside>
-  </div>
-</body>
+      `;
+
+      // Adiciona o novo tópico à lista
+      threadsDiv.appendChild(threadDiv);
+    });
+}
+
+function listenForDiscussoes(categoria) {
+    if (!categoria) {
+        console.error('Código de categoria é necessário para escutar mensagens.');
+        alert('Categoria ou discussão não especificada.');
+        return;
+    }
+
+    // Conectar ao servidor de mensagens com parâmetros na URL
+    const eventSource = new EventSource(`/stream-discussoes?categoria=${categoria}`);
+
+    eventSource.onmessage = (event) => {
+        try {
+            const discussoes = JSON.parse(event.data);
+            renderDiscussoes(discussoes); // Renderiza as discussões recebidas
+        } catch (error) {
+            console.error('Erro ao processar os dados recebidos:', error);
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        eventSource.close();
+    };
+}
+
+document.getElementById('nova-discussao').addEventListener('click', function() {
+    window.location.href = '/forum/novadiscussao';
+});
+
+window.onload = () => {
+    // Recuperando os parâmetros da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    categoria = urlParams.get('categoria');
+
+    // Atribuindo os valores recuperados nas variáveis globais
+    listenForDiscussoes(categoria);
+    
+    document.getElementById("titulo-categoria").innerHTML = `<h2>${categoria}</h2>`;
+}
+</script>
 </html>

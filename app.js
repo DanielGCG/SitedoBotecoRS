@@ -8,7 +8,7 @@ const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
 const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } = require('firebase/auth');
-const { getDatabase, ref: dbRef, set, get } = require('firebase/database');
+const { getDatabase, ref: dbRef, set, get, onValue, push, update, increment } = require('firebase/database');
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -66,6 +66,238 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
+app.post('/posts', async (req, res) => {
+  const { userTag, categoria, discussao, text, media = null } = req.body;
+
+  // Validação dos dados recebidos
+  if (!userTag || !text) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userTag e texto.' });
+  }
+
+  try {
+    // Referência para o nó 'posts' no Firebase Realtime Database
+    const postsRef = dbRef(database, `forum/${categoria}/${discussao}`);
+
+    // Adiciona um novo post com o conteúdo e timestamp
+    await push(postsRef, {
+      userTag,
+      categoria,
+      discussao,
+      text,
+      media,
+      timestamp: Date.now(),
+    });
+
+    // Atualiza o tempo do último post da discussão
+    const discussaoRef = dbRef(database, `forum/${categoria}/headerDiscussoes/${discussao}`);
+    await update(discussaoRef, { ultimoUpdate: Date.now(), postAmount: increment(1) });
+
+    // Retorna sucesso se tudo ocorreu bem
+    res.status(201).json({ message: 'Post criado com sucesso e tempo da discussão atualizado.' });
+  } catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+app.post('/criardiscussao', (req, res) => {
+  const { exibitionName, userTag, categoria, discussao } = req.body;
+
+  const postAmount = 0;
+
+  if (!exibitionName || !userTag || !categoria || !discussao) {
+    return res.status(400).json({ error: 'O conteúdo precisa de autor, categoria e discussão.' });
+  }
+
+  // Referência para o nó da discussão
+  const discussaoRef = dbRef(database, `forum/${categoria}/headerDiscussoes/${discussao}`);
+
+  // Referência para o nó do usuário
+  const userRef = dbRef(database, `users/${userTag}/discussoes/${categoria}`);
+
+  // Dados da discussão
+  const discussaoData = {
+    exibitionName,
+    userTag,
+    categoria,
+    discussao,
+    postAmount,
+    ultimoUpdate: Date.now(),
+  };
+
+  // Cria uma nova discussão e atualiza o nó do usuário
+  Promise.all([
+    set(discussaoRef, discussaoData),
+    update(userRef, { discussaoAmount: increment(1) }) // Adiciona ou atualiza a discussão no nó do usuário
+  ])
+    .then(() => res.status(201).json({ message: 'Discussão criada com sucesso e associada ao usuário.' }))
+    .catch(error => {
+      console.error('Erro ao salvar no Firebase:', error);
+      res.status(500).json({ error: 'Erro interno do servidor.' });
+    });
+});
+
+app.get('/stream-posts', (req, res) => {
+  const { categoria, discussao } = req.query;
+
+  if (!categoria || !discussao) {
+    res.status(400).json({ error: 'Categoria e discussão são obrigatórias.' });
+    return;
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  // Referência para o nó 'posts' no Firebase Realtime Database
+  const postsRef = dbRef(database, `forum/${categoria}/${discussao}`);
+
+  // Escutando mudanças em tempo real no Firebase
+  const listener = onValue(
+    postsRef,
+    (snapshot) => {
+      const posts = [];
+      snapshot.forEach((childSnapshot) => {
+        posts.push(childSnapshot.val());
+      });
+
+      // Envia os dados atualizados para o cliente
+      res.write(`data: ${JSON.stringify(posts)}\n\n`);
+    },
+    (error) => {
+      console.error('Erro ao escutar mudanças no Firebase:', error);
+      res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar posts' })}\n\n`);
+    }
+  );
+
+  // Fechar conexão e remover o listener ao desconectar
+  req.on('close', () => {
+    console.log('Conexão SSE fechada');
+    listener(); // Remove o listener do Firebase
+  });
+});
+
+app.get('/stream-discussoes', (req, res) => {
+  const { categoria, userTag } = req.query; // Alterado de req.body para req.query
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  // Referências para múltiplos caminhos (Destaques e outras categorias)
+  const categoriasRef = [
+    'forum/Destaques/headerDiscussoes',
+    'forum/Computaria/headerDiscussoes',
+    'forum/Fofoca/headerDiscussoes',
+    'forum/BSMP/headerDiscussoes',
+    'forum/RPG/headerDiscussoes',
+  ];
+
+  // Se existe um userTag, filtra as discussões
+  if (userTag) {
+    const discussoes = [];
+
+    // Escuta de múltiplos caminhos
+    categoriasRef.forEach((caminho, index) => {
+      const discussoesRef = dbRef(database, caminho);
+
+      const listener = onValue(
+        discussoesRef,
+        (snapshot) => {
+          snapshot.forEach((childSnapshot) => {
+            const discussao = childSnapshot.val();
+
+            // Verifica se a discussão pertence ao userTag
+            if (discussao.userTag === userTag) {
+              discussoes.push(discussao);
+            }
+          });
+
+          // Se for a última categoria, envia os dados para o cliente
+          if (index === categoriasRef.length - 1) {
+            console.log(`data: ${JSON.stringify(discussoes)}\n\n`);
+            res.write(`data: ${JSON.stringify(discussoes)}\n\n`);
+          }
+        },
+        (error) => {
+          console.error('Erro ao escutar mudanças no Firebase:', error);
+          res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar posts' })}\n\n`);
+        }
+      );
+
+      // Fechar conexão e remover o listener ao desconectar
+      req.on('close', () => {
+        console.log('Conexão SSE fechada');
+        listener(); // Remove o listener do Firebase
+      });
+    });
+  } else {
+    // Caso não seja necessário filtrar por userTag, busca por categoria específica
+    if (categoria) {
+      const discussoesRef = dbRef(database, `forum/${categoria}/headerDiscussoes`);
+
+      const listener = onValue(
+        discussoesRef,
+        (snapshot) => {
+          const discussoes = [];
+          snapshot.forEach((childSnapshot) => {
+            discussoes.push(childSnapshot.val());
+          });
+
+          // Envia os dados atualizados para o cliente
+          res.write(`data: ${JSON.stringify(discussoes)}\n\n`);
+        },
+        (error) => {
+          console.error('Erro ao escutar mudanças no Firebase:', error);
+          res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar posts' })}\n\n`);
+        }
+      );
+
+      // Fechar conexão e remover o listener ao desconectar
+      req.on('close', () => {
+        console.log('Conexão SSE fechada');
+        listener(); // Remove o listener do Firebase
+      });
+    }
+  }
+});
+
+app.get('/stream-user', (req, res) => {
+  const { userTag } = req.query; // Obtém o userTag via query
+
+  if (!userTag) {
+    res.status(400).json({ error: 'userTag é obrigatório.' });
+    return;
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  // Referência para o nó 'users' no Firebase Realtime Database
+  const userRef = dbRef(database, `users/${userTag}`);
+
+  // Escutando mudanças em tempo real no Firebase
+  const listener = onValue(
+    userRef,
+    (snapshot) => {
+      const user = snapshot.val(); // Obtém os dados diretamente
+
+      // Envia os dados atualizados para o cliente
+      res.write(`data: ${JSON.stringify(user)}\n\n`);
+    },
+    (error) => {
+      console.error('Erro ao escutar mudanças no Firebase:', error);
+      res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar usuário' })}\n\n`);
+    }
+  );
+
+  // Fechar conexão e remover o listener ao desconectar
+  req.on('close', () => {
+    console.log('Conexão SSE fechada');
+    listener(); // Remove o listener do Firebase
+  });
+});
+
 // Rota de login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -74,23 +306,33 @@ app.post('/login', async (req, res) => {
     const user = userCredential.user;
 
     if (user.emailVerified) {
-      const idToken = await user.getIdToken();
+      // Buscar o usuário pelo email no banco de dados
+      const usersRef = dbRef(database, 'users'); // Referência para todos os usuários
+      const snapshot = await get(usersRef);
 
-      // Log para verificar o idToken gerado após o login
-      console.log('ID Token gerado no login:', idToken);
+      if (snapshot.exists()) {
+        let userTag = null;
 
-      // Define o cookie HttpOnly
-      res.cookie('idToken', idToken, {
-        httpOnly: true, // Impede que o cookie seja acessado via JavaScript
-        secure: process.env.NODE_ENV === 'production', // Só envia o cookie via HTTPS em produção
-        maxAge: 60 * 60 * 1000, // Tempo de expiração do cookie em milissegundos (1 hora)
-        sameSite: 'Strict', // Evita que o cookie seja enviado em requisições de outros domínios
-      });      
+        // Percorrer todos os usuários e procurar pelo email correspondente
+        snapshot.forEach((userData) => {
+          const userInfo = userData.val();
+          if (userInfo.email === email) {
+            userTag = userInfo.userTag; // Encontrou o userTag correspondente
+          }
+        });
 
-      res.status(200).json({
-        message: 'Login efetuado com sucesso.',
-        userData: { email: user.email, displayName: user.displayName },
-      });
+        if (userTag) {
+          res.status(200).json({
+            message: 'Login efetuado com sucesso.',
+            success: true,
+            userTag: userTag,  // Retorne o userTag encontrado
+          });
+        } else {
+          res.status(400).json({ error: 'Usuário não encontrado.' });
+        }
+      } else {
+        res.status(400).json({ error: 'Nenhum usuário registrado.' });
+      }
     } else {
       res.status(400).json({ error: 'Por favor, verifique seu e-mail antes de continuar.' });
     }
@@ -110,24 +352,31 @@ app.post('/register', async (req, res) => {
     await sendEmailVerification(user);
 
     // Criar um novo usuário no Realtime Database
-    const userRef = dbRef(database, `users/${email.replace('.', ',')}`);
+    const userRef = dbRef(database, `users/${userTag}`);
     await set(userRef, {
       exibitionName: exibitionName,
       userTag: userTag,
       email: user.email,
-      followersList: null,
+      biography: '',
+      pronouns: '',
+      bannerImage: '/pages/forum/img/banner.png',
+      profileImage: '',
+      socialMediaLinks: '',
+      followersList: '',
       followersAmount: 0,
-      followingList: null,
+      followingList: '',
       followingAmount: 0,
-      friendList: null,
+      friendList: '',
       friendAmount: 0,
-      postList: null,
+      discussaoList: '',
+      discussaoAmount: 0,
+      postList: '',
       postAmount: 0,
-      pinList: null,
+      pinList: '',
       pinAmount: 0,
       cargo: 0,
-      timedOut: false,
-      lastTimeOut: null,
+      timedOut: '',
+      lastTimeOut: '',
       createdAt: new Date().toISOString(),
       // Outros dados do usuário podem ser adicionados aqui
     });
@@ -155,12 +404,6 @@ app.post('/verify-email', async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
-});
-
-// Rota de logout
-app.post('/logout', (req, res) => {
-  res.clearCookie('idToken'); // Limpa o cookie de autenticação
-  res.status(200).json({ message: 'Usuário deslogado com sucesso.' });
 });
 
 // Função para enviar o log para o Firebase Storage

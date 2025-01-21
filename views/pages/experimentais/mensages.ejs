@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mensagens</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    .mensagens {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .mensagem {
+      margin-bottom: 10px;
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+    }
+    .mensagem:last-child {
+      border-bottom: none;
+    }
+    #statusMessage {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Postar Mensagem</h2>
+  <input type="text" id="writePost" placeholder="Escrever mensagem" style="width: 80%;" required>
+  <input type="text" id="autor" placeholder="autor" style="width: 80%;" required>
+
+  <button id="post">Publicar</button>
+  <p id="statusMessage"></p>
+
+  <h2>Mensagens</h2>
+  <div class="mensagens" id="mensagens"></div>
+
+  <script>
+    const baseUrl = 'http://localhost:3000';
+
+    // Exibir mensagens
+    function renderPosts(posts) {
+      const messagesDiv = document.getElementById('mensagens');
+      messagesDiv.innerHTML = ''; // Limpa os posts existentes
+
+      if (posts.length === 0) {
+        messagesDiv.innerHTML = '<div class="mensagem">Nenhuma mensagem publicada ainda.</div>';
+        return;
+      }
+
+      posts.forEach(post => {
+        const postDiv = document.createElement('div');
+        postDiv.classList.add('mensagem');
+        postDiv.textContent = `${post.autor}: ${post.text}`;
+        messagesDiv.appendChild(postDiv);
+      });
+    }
+
+    // Conectar ao servidor de mensagens
+    function listenForPosts(codigoCategoria, codigoDiscussao) {
+        if (!codigoCategoria || !codigoDiscussao) {
+            console.error('Código de categoria e discussão são necessários para escutar mensagens.');
+            document.getElementById('statusMessage').textContent = 'Categoria ou discussão não especificada.';
+            return;
+        }
+
+        // Conectar ao servidor de mensagens com parâmetros na URL
+        const eventSource = new EventSource(`${baseUrl}/stream-posts?codigoCategoria=${codigoCategoria}&codigoDiscussao=${codigoDiscussao}`);
+
+        eventSource.onmessage = (event) => {
+            try {
+            const posts = JSON.parse(event.data);
+            renderPosts(posts); // Renderizar as mensagens no frontend
+            } catch (error) {
+            console.error('Erro ao processar os dados recebidos:', error);
+            }
+        };
+
+        eventSource.onerror = (error) => {
+            console.error('Erro na conexão com o servidor:', error);
+            eventSource.close();
+        };
+    }
+
+    // Postar nova mensagem
+    document.getElementById('post').addEventListener('click', async () => {
+      const text = document.getElementById('writePost').value.trim();
+      const autor = document.getElementById('autor').value;
+
+      if (!text) {
+        document.getElementById('statusMessage').textContent = 'A mensagem não pode estar vazia.';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseUrl}/posts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, autor }),
+        });
+
+        const responseData = await response.json();
+        if (response.ok) {
+          document.getElementById('statusMessage').textContent = 'Mensagem publicada com sucesso.';
+          document.getElementById('writePost').value = ''; // Limpar o campo de entrada
+        } else {
+          document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
+        }
+      } catch (error) {
+        document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
+      }
+    });
+
+    // Iniciar conexão ao carregar a página
+    window.onload = listenForPosts(1, 10);
+  </script>
+</body>
+</html>
