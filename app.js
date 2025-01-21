@@ -103,8 +103,8 @@ app.post('/posts', async (req, res) => {
   const { userTag, categoria, discussao, text, media = null } = req.body;
 
   // Validação dos dados recebidos
-  if (!userTag || !text) {
-    return res.status(400).json({ error: 'O conteúdo precisa de userTag e texto.' });
+  if (!userTag || (!text && !media)) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userTag e (texto ou midia).' });
   }
 
   try {

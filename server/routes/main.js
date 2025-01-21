@@ -268,14 +268,6 @@ router.get('/forum/discussao', (req, res) => {
     });
 });
 
-router.get('/forum/novadiscussao', (req, res) => {
-    const locals = {
-        title: "Nova Discussão",
-        description: "forumforumforum"
-    }
-    res.render('pages/forum/novadiscussao', { locals: locals });
-});
-
 /* ------ Página de TRABALHO DE ALA ------*/
 
 // Rota para página de recomendações

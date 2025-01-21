@@ -2,6 +2,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/pages/forum/style/forum.css">
+  <link rel="stylesheet" href="/pages/forum/style/novadiscussao.css">
+  <link rel="stylesheet" href="/geral/popup.css">
 </head>
 
 <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"></div>
@@ -9,6 +11,26 @@
   <input type="text" placeholder="Buscar tópicos ou categorias...">
   <button id="nova-discussao">Nova Discussão</button>
 </section>
+<div id="popup-nova-discussao" class="popup" style="display: none;">
+  <div id="popup-conteudo" class="popup-conteudo">
+    <h2>Nova Discussão</h2>
+    <div class="acoes">
+      
+      <input type="text" id="discussao" placeholder="nome da discussão" style="width: 80%;" required>
+
+      <select id="categoria" style="width: 80%;" required>
+          <option value="" disabled selected>Selecione uma categoria</option>
+          <option value="Destaques">Destaques</option>
+          <option value="Computaria">Computaria</option>
+          <option value="Fofoca">Fofoca</option>
+          <option value="BSMP">BSMP</option>
+          <option value="RPG">RPG</option>
+        </select>    
+      <button id="post">Publicar</button>
+      <p id="statusMessage"></p>
+    </div>
+  </div>
+</div>
 <section class="threads" id="threads">
 </section>
 
@@ -74,7 +96,42 @@ function listenForDiscussoes(categoria) {
 }
 
 document.getElementById('nova-discussao').addEventListener('click', function() {
-    window.location.href = '/forum/novadiscussao';
+  document.getElementById('popup-nova-discussao').style.display = '';
+});
+
+// Postar nova mensagem
+document.getElementById('post').addEventListener('click', async () => {
+    const categoria = document.getElementById('categoria').value;
+    const discussao = document.getElementById('discussao').value.trim();
+    const userTag = localStorage.getItem("autenticationUserTag");
+
+    console.log (`[${categoria}, ${discussao}, ${userTag}]`);
+
+    if (!discussao || !userTag || !categoria) {
+        document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem discussao e/ou autor e/ou categoria.';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/criardiscussao`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userTag, categoria, discussao }),
+        });
+
+        const responseData = await response.json();
+        if (response.ok) {
+            document.getElementById('statusMessage').textContent = 'Mensagem publicada com sucesso.';
+            document.getElementById('discussao').value = ''; // Limpar o campo de entrada
+            document.getElementById('categoria').value = ''; // Limpar o campo de entrada
+        } else {
+        document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
+        }
+    } catch (error) {
+        document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
+    }
+    document.getElementById('popup-nova-discussao').style.display = 'none';
+    window.location.href = `/forum/discussao?categoria=${categoria}&discussao=${discussao}`;
 });
 
 window.onload = () => {

@@ -1,10 +1,9 @@
 body {
-    overflow: hidden;
 }  
 .layout {
     display: flex;
     flex-wrap: nowrap;
-    min-height: 100vh;
+    height: 90.5vh;
 }
 .sidebar, .right-sidebar {
     width: 175px;
@@ -28,6 +27,7 @@ body {
     flex: 1;
     padding: 1rem;
     overflow-y: auto;
+    overflow:scroll;
 }
 .forum-header {
     display: flex;
