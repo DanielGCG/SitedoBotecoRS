@@ -32,9 +32,12 @@
 </head>
     <body>
         <%- include('../partials/header.ejs')  %>
+        <div class="mobile-controls">
+            <button id="toggle-left-sidebar" aria-label="Mostrar menu esquerdo">☰ Categorias</button>
+        </div>
         <div class="layout">
             <!-- Sidebar Esquerdo -->
-            <aside class="sidebar">
+            <aside class="sidebar" id="left-sidebar">
                 <div class="categorias">
                     <h2>Categorias</h2>
                     <a href="/forum?categoria=Destaques" id="Destaques">Destaques</a>
@@ -43,7 +46,7 @@
                     <a href="/forum?categoria=BSMP" id="BSMP">BSMP</a>
                     <a href="/forum?categoria=RPG" id="RPG">RPG</a>
                 </div>
-                <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+                <hr class="divisoria-sidebar">
                 <div class="links-uteis">
                     <h2>Links Úteis</h2>
                     <p><a href="#">Como usar o fórum</a></p>
@@ -55,10 +58,10 @@
             <main class="main-content">
                 <%- body %>
             </main>
+            <aside class="right-sidebar" id="right-sidebar">
+            </aside>
         </div>
     </body>
-</html>
-
 <script>
 // Recuperando os parâmetros da URL
 const urlParamsSidebar = new URLSearchParams(window.location.search);
@@ -71,10 +74,17 @@ if (categoriaSidebar) {
         link.style.fontWeight = "bold"; // Torna o texto em negrito para destaque adicional
     }
 }
-
 document.addEventListener('DOMContentLoaded', function() {
     if (!localStorage.getItem('autenticationUserTag')) {
     window.location.href = "/forum/autenticacao";
     }
+
+    const leftSidebar = document.getElementById('left-sidebar');
+    const toggleLeftButton = document.getElementById('toggle-left-sidebar');
+
+    toggleLeftButton.addEventListener('click', () => {
+        leftSidebar.classList.toggle('active');
+    });
 });
 </script>
+</html>

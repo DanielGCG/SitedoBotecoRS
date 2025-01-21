@@ -32,25 +32,126 @@
 </head>
     <body>
         <%- include('../partials/header.ejs')  %>
+        <div class="mobile-controls">
+            <button id="toggle-left-sidebar" aria-label="Mostrar menu esquerdo">☰ Categorias</button>
+            <button id="toggle-right-sidebar" aria-label="Mostrar menu direito">Perfil ☰</button>
+        </div>
         <div class="layout">
-            <%- include('../partials/forum-sidebar-esquerda.ejs')  %>
+            <!-- Sidebar Esquerdo -->
+            <aside class="sidebar" id="left-sidebar">
+                <div class="categorias">
+                    <h2>Categorias</h2>
+                    <a href="/forum?categoria=Destaques" id="Destaques">Destaques</a>
+                    <a href="/forum?categoria=Computaria" id="Computaria">Computaria</a>
+                    <a href="/forum?categoria=Fofoca" id="Fofoca">Fofoca</a>
+                    <a href="/forum?categoria=BSMP" id="BSMP">BSMP</a>
+                    <a href="/forum?categoria=RPG" id="RPG">RPG</a>
+                </div>
+                <hr class="divisoria-sidebar">
+                <div class="links-uteis">
+                    <h2>Links Úteis</h2>
+                    <p><a href="#">Como usar o fórum</a></p>
+                    <p><a href="#">Políticas de uso</a></p>
+                    <p><a href="#">Fale conosco</a></p>
+                </div>
+            </aside>
             <!-- Conteúdo Principal -->
             <main class="main-content">
                 <%- body %>
             </main>
-            <!-- Sidebar Direito -->
-            <%- include('../partials/forum-sidebar-direita.ejs')  %>
+            <aside class="right-sidebar" id="right-sidebar">
+            </aside>
         </div>
     </body>
-
-
 <script>
+// Recuperando os parâmetros da URL
+const urlParamsSidebar = new URLSearchParams(window.location.search);
+const categoriaSidebar = urlParamsSidebar.get('categoria');
 
+// Se a categoria existir, aplicar estilo ao link correspondente
+if (categoriaSidebar) {
+    const link = document.getElementById(categoriaSidebar);
+    if (link) {
+        link.style.fontWeight = "bold"; // Torna o texto em negrito para destaque adicional
+    }
+}
 
+searchUserDataForSidebar(localStorage.getItem('autenticationUserTag'));
+
+function renderSidebarDireita(userDataForSidebar) {
+    document.getElementById("right-sidebar").innerHTML =
+    `<div class="user-box">
+        <div class="user-box-picture">
+        <a href="/forum/user?userTag=${userDataForSidebar.userTag}"><img src="${userDataForSidebar.profileImage}"></a>
+        </div>
+        <div class="user-box-nickname">
+        <a href="/forum/user?userTag=${userDataForSidebar.userTag}">${userDataForSidebar.userTag}</a>
+        </div>        
+        <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+        <div class="user-box-info">
+        <p>🗣️ ${userDataForSidebar.discussaoAmount} discussões</p>
+        <p>👥 ${userDataForSidebar.friendAmount} amigos</p>
+        <p>📌 ${userDataForSidebar.pinAmount} pins</p>
+        </div>
+        <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+        <div class="user-box-action">
+        <a href="/forum/editar"><p>📝 editar perfil</p></a>
+        <hr class="divisoria-sidebar"> <!-- Linha divisória -->
+        <button style="none" onclick="logout()"><p>💡logout</p></button>
+        </div>
+        
+    </div>`;
+}
+
+function logout () {
+    localStorage.removeItem("autenticationUserTag");
+    window.location.href = "/forum/autenticacao";
+}
+
+function searchUserDataForSidebar(userTag) {
+    if (!userTag) {
+        console.error('precisamos do userTag do usuário para localiza-lo.');
+        alert('precisamos do email do usuário para localiza-lo.');
+        return;
+    }
+
+    // Conectar ao servidor de mensagens com parâmetros na URL
+    const eventSource = new EventSource(`/stream-user?userTag=${userTag}`);
+
+    eventSource.onmessage = (event) => {
+        try {
+            userDataForSidebar = JSON.parse(event.data);
+            renderSidebarDireita(userDataForSidebar);
+        } catch (error) {
+            console.error('Erro ao processar os dados recebidos:', error);
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        console.error('Erro na conexão com o servidor:', error);
+        eventSource.close();
+    };
+}
 document.addEventListener('DOMContentLoaded', function() {
     if (!localStorage.getItem('autenticationUserTag')) {
     window.location.href = "/forum/autenticacao";
     }
+
+    const leftSidebar = document.getElementById('left-sidebar');
+    const rightSidebar = document.getElementById('right-sidebar');
+    const toggleLeftButton = document.getElementById('toggle-left-sidebar');
+    const toggleRightButton = document.getElementById('toggle-right-sidebar');
+
+    toggleLeftButton.addEventListener('click', () => {
+        leftSidebar.classList.toggle('active');
+
+        rightSidebar.classList.remove('active'); // Fecha a outra sidebar se estiver aberta
+    });
+
+    toggleRightButton.addEventListener('click', () => {
+        rightSidebar.classList.toggle('active');
+        leftSidebar.classList.remove('active'); // Fecha a outra sidebar se estiver aberta
+    });
 });
 </script>
 </html>

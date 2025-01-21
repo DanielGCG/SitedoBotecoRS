@@ -1,34 +1,60 @@
-body {
-}  
+/* Layout Principal */
 .layout {
     display: flex;
     flex-wrap: nowrap;
     height: 90.5vh;
 }
+
+/* Sidebars escondidas por padrão */
 .sidebar, .right-sidebar {
     width: 175px;
-    background-color: var(--cor-fundo-caixa-texto);
-    padding: 1rem;
-    overflow-y: auto; /* Adiciona barra de rolagem vertical */
-    max-height: 100vh; /* Limita a altura ao tamanho da tela */
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1); /* Opcional: adiciona um leve efeito de borda interna */
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out, background-color 0.5s ease-in-out; /* Animação suave */
+    position: relative;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    background-color: var(--cor-transparente);
 }
+
+.sidebar {
+    padding: 10px;
+}
+
+.right-sidebar {
+    right: 0;
+    padding: 10px;
+}
+
+/* Sidebars visíveis quando ativas */
+.sidebar.active, .right-sidebar.active {
+    transform: translateX(0);
+    background-color: var(--cor-fundo); /* Mudança de cor suave */
+}
+
+/* Estilos das Sidebars */
 .sidebar h2, .right-sidebar h2 {
     font-size: 1.2rem;
     margin-bottom: 1rem;
 }
+
 .sidebar a, .right-sidebar a {
     text-decoration: none;
     color: #3d3d3d;
     display: block;
     margin: 0.5rem 0;
 }
+
+/* Conteúdo Principal */
 .main-content {
     flex: 1;
     padding: 1rem;
     overflow-y: auto;
-    overflow:scroll;
+    overflow: scroll;
+    min-height: 300px;
 }
+
+/* Header do Fórum */
 .forum-header {
     display: flex;
     flex-wrap: wrap;
@@ -36,6 +62,7 @@ body {
     align-items: center;
     margin-bottom: 1rem;
 }
+
 .forum-header input {
     flex: 1;
     min-width: 150px;
@@ -44,6 +71,7 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
 }
+
 .forum-header button {
     padding: 0.5rem 1rem;
     background-color: #4CAF50;
@@ -52,9 +80,12 @@ body {
     border-radius: 5px;
     cursor: pointer;
 }
+
+/* Threads */
 .threads {
     margin-bottom: 2rem;
 }
+
 .thread {
     background-color: white;
     border: 1px solid #ddd;
@@ -66,45 +97,57 @@ body {
     justify-content: space-between;
     align-items: center;
 }
+
 .thread-title a {
     text-decoration: none;
     color: #333;
     font-weight: bold;
 }
+
 .thread-title a:hover {
     color: #4CAF50;
 }
+
 .thread-info {
     font-size: 0.9rem;
     color: #777;
 }
+
+/* Divisória */
 .divisoria-sidebar {
     border: 0;
     height: 1px;
     background-color: #3d3d3d;
     margin: 1rem 0;
 }
+
+/* User Box */
 .user-box {
     text-align: center;
 }
+
 .user-box-picture img {
     width: 80px;
     height: 80px;
     border-radius: 25%;
-    transition: opacity 0.5s ease-in-out; /* Adiciona uma transição suave */
+    transition: opacity 0.5s ease-in-out;
 }
+
 .user-box-nickname {
     color: #3d3d3d;
     margin-bottom: 1rem;
 }
+
 .user-box-info {
     text-align: start;
     font-size: 14px;
 }
+
 .user-box-action {
     text-align: start;
     font-size: 14px;
 }
+
 #back-button {
     background: none;
     border: none;
@@ -113,40 +156,54 @@ body {
     cursor: pointer;
 }
 
-/* Estilos responsivos */
-@media (max-width: 468px) {
-    .layout {
-        flex-direction: column;
-    }
+/* Botões de controle no mobile */
+.mobile-controls {
+    display: none;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background-color: var(--cor-transparente);
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+}
+
+.mobile-controls button {
+    background-color: var(--cor-transparente);
+    border: none;
+    padding: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
     .sidebar, .right-sidebar {
-        width: 100%;
-        max-width: none;
-        margin-bottom: 1rem;
-        border: none;
-        padding: 1rem 0;
+        transform: translateX(-100%);
+        position: absolute;
     }
-    .main-content {
-        padding: 1rem;
+
+    .right-sidebar {
+        transform: translateX(100%);
     }
-    .forum-header {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .forum-header input, .forum-header button {
-        width: 100%;
-        margin: 0;
-    }
-    .thread {
-        flex-direction: column;
-        gap: 1rem;
+
+    /* Sidebars visíveis quando ativas no mobile */
+    .sidebar.active, .right-sidebar.active {
+        transform: translateX(0);
     }
 }
 
-@media (max-width: 480px) {
-    .forum-header input, .forum-header button {
-        font-size: 1rem;
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .mobile-controls {
+        display: flex;
     }
-    .sidebar h2, .right-sidebar h2 {
-        font-size: 1rem;
+
+    .layout {
+        position: relative;
+    }
+}
+
+@media (max-width: 468px) {
+    .main-content {
+        padding: 1rem;
     }
 }
