@@ -17,16 +17,7 @@
     <h2>Nova Discussão</h2>
     <div class="acoes">
       
-      <input type="text" id="discussao" placeholder="nome da discussão" style="width: 80%;" required>
-
-      <select id="categoria" style="width: 80%;" required>
-          <option value="" disabled selected>Selecione uma categoria</option>
-          <option value="Destaques">Destaques</option>
-          <option value="Computaria">Computaria</option>
-          <option value="Fofoca">Fofoca</option>
-          <option value="BSMP">BSMP</option>
-          <option value="RPG">RPG</option>
-        </select>    
+      <input type="text" id="discussao" placeholder="nome da discussão..." style="width: 80%;" required>
       <button id="post">Publicar</button>
       <p id="statusMessage"></p>
     </div>
@@ -51,15 +42,26 @@ function renderDiscussoes(discussoes) {
     }
 
     discussoes.forEach(discussao => {
-      // Criando a div para cada discussão
       const threadDiv = document.createElement('div');
       threadDiv.classList.add('thread');
 
-      // Formatando a data de última atualização, caso seja necessário
       const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
       const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
 
-      threadDiv.innerHTML = `
+      if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
+        threadDiv.innerHTML = `
+        <div>
+          <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
+          <p class="thread-info">Por <a href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; height: 100%;">
+          <p class="thread-info" style="margin-bottom: auto;">último post ${tempoFormatado}</p>
+          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoria}', '${discussao.discussao}', '${discussao.userTag}')">Remover</button>
+        </div>
+        `;
+      }
+      else {
+        threadDiv.innerHTML = `
         <div>
           <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
           <p class="thread-info">Por <a href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
@@ -68,6 +70,8 @@ function renderDiscussoes(discussoes) {
           <p class="thread-info">último post ${tempoFormatado}</p>
         </div>
       `;
+      }
+
 
       // Adiciona o novo tópico à lista
       threadsDiv.appendChild(threadDiv);
@@ -97,15 +101,33 @@ function listenForDiscussoes(categoria) {
     };
 }
 
+async function deletaDiscussao(categoria, discussao, userTag) {
+  try {
+      const response = await fetch(`/removerdiscussao`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userTag, categoria, discussao }),
+      });
+
+      const responseData = await response.json();
+      if (response.ok) {
+      }
+
+    }catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+}
+
 document.getElementById('nova-discussao').addEventListener('click', function() {
   document.getElementById('popup-nova-discussao').style.display = '';
 });
 
 // Postar nova mensagem
 document.getElementById('post').addEventListener('click', async () => {
-    const categoria = document.getElementById('categoria').value;
     const discussao = document.getElementById('discussao').value.trim();
     const userTag = localStorage.getItem("autenticationUserTag");
+    const categoria = categoriaPagina;
 
     console.log (`[${categoria}, ${discussao}, ${userTag}]`);
 
@@ -136,16 +158,18 @@ document.getElementById('post').addEventListener('click', async () => {
     window.location.href = `/forum/discussao?categoria=${categoria}&discussao=${discussao}`;
 });
 
+let categoriaPagina;
+
 window.onload = () => {
     // Recuperando os parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
-    categoria = urlParams.get('categoria');
-    console.log(categoria);
+    categoriaPagina = urlParams.get('categoria');
+    console.log(categoriaPagina);
 
     // Atribuindo os valores recuperados nas variáveis globais
-    listenForDiscussoes(categoria);
+    listenForDiscussoes(categoriaPagina);
     
-    document.getElementById("titulo-categoria").innerHTML = `<h2>${categoria}</h2>`;
+    document.getElementById("titulo-categoria").innerHTML = `<h2>${categoriaPagina}</h2>`;
 }
 </script>
 </html>

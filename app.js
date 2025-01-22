@@ -8,7 +8,7 @@ const { TwitterApi } = require('twitter-api-v2');
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
 const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } = require('firebase/auth');
-const { getDatabase, ref: dbRef, set, get, onValue, push, update, increment } = require('firebase/database');
+const { getDatabase, ref: dbRef, set, get, onValue, push, update, remove } = require('firebase/database');
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -190,6 +190,47 @@ app.post('/criardiscussao', async (req, res) => {
     }
 
     res.status(201).json({ message: 'Discussão criada com sucesso e associada ao usuário.' });
+  } catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+app.post('/removerdiscussao', async (req, res) => {
+  const { userTag, categoria, discussao } = req.body;
+
+  // Validação dos dados de entrada
+  if (!userTag || !categoria || !discussao) {
+    return res.status(400).json({ error: 'O conteúdo precisa de autor, categoria e discussão.' });
+  }
+
+  // Referência para o nó da discussão
+  const discussaoHeaderRef = dbRef(database, `forum/${categoria}/headerDiscussoes/${discussao}`);
+
+  // Referência para a discussao em si
+  const discussaoRef = dbRef(database, `forum/${categoria}/${discussao}`);
+
+  // Referência para o nó do usuário
+  const userRef = dbRef(database, `users/${userTag}`);
+
+  try {
+    // Remoção de uma discussão
+    await remove(discussaoHeaderRef);
+    await remove(discussaoRef);
+
+    // Decremento seguro do `discussaoAmount`
+    const userSnapshot = await get(userRef);
+
+    if (userSnapshot.exists()) {
+      // Decrementa o valor existente
+      console.log(userSnapshot.val().discussaoAmount);
+      await update(userRef, { discussaoAmount: (userSnapshot.val().discussaoAmount || 0) - 1 });
+    } else {
+      // Inicializa o valor se o nó não existir
+      await set(userRef, { discussaoAmount: 1 });
+    }
+
+    res.status(201).json({ message: 'Discussão removida com sucesso e desassociada ao usuário.' });
   } catch (error) {
     console.error('Erro ao salvar no Firebase:', error);
     res.status(500).json({ error: 'Erro interno do servidor.' });

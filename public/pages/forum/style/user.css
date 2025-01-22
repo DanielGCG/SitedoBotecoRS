@@ -12,9 +12,9 @@
 .userpage-userinfo {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    width: 200px;
+    max-width: 250px;
     font-size: 14px;
     margin-left: 1rem;
     background-color: #f9f9f95b;
@@ -25,6 +25,10 @@
     width: 80px;
     height: 80px;
     border-radius: 25%;
+}
+.userpage-userinfo-name {
+    margin-left: 10px;
+    margin-right: 10px;
 }
 .userpage-userbox-actions {
     display: flex;
