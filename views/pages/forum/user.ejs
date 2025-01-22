@@ -117,10 +117,10 @@ function renderDiscussoes(discussoes) {
         threadDiv.innerHTML = `
         <div>
           <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
-          <p class="thread-info">Por <a href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; height: 100%;">
-          <p class="thread-info" >último post ${tempoFormatado}</p>
+        <div>
+          <p class="thread-info">último post ${tempoFormatado}</p>
           <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoria}', '${discussao.discussao}', '${discussao.userTag}')">Remover</button>
         </div>
         `;
@@ -129,7 +129,7 @@ function renderDiscussoes(discussoes) {
         threadDiv.innerHTML = `
         <div>
           <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
-          <p class="thread-info">Por <a href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
           <p class="thread-info">último post ${tempoFormatado}</p>

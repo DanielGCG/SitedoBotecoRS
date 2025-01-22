@@ -26,6 +26,28 @@
     display: block;
     object-fit: contain; 
 }
+.post-header {
+    position: relative;
+}
+
+.edit-button,
+.remove-button {
+  position: absolute;
+  top: 0;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  background-color: #00000000;
+}
+
+.edit-button {
+  right: 40px;
+}
+
+.remove-button {
+  right: 10px;
+}
+
 #writePost, #autor {
     width: 100%;
     height: 30px;
@@ -48,12 +70,12 @@
 }
 .tweet-input-grande {
     width: 100%;
-    height: 35px;
+    min-height: 100px;
     border: 1px solid #e1e8ed;
     border-radius: 8px;
-    padding: 4px;
+    padding: 8px;
     font-size: 16px;
-    resize: none;
+    resize:vertical;
     font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji";
 }
 .char-count {

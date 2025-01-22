@@ -11,9 +11,9 @@
     <section class="send-messagearea">
         <div class="twitter-draft-container">
           <!-- Campo de texto -->
-          <textarea class="tweet-input-grande" id="messageText" placeholder="resto da mensagem..." maxlength="220"></textarea>
+          <textarea class="tweet-input-grande" id="messageText" placeholder="resto da mensagem..." maxlength="440"></textarea>
           <div id="char-count" class="char-count">
-              <span id="char-count-text">0/220</span>
+              <span id="char-count-text">0/440</span>
           </div>
 
           <!-- Preview de Mídia -->
@@ -60,6 +60,78 @@
       </div>
     </section>
 <script>
+function removerPost() {
+
+}
+
+function previewMedia() {
+    const fileInput = document.getElementById('mediaFile');
+    const previewContainer = document.getElementById('media-preview');
+
+    // Limpa o preview anterior e adiciona o botão de limpar input
+    previewContainer.innerHTML = '';
+    previewContainer.innerHTML += `
+    <div id="media-preview-closebtn" class="media-preview-closebtn">
+        <label for="clearMidiaInput" style="cursor: url('/img/cursor-mao.png'), auto;">
+            <?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+            <svg width="36px" height="36px" viewBox="0 0 24 24" fill="#1D9BF0" xmlns="http://www.w3.org/2000/svg">
+                <circle opacity="0.5" cx="12" cy="12" r="8" stroke="#1C274C" stroke-width="1.5"/>
+                <path d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+        </label>
+        <button id="clearMidiaInput" style="display: none;" onclick="event.preventDefault(), clearMidiaInput()"></button>
+    </div>
+    `
+
+    if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const fileType = file.type;
+
+        // Verifica o tipo do arquivo
+        if (fileType.startsWith('image/')) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            previewContainer.appendChild(img);
+        } else if (fileType.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.controls = true;
+            previewContainer.appendChild(video);
+        } else {
+            previewContainer.textContent = 'Formato de arquivo não suportado.';
+        }
+    }
+}
+
+// Contador de caracteres do post
+document.getElementById("messageText").addEventListener("input", function() {
+    var maxLength = 440; // Limite de caracteres
+    var currentLength = this.value.length;
+
+    // Atualiza o contador para mostrar "x/440"
+    document.getElementById("char-count-text").textContent = `${currentLength}/${maxLength}`;
+
+    // Se o limite for alcançado, desabilitar mais entradas
+    if (currentLength >= maxLength) {
+        this.value = this.value.substring(0, maxLength); // Impede mais caracteres
+    }
+});
+
+function clearMidiaInput() {
+    document.getElementById('mediaFile').value = '';
+
+    if (document.getElementById('media-preview-closebtn') !== null){
+        const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
+        mediaPreviewCloseBtn.innerHTML = '';
+        document.getElementById('clearMidiaInput').style.display = "none";
+    }
+
+    // Limpa o preview anterior
+    const previewContainer = document.getElementById('media-preview');
+    previewContainer.innerHTML = '';
+    
+}
+
 function renderPosts(posts) {
   const messagesDiv = document.getElementById('postarea');
   messagesDiv.innerHTML = ''; // Limpa os posts existentes
@@ -76,14 +148,31 @@ function renderPosts(posts) {
     const timestamp = new Date(post.timestamp);
     const tempoFormatado = `${timestamp.toLocaleDateString()} ${timestamp.toLocaleTimeString()}`;
     
-    postDiv.innerHTML = `
+    if (post.userTag === localStorage.getItem("autenticationUserTag")){
+      postDiv.innerHTML = `
+      <div class="post-header">
+        <button class="edit-button">📝</button>
+        <button class="remove-button">🗑️</button>
+      </div>
       <div class="post-text">${post.text}</div>
       ${post.media ? `<div class="post-media"><img src="${post.media}" alt="Mídia"></div>` : ''}
       <div class="post-info">
-        <p><strong>${post.userTag}</strong></p>
+        <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${post.userTag}"><strong>${post.userTag}</strong></a></p>
         <p>${tempoFormatado}</p>
       </div>
     `;
+    }
+    else{
+      postDiv.innerHTML = `
+      <div class="post-text">${post.text}</div>
+      ${post.media ? `<div class="post-media"><img src="${post.media}" alt="Mídia"></div>` : ''}
+      <div class="post-info">
+                <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${post.userTag}"><strong>${post.userTag}</strong></a></p>
+        <p>${tempoFormatado}</p>
+      </div>
+    `;
+    }
+
     messagesDiv.appendChild(postDiv);
   });
 
