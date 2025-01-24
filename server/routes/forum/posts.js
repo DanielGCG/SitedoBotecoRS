@@ -167,36 +167,4 @@ router.post('/removerdiscussao', async (req, res) => {
   }
 });
 
-router.post('/removerdiscussaopost', async (req, res) => {
-  const { postId, categoriaId, discussaoId } = req.body;
-
-  // Validação dos dados de entrada
-  if (!userTag || !categoriaId || !discussaoId) {
-    return res.status(400).json({ error: 'O conteúdo precisa de userTag, categoriaId e discussaoId.' });
-  }
-
-  try {
-    // Referências no Firebase
-    const discussaoHeaderRef = dbRef(database, `forum/publicacoes/headers/discussoes/${categoriaId}/${discussaoId}`);
-    const discussaoPostRef = dbRef(database, `forum/publicacoes/${userTag}/discussoes/${categoriaId}/${discussaoId}/${postId}`);
-    const dicussaoHeaderInUsersRef = dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes/${categoriaId}/${discussaoId}`);
-
-    // Remoção da discussão
-    await remove(discussaoPostRef);
-    
-    await get(discussaoHeaderRef);
-
-      await update(userRef, { discussaoAmount: newAmount });
-    } else {
-      // Inicializa o valor se o nó não existir (embora improvável)
-      await set(userRef, { discussaoAmount: 0 });
-    }
-
-    res.status(200).json({ message: 'Discussão removida com sucesso e desassociada ao usuário.' });
-  } catch (error) {
-    console.error('Erro ao remover no Firebase:', error);
-    res.status(500).json({ error: 'Erro interno do servidor.' });
-  }
-});
-
 module.exports = router;
