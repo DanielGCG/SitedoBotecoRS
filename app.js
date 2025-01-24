@@ -24,10 +24,10 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 // Rotas Fórum
-app.use('', require('./server/routes/forum/auth'));
-app.use('', require('./server/routes/forum/profile'));
-app.use('', require('./server/routes/forum/stream'));
-app.use('', require('./server/routes/forum/posts'));
+app.use('/API/forum', require('./server/routes/forum/auth'));
+app.use('/API/forum', require('./server/routes/forum/profile'));
+app.use('/API/forum', require('./server/routes/forum/stream'));
+app.use('/API/forum', require('./server/routes/forum/posts'));
 
 // Rota Cutucar
 app.use('', require('./server/routes/cutucar'));
@@ -41,4 +41,20 @@ app.use('', require('./server/routes/watchlist'))
 // Rota principal
 app.use('/', require('./server/routes/main'));
 
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+// Iniciar o servidor
+const server = app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
+
+// Tratar encerramento de processo para liberar a porta
+const shutdown = () => {
+  console.log('Encerrando servidor...');
+  server.close(() => {
+      console.log('Servidor encerrado com sucesso.');
+      process.exit(0);
+  });
+};
+
+// Escutar sinais de interrupção e finalização do processo
+process.on('SIGINT', shutdown); // Ctrl+C no terminal
+process.on('SIGTERM', shutdown); // Finalização pelo sistema

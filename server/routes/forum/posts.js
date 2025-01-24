@@ -4,8 +4,8 @@ const { database } = require('../../config/firebase');
 const router = express.Router();
 
 
-router.post('/posts', async (req, res) => {
-  const { userTag, categoria, discussao, text, media = null } = req.body;
+router.post('/discussaopost', async (req, res) => {
+  const { userTag, categoriaId, discussaoId, text, media, mediaType = null } = req.body;
 
   // Validação dos dados recebidos
   if (!userTag || (!text && !media)) {
@@ -13,37 +13,52 @@ router.post('/posts', async (req, res) => {
   }
 
   try {
-    // Referência para o nó 'posts' no Firebase Realtime Database
-    const postsRef = dbRef(database, `forum/${categoria}/${discussao}`);
+    /* LastPostID */
 
-    // Adiciona um novo post com o conteúdo e timestamp
-    await push(postsRef, {
+    let lastPostId = await get(dbRef(database, `forum/publicacoes/${userTag}/discussoes/${categoriaId}/${discussaoId}/lastPostId`));
+    lastPostId = parseInt(lastPostId.val(), 10) || 0;
+
+    // Declaração fora do bloco condicional
+    let lastPostIdAcrescentado;
+
+    if (lastPostId === "" || lastPostId === null) {
+      lastPostIdAcrescentado = 0; // Inicializa em 0 se estiver vazio ou null
+    } else {
+      lastPostIdAcrescentado = lastPostId + 1; // Incrementa caso contrário
+    }
+
+    const postId = lastPostIdAcrescentado;
+
+    // Atualiza o lastPostId no Firebase
+    await set(dbRef(database, `forum/publicacoes/${userTag}/discussoes/${categoriaId}/${discussaoId}/lastPostId`), lastPostIdAcrescentado);
+
+    /* postId */
+
+    await set(dbRef(database, `forum/publicacoes/${userTag}/discussoes/${categoriaId}/${discussaoId}/${lastPostIdAcrescentado}`), {
       userTag,
-      categoria,
-      discussao,
+      postId,
+      categoriaId,
+      discussaoId,
       text,
       media,
-      timestamp: Date.now(),
+      mediaType,
+      time: Date.now(),
     });
 
-    // Referência para o nó da discussão
-    const discussaoRef = dbRef(database, `forum/${categoria}/headerDiscussoes/${discussao}`);
+    /* Headers/Discussoes/categoriaId/discussaoId */
 
-    // Incremento seguro do `postAmount`
-    const discussaoSnapshot = await get(discussaoRef);
-    if (discussaoSnapshot.exists()) {
-      const currentPostAmount = discussaoSnapshot.val().postAmount || 0;
-      await update(discussaoRef, {
-        ultimoUpdate: Date.now(),
-        postAmount: currentPostAmount + 1,
-      });
-    } else {
-      // Inicializa o valor caso a discussão não exista (cenário improvável)
-      await set(discussaoRef, {
-        ultimoUpdate: Date.now(),
-        postAmount: 1,
-      });
-    }
+    let currentPostAmount = await get(dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes/${categoriaId}/${discussaoId}/postAmount`));
+    currentPostAmount = parseInt(currentPostAmount.val(), 10) || 0;
+
+    await update(dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes/${categoriaId}/${discussaoId}`), {
+      ultimoUpdate: Date.now(),
+      postAmount: currentPostAmount + 1,
+    });
+
+    await update(dbRef(database, `forum/publicacoes/headers/discussoes/${categoriaId}/${discussaoId}`), {
+      ultimoUpdate: Date.now(),
+      postAmount: currentPostAmount + 1,
+    });
 
     // Retorna sucesso se tudo ocorreu bem
     res.status(201).json({ message: 'Post criado com sucesso e tempo da discussão atualizado.' });
@@ -54,41 +69,46 @@ router.post('/posts', async (req, res) => {
 });
 
 router.post('/criardiscussao', async (req, res) => {
-  const { userTag, categoria, discussao } = req.body;
-
-  const postAmount = 0;
+  const { userTag, categoriaId, discussaoId } = req.body;
 
   // Validação dos dados de entrada
-  if (!userTag || !categoria || !discussao) {
-    return res.status(400).json({ error: 'O conteúdo precisa de autor, categoria e discussão.' });
+  if (!userTag || !categoriaId) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userTag e categoriaId.' });
   }
 
-  // Referência para o nó da discussão
-  const discussaoRef = dbRef(database, `forum/${categoria}/headerDiscussoes/${discussao}`);
-
-  // Referência para o nó do usuário
-  const userRef = dbRef(database, `users/${userTag}`);
-
-  // Dados da discussão
-  const discussaoData = {
-    userTag,
-    categoria,
-    discussao,
-    postAmount,
-    ultimoUpdate: Date.now(),
-  };
-
   try {
-    // Criação da nova discussão
-    await set(discussaoRef, discussaoData);
+    const postAmount = 0;
 
-    // Incremento seguro do `discussaoAmount`
+    // Referência para o nó da discussão
+    const discussaoHeaderRef = dbRef(database, `forum/publicacoes/headers/discussoes/${categoriaId}/${discussaoId}`);
+
+    const dicussaoHeaderInUsersRef = dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes/${categoriaId}/${discussaoId}`);
+
+    // Referência para o nó do usuário
+    const userRef = dbRef(database, `/forum/usuarios/${userTag}`)
+
+    // Dados da discussão
+    const discussaoData = {
+      userTag,
+      categoriaId,
+      discussaoId,
+      postAmount,
+      ultimoUpdate: Date.now(),
+    };
+
+    // Criação da nova header de discussão
+    await set(discussaoHeaderRef, discussaoData);
+
+    // Criação da nova header de discussão em headers/usuarios
+    await set(dicussaoHeaderInUsersRef, discussaoData);
+
+    // Incremento seguro de discussaoAmount no usuário
     const userSnapshot = await get(userRef);
 
     if (userSnapshot.exists()) {
       // Incrementa o valor existente
-      console.log(userSnapshot.val().discussaoAmount);
-      await update(userRef, { discussaoAmount: (userSnapshot.val().discussaoAmount || 0) + 1 });
+      const currentAmount = parseInt(userSnapshot.val().discussaoAmount, 10) || 0;
+      await update(userRef, { discussaoAmount: currentAmount + 1 });
     } else {
       // Inicializa o valor se o nó não existir
       await set(userRef, { discussaoAmount: 1 });
@@ -102,42 +122,79 @@ router.post('/criardiscussao', async (req, res) => {
 });
 
 router.post('/removerdiscussao', async (req, res) => {
-  const { userTag, categoria, discussao } = req.body;
+  const { userTag, categoriaId, discussaoId } = req.body;
 
   // Validação dos dados de entrada
-  if (!userTag || !categoria || !discussao) {
-    return res.status(400).json({ error: 'O conteúdo precisa de autor, categoria e discussão.' });
+  if (!userTag || !categoriaId || !discussaoId) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userTag, categoriaId e discussaoId.' });
   }
 
-  // Referência para o nó da discussão
-  const discussaoHeaderRef = dbRef(database, `forum/${categoria}/headerDiscussoes/${discussao}`);
-
-  // Referência para a discussao em si
-  const discussaoRef = dbRef(database, `forum/${categoria}/${discussao}`);
-
-  // Referência para o nó do usuário
-  const userRef = dbRef(database, `users/${userTag}`);
-
   try {
-    // Remoção de uma discussão
+    // Referências no Firebase
+    const discussaoHeaderRef = dbRef(database, `forum/publicacoes/headers/discussoes/${categoriaId}/${discussaoId}`);
+    const discussaoRef = dbRef(database, `forum/publicacoes/${userTag}/discussoes/${categoriaId}/${discussaoId}`);
+    const userRef = dbRef(database, `/forum/usuarios/${userTag}`);
+    const dicussaoHeaderInUsersRef = dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes/${categoriaId}/${discussaoId}`);
+
+    // Remoção da discussão
     await remove(discussaoHeaderRef);
+    await remove(dicussaoHeaderInUsersRef);
     await remove(discussaoRef);
 
-    // Decremento seguro do `discussaoAmount`
+        // Criação da nova header de discussão
+        await set(discussaoHeaderRef, discussaoData);
+
+        // Criação da nova header de discussão em headers/usuarios
+        await set(dicussaoHeaderInUsersRef, discussaoData);
+
+    // Atualização do discussaoAmount no usuário
     const userSnapshot = await get(userRef);
 
     if (userSnapshot.exists()) {
-      // Decrementa o valor existente
-      console.log(userSnapshot.val().discussaoAmount);
-      await update(userRef, { discussaoAmount: (userSnapshot.val().discussaoAmount || 0) - 1 });
+      const currentAmount = parseInt(userSnapshot.val().discussaoAmount, 10) || 0;
+      const newAmount = Math.max(currentAmount - 1, 0); // Garante que não fique negativo
+
+      await update(userRef, { discussaoAmount: newAmount });
     } else {
-      // Inicializa o valor se o nó não existir
-      await set(userRef, { discussaoAmount: 1 });
+      // Inicializa o valor se o nó não existir (embora improvável)
+      await set(userRef, { discussaoAmount: 0 });
     }
 
-    res.status(201).json({ message: 'Discussão removida com sucesso e desassociada ao usuário.' });
+    res.status(200).json({ message: 'Discussão removida com sucesso e desassociada ao usuário.' });
   } catch (error) {
-    console.error('Erro ao salvar no Firebase:', error);
+    console.error('Erro ao remover no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+router.post('/removerdiscussaopost', async (req, res) => {
+  const { postId, categoriaId, discussaoId } = req.body;
+
+  // Validação dos dados de entrada
+  if (!userTag || !categoriaId || !discussaoId) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userTag, categoriaId e discussaoId.' });
+  }
+
+  try {
+    // Referências no Firebase
+    const discussaoHeaderRef = dbRef(database, `forum/publicacoes/headers/discussoes/${categoriaId}/${discussaoId}`);
+    const discussaoPostRef = dbRef(database, `forum/publicacoes/${userTag}/discussoes/${categoriaId}/${discussaoId}/${postId}`);
+    const dicussaoHeaderInUsersRef = dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes/${categoriaId}/${discussaoId}`);
+
+    // Remoção da discussão
+    await remove(discussaoPostRef);
+    
+    await get(discussaoHeaderRef);
+
+      await update(userRef, { discussaoAmount: newAmount });
+    } else {
+      // Inicializa o valor se o nó não existir (embora improvável)
+      await set(userRef, { discussaoAmount: 0 });
+    }
+
+    res.status(200).json({ message: 'Discussão removida com sucesso e desassociada ao usuário.' });
+  } catch (error) {
+    console.error('Erro ao remover no Firebase:', error);
     res.status(500).json({ error: 'Erro interno do servidor.' });
   }
 });

@@ -43,7 +43,7 @@
       const email = document.getElementById('registerEmail').value;
       const password = document.getElementById('registerPassword').value;
 
-      const response = await fetch(`/register`, {
+      const response = await fetch(`/API/forum/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ exibitionName, userTag, email, password }),
@@ -58,7 +58,7 @@
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
 
-      const response = await fetch(`/login`, {
+      const response = await fetch(`/API/forum/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -70,7 +70,7 @@
         localStorage.setItem('autenticationUserTag', result.userTag); // Armazenando o userTag no localStorage
       }
       if (localStorage.getItem('autenticationUserTag')) {
-        window.location.href = "/forum?categoria=Destaques"; // Redireciona para a nova página
+        window.location.href = "/forum?categoriaId=Destaques"; // Redireciona para a nova página
       }
       displayStatusMessage(result.message || result.error);
     });

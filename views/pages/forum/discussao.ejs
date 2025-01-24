@@ -181,20 +181,18 @@ function renderPosts(posts) {
 }
 
 // Conectar ao servidor de mensagens
-function listenForPosts(categoria, discussao) {
-  console.log(`Escutando posts na categoria ${categoria} e discussão ${discussao}`);
-    if (!categoria || !discussao) {
-        console.error('categoria e discussao são necessários para escutar mensagens.');
+function listenForPosts(categoriaId, discussaoId, userTagCreator) {
+    if (!categoriaId || !discussaoId) {
+        console.error('categoriaId e discussaoId são necessários para escutar mensagens.');
         return;
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/stream-posts?categoria=${categoria}&discussao=${discussao}`);
+    const eventSource = new EventSource(`/API/forum/stream-posts?categoriaId=${categoriaId}&discussaoId=${discussaoId}&userTagCreator=${userTagCreator}`);
     
     eventSource.onmessage = (event) => {
         try {
         const posts = JSON.parse(event.data);
-        console.log(posts);
         renderPosts(posts); // Renderizar as mensagens no frontend
         } catch (error) {
         console.error('Erro ao processar os dados recebidos:', error);
@@ -216,15 +214,17 @@ document.getElementById('post').addEventListener('click', async () => {
     }
 
     try {
-      const response = await fetch(`/posts`, {
+      /* Enquanto não finaliso o evio de midias */
+      const media = null;
+      const mediaType = null;
+      const response = await fetch(`/API/forum/discussaopost`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, categoria, discussao, userTag }),
+        body: JSON.stringify({ text, categoriaId, discussaoId, userTag, media, mediaType }),
       });
 
       const responseData = await response.json();
       if (response.ok) {
-        console.log(`Post publicado com sucesso.`);
         document.getElementById('messageText').value = ''; // Limpar o campo de entrada
 
         // Atualizar a lista de posts e rolar para o final
@@ -244,8 +244,9 @@ document.getElementById('post').addEventListener('click', async () => {
 });
 
 // Declarando as variáveis fora do escopo da função
-let categoria;
-let discussao;
+let categoriaId;
+let discussaoId;
+let userTagCreator;
 
 window.onload = () => {
     document.getElementById('messageText').value = ''; // Limpar o campo de entrada
@@ -254,13 +255,14 @@ window.onload = () => {
     const urlParams = new URLSearchParams(window.location.search);
 
     // Atribuindo os valores recuperados nas variáveis globais
-    categoria = urlParams.get('categoria');
-    discussao = urlParams.get('discussao');
+    categoriaId = urlParams.get('categoriaId');
+    discussaoId = urlParams.get('discussaoId');
+    userTagCreator = urlParams.get('userTagCreator');
 
     // Adiciona titulo à página
     document.getElementById("titulo-categoria-discussao").innerHTML = `
       <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-        <button id="back-button" onclick="window.location.href='/forum?categoria=${categoria}'">
+        <button id="back-button" onclick="window.location.href='/forum?categoriaId=${categoriaId}'">
           <svg fill="#000000" height="16px" width="16px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
             viewBox="0 0 26.676 26.676" xml:space="preserve" style="margin-right: 5px;">
             <path d="M26.105,21.891c-0.229,0-0.439-0.131-0.529-0.346l0,0c-0.066-0.156-1.716-3.857-7.885-4.59
@@ -272,12 +274,12 @@ window.onload = () => {
         </button>        
         <!-- Texto com categoria e discussão -->
         <strong style="font-size: 18px;">
-          <a href="/forum?categoria=${categoria}" style="color: inherit; text-decoration: underline; text-decoration-color: currentColor;">${categoria}</a> / ${discussao}
+          <a href="/forum?categoriaId=${categoriaId}" style="color: inherit; text-decoration: underline; text-decoration-color: currentColor;">${categoriaId}</a> / ${discussaoId}
         </strong>
       </div>
       `;
 
     // Chama a função listenForPosts com os parâmetros
-    listenForPosts(categoria, discussao);
+    listenForPosts(categoriaId, discussaoId, userTagCreator);
 };
 </script>

@@ -95,7 +95,7 @@
             }
 
             // Conectar ao servidor de mensagens com parâmetros na URL
-            const eventSource = new EventSource(`/stream-user?userTag=${userTag}`);
+            const eventSource = new EventSource(`/API/forum/stream-user?userTag=${userTag}`);
 
             eventSource.onmessage = (event) => {
                 try {
@@ -134,7 +134,7 @@
 
             console.log("Enviando dados atualizados para o servidor:", updatedData);
 
-            fetch('/update-profile', {
+            fetch('/API/forum/update-profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -14,7 +14,7 @@ router.post('/login', async (req, res) => {
 
     if (user.emailVerified) {
       // Buscar o usuário pelo email no banco de dados
-      const usersRef = dbRef(database, 'users'); // Referência para todos os usuários
+      const usersRef = dbRef(database, 'forum/usuarios'); // Referência para todos os usuários
       const snapshot = await get(usersRef);
 
       if (snapshot.exists()) {
@@ -59,7 +59,7 @@ router.post('/register', async (req, res) => {
     await sendEmailVerification(user);
 
     // Criar um novo usuário no Realtime Database
-    const userRef = dbRef(database, `users/${userTag}`);
+    const userRef = dbRef(database, `forum/usuarios/${userTag}`);
     await set(userRef, {
       exibitionName: exibitionName,
       userTag: userTag,
@@ -75,9 +75,7 @@ router.post('/register', async (req, res) => {
       followingAmount: 0,
       friendList: '',
       friendAmount: 0,
-      discussaoList: '',
       discussaoAmount: 0,
-      postList: '',
       postAmount: 0,
       pinList: '',
       pinAmount: 0,

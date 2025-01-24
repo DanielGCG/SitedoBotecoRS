@@ -41,11 +41,11 @@
             <aside class="sidebar" id="left-sidebar">
                 <div class="categorias">
                     <h2>Categorias</h2>
-                    <a href="/forum?categoria=Destaques" id="Destaques">Destaques</a>
-                    <a href="/forum?categoria=Computaria" id="Computaria">Computaria</a>
-                    <a href="/forum?categoria=Fofoca" id="Fofoca">Fofoca</a>
-                    <a href="/forum?categoria=BSMP" id="BSMP">BSMP</a>
-                    <a href="/forum?categoria=RPG" id="RPG">RPG</a>
+                    <a href="/forum?categoriaId=Destaques" id="Destaques">Destaques</a>
+                    <a href="/forum?categoriaId=Computaria" id="Computaria">Computaria</a>
+                    <a href="/forum?categoriaId=Fofoca" id="Fofoca">Fofoca</a>
+                    <a href="/forum?categoriaId=BSMP" id="BSMP">BSMP</a>
+                    <a href="/forum?categoriaId=RPG" id="RPG">RPG</a>
                 </div>
                 <hr class="divisoria-sidebar">
                 <div class="links-uteis">
@@ -116,7 +116,7 @@ function searchUserDataForSidebar(userTag) {
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/stream-user?userTag=${userTag}`);
+    const eventSource = new EventSource(`/API/forum/stream-user?userTag=${userTag}`);
 
     eventSource.onmessage = (event) => {
         try {

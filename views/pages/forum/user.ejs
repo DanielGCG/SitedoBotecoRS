@@ -10,7 +10,7 @@
       <section class="userpage-main-layout">
         <!-- Lado esquerdo (posts) -->
         <div class="userpage-main-right">
-          <h2 style="text-align: center; font-size: 14px; margin: 10px;">Discussões</h2>
+          <h2 style="text-align: center; font-size: 14px; margin: 10px;">Publicações</h2>
           <div class="threads" id="threads">
           </div>
         </div>
@@ -95,40 +95,38 @@ function renderDiscussoes(discussoes) {
     const threadsDiv = document.getElementById('threads');
     threadsDiv.innerHTML = '';
 
-    // Verificar se discussoes é um array
-    if (!Array.isArray(discussoes) || discussoes.length === 0) {
-        threadsDiv.innerHTML = `
-            <div>
-                <h3 style="text-align: center;">Ainda criou uma discussão! D:<</h3>
-            </div>
-        `;
-        return;
+    if (discussoes.length === 0) {
+      threadsDiv.innerHTML = `
+        <div>
+          <h2>Ainda não publicou nada :P melhore!</h2>
+        </div>
+      `;
+      return;
     }
 
-    // Percorrer as discussões
     discussoes.forEach(discussao => {
-        const threadDiv = document.createElement('div');
-        threadDiv.classList.add('thread');
+      const threadDiv = document.createElement('div');
+      threadDiv.classList.add('thread');
 
-        const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
-        const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
+      const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
+      const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
 
-        if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
+      if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
         threadDiv.innerHTML = `
         <div>
-          <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
+          <h3 class="thread-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
           <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
           <p class="thread-info">último post ${tempoFormatado}</p>
-          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoria}', '${discussao.discussao}', '${discussao.userTag}')">Remover</button>
+          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoriaId}', '${discussao.discussaoId}', '${discussao.userTag}')">Remover</button>
         </div>
         `;
       }
       else {
         threadDiv.innerHTML = `
         <div>
-          <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
+          <h3 class="thread-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
           <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
@@ -137,7 +135,8 @@ function renderDiscussoes(discussoes) {
       `;
       }
 
-        threadsDiv.appendChild(threadDiv);
+      // Adiciona o novo tópico à lista
+      threadsDiv.appendChild(threadDiv);
     });
 }
 
@@ -149,7 +148,7 @@ function searchUserData() {
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/stream-user?userTag=${userTag}`);
+    const eventSource = new EventSource(`/API/forum/stream-user?userTag=${userTag}`);
 
     eventSource.onmessage = (event) => {
         try {
@@ -175,7 +174,7 @@ function searchUserDiscussoes() {
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/stream-discussoes?userTag=${userTag}`);
+    const eventSource = new EventSource(`/API/forum/stream-discussoes?userTag=${userTag}`);
 
     eventSource.onmessage = (event) => {
         try {

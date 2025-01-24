@@ -50,19 +50,19 @@ function renderDiscussoes(discussoes) {
       if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
         threadDiv.innerHTML = `
         <div>
-          <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
+          <h3 class="thread-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
           <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
           <p class="thread-info">último post ${tempoFormatado}</p>
-          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoria}', '${discussao.discussao}', '${discussao.userTag}')">Remover</button>
+          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoriaId}', '${discussao.discussaoId}', '${discussao.userTag}')">Remover</button>
         </div>
         `;
       }
       else {
         threadDiv.innerHTML = `
         <div>
-          <h3 class="thread-title"><a href="/forum/discussao?categoria=${discussao.categoria}&discussao=${discussao.discussao}">${discussao.discussao}</a></h3>
+          <h3 class="thread-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
           <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
@@ -77,14 +77,14 @@ function renderDiscussoes(discussoes) {
     });
 }
 
-function listenForDiscussoes(categoria) {
-    if (!categoria) {
+function listenForDiscussoes(categoriaId) {
+    if (!categoriaId) {
         console.error('Código de categoria é necessário para escutar mensagens.');
         return;
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/stream-discussoes?categoria=${categoria}`);
+    const eventSource = new EventSource(`/API/forum/stream-discussoes?categoriaId=${categoriaId}`);
 
     eventSource.onmessage = (event) => {
         try {
@@ -100,12 +100,12 @@ function listenForDiscussoes(categoria) {
     };
 }
 
-async function deletaDiscussao(categoria, discussao, userTag) {
+async function deletaDiscussao(categoriaId, discussaoId, userTag) {
   try {
-      const response = await fetch(`/removerdiscussao`, {
+      const response = await fetch(`/API/forum/removerdiscussao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userTag, categoria, discussao }),
+        body: JSON.stringify({ userTag, categoriaId, discussaoId }),
       });
 
       const responseData = await response.json();
@@ -124,22 +124,22 @@ document.getElementById('nova-discussao').addEventListener('click', function() {
 
 // Postar nova mensagem
 document.getElementById('post').addEventListener('click', async () => {
-    const discussao = document.getElementById('discussao').value.trim();
+    const discussaoId = document.getElementById('discussao').value.trim();
     const userTag = localStorage.getItem("autenticationUserTag");
-    const categoria = categoriaPagina;
+    const categoriaId = categoriaPagina;
 
-    console.log (`[${categoria}, ${discussao}, ${userTag}]`);
+    console.log (`[${categoriaId}, ${discussaoId}, ${userTag}]`);
 
-    if (!discussao || !userTag || !categoria) {
+    if (!discussaoId || !userTag || !categoriaId) {
         document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem discussao e/ou autor e/ou categoria.';
         return;
     }
 
     try {
-        const response = await fetch(`/criardiscussao`, {
+        const response = await fetch(`/API/forum/criardiscussao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userTag, categoria, discussao }),
+        body: JSON.stringify({ userTag, categoriaId, discussaoId }),
         });
 
         const responseData = await response.json();
@@ -154,7 +154,7 @@ document.getElementById('post').addEventListener('click', async () => {
         document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
     }
     document.getElementById('popup-nova-discussao').style.display = 'none';
-    window.location.href = `/forum/discussao?categoria=${categoria}&discussao=${discussao}`;
+    window.location.href = `/forum/discussao?categoriaId=${categoriaId}&discussaoId=${discussaoId}&userTagCreator=${userTag}`;
 });
 
 let categoriaPagina;
@@ -162,8 +162,7 @@ let categoriaPagina;
 window.onload = () => {
     // Recuperando os parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
-    categoriaPagina = urlParams.get('categoria');
-    console.log(categoriaPagina);
+    categoriaPagina = urlParams.get('categoriaId');
 
     // Atribuindo os valores recuperados nas variáveis globais
     listenForDiscussoes(categoriaPagina);

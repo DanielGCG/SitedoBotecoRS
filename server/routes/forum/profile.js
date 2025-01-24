@@ -14,7 +14,7 @@ router.post('/update-profile', async (req, res) => {
 
   try {
     // Referência para o nó do usuário no Firebase Realtime Database
-    const userRef = dbRef(database, `users/${userTag}`);
+    const userRef = dbRef(database, `forum/usuarios/${userTag}`);
 
     // Dados atualizados do perfil
     const updatedProfileData = {
@@ -36,5 +36,7 @@ router.post('/update-profile', async (req, res) => {
     res.status(500).json({ error: 'Erro interno do servidor.' });
   }
 });
+
+
 
 module.exports = router;
