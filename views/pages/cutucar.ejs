@@ -139,12 +139,15 @@
             alert('Por favor, preencha ambos os campos.');
             return;
         }
+
+        let tweetText;
+
         if (bratEnabled){
-            const tweetText = `☝${mention}
+            tweetText = `☝${mention}
 
 🔗https://www.botecors.me/cutucar`; 
         }else{
-            const tweetText = `☝${mention}, ${messageText}
+            tweetText = `☝${mention}, ${messageText}
 
 🔗https://www.botecors.me/cutucar`;
         }
