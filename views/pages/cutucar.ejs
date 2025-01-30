@@ -139,17 +139,19 @@
             alert('Por favor, preencha ambos os campos.');
             return;
         }
+        if (bratEnabled){
+            const tweetText = `☝${mention}
 
-
-        const tweetText = `☝${mention}, ${messageText}
+🔗https://www.botecors.me/cutucar`; 
+        }else{
+            const tweetText = `☝${mention}, ${messageText}
 
 🔗https://www.botecors.me/cutucar`;
+        }
 
         const formData = new FormData();
 
-        if (!bratEnabled){
-            formData.append('text', tweetText);
-        }
+        formData.append('text', tweetText);
 
         if (mediaFile) {
             formData.append('media', mediaFile); // Adicionar mídia somente se for enviada
