@@ -246,10 +246,9 @@
         document.getElementById('mediaFile').value = '';
         disableBrat();
 
-        if (document.getElementById('media-preview-closebtn') !== null){
-            const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
-            mediaPreviewCloseBtn.innerHTML = '';
-        }
+        const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
+        mediaPreviewCloseBtn.remove();
+
 
         // Limpa o preview anterior
         const previewContainer = document.getElementById('media-preview');

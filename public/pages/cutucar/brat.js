@@ -34,17 +34,17 @@ function generateImage() {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
-  canvas.width = 80;
-  canvas.height = 80;
+  canvas.width = 100;
+  canvas.height = 100;
 
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "black";
   ctx.font = "9px 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
   ctx.textAlign = "center";
-  ctx.filter = "blur(0.170px)";
+  ctx.filter = "blur(0.17px)";
 
-  let lines = wrapText(ctx, text, 70);
+  let lines = wrapText(ctx, text, 90);
   let lineHeight = 12;
   let y = (canvas.height - lines.length * lineHeight) / 2 + lineHeight;
 
