@@ -46,7 +46,6 @@ router.get('/stream-posts', (req, res) => {
 
   // Fechar conexão e remover o listener ao desconectar
   req.on('close', () => {
-    console.log('Conexão SSE fechada');
     listener(); // Remove o listener do Firebase
   });
 });
@@ -87,7 +86,6 @@ router.get('/stream-discussoes', (req, res) => {
 
       // Fechar conexão e remover o listener ao desconectar
       req.on('close', () => {
-        console.log('Conexão SSE fechada');
         listener(); // Remove o listener do Firebase
       });
     } else {
@@ -115,7 +113,6 @@ router.get('/stream-discussoes', (req, res) => {
 
       // Fechar conexão e remover o listener ao desconectar
       req.on('close', () => {
-        console.log('Conexão SSE fechada');
         listener(); // Remove o listener do Firebase
       });
     }
@@ -154,7 +151,6 @@ router.get('/stream-user', (req, res) => {
 
   // Fechar conexão e remover o listener ao desconectar
   req.on('close', () => {
-    console.log('Conexão SSE fechada');
     listener(); // Remove o listener do Firebase
   });
 });

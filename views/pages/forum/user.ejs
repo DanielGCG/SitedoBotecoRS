@@ -11,13 +11,16 @@
         <!-- Lado esquerdo (posts) -->
         <div class="userpage-main-right">
           <h2 style="text-align: center; font-size: 14px; margin: 10px;">Publicações</h2>
-          <div class="threads" id="threads">
+          <div class="discussoes" id="discussoes">
           </div>
         </div>
         <!-- Lado direito (biografia) -->
         <div class="userpage-main-left">
           <h2 style="text-align: center; font-size: 14px; margin: 10px;">Biografia</h2>
-          <div class="biografia" id="biografia">
+          <div class="left-sided-userarea" id="biografia">
+          </div>
+          <h2 style="text-align: center; font-size: 14px; margin: 10px;">Amizades</h2>
+          <div class="left-sided-userarea" id="amizades">
           </div>
         </div>
       </section>
@@ -26,52 +29,131 @@
 </body>
 
 <script>
-function renderUserBox(user) {
-    const userpageUserbox = document.getElementById("userpage-userbox");
-    if(user.userTag === localStorage.getItem("autenticationUserTag")){
-      userpageUserbox.innerHTML =
-      `<div class="userpage-userinfo">
-          <div class="userpage-userinfo-image">
-            <img src="${user.profileImage}">
-          </div>
-          <div class="userpage-userinfo-name">
-            <h3>${user.exibitionName}</h3>
-            <p>${user.userTag}</p>
-            <p style="margin-top: 5px;">${user.pronouns}</p>
-          </div>
-        </div>
-        <div class="userpage-userbox-actions">
-          <div class="userpage-userbox-actions">
-            <button id="edit-button" onclick="window.location.href='/forum/editar'">Editar</button>
-          </div>          
-        </div>
-      </div>
-      `;
-    }
-    else{
-      userpageUserbox.innerHTML =
-      `<div class="userpage-userinfo">
-          <div class="userpage-userinfo-image">
-            <img src="${user.profileImage}">
-          </div>
-          <div class="userpage-userinfo-name">
-            <h3>${user.exibitionName}</h3>
-            <p>${user.userTag}</p>
-            <p style="margin-top: 5px;">${user.pronouns}</p>
-          </div>
-        </div>
-        <div class="userpage-userbox-actions">
-          <div class="userpage-userbox-actions">
-            <button id="follow-button">Follow</button>
-          </div>          
-        </div>
-      </div>
-      `;
-    }
-    
+async function followUser(userTag) {
+  const userTagRequester = localStorage.getItem("autenticationUserTag");
 
-    // Definindo o background-image corretamente
-    userpageUserbox.style.backgroundImage = `url(${user.bannerImage})`;
+  try {
+    const response = await fetch('/API/forum/followuser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userTag, userTagRequester }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Erro ao seguir usuário:', errorData.error);
+      alert(`Erro: ${errorData.error}`);
+      return;
+    }
+
+    const data = await response.json();
+    console.log('Usuário seguido com sucesso:', data);
+
+    // Alterar botão para "Unfollow"
+    const button = document.getElementById('follow-button');
+    if (button) {
+      button.id = 'unfollow-button';
+      button.textContent = 'Unfollow';
+      button.setAttribute('onclick', `unfollowUser('${userTag}')`);
+    }
+  } catch (error) {
+    console.error('Erro ao processar os dados:', error);
+    alert('Ocorreu um erro ao seguir o usuário. Tente novamente mais tarde.');
+  }
+}
+
+async function unfollowUser(userTag) {
+  const userTagRequester = localStorage.getItem("autenticationUserTag");
+
+  try {
+    const response = await fetch('/API/forum/unfollowuser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userTag, userTagRequester }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Erro ao deixar de seguir usuário:', errorData.error);
+      alert(`Erro: ${errorData.error}`);
+      return;
+    }
+
+    const data = await response.json();
+    console.log('Unfollow realizado com sucesso:', data);
+
+    // Alterar botão para "Follow"
+    const button = document.getElementById('unfollow-button');
+    if (button) {
+      button.id = 'follow-button';
+      button.textContent = 'Follow';
+      button.setAttribute('onclick', `followUser('${userTag}')`);
+    }
+
+  } catch (error) {
+    console.error('Erro ao processar os dados:', error);
+    alert('Ocorreu um erro ao deixar de seguir o usuário. Tente novamente mais tarde.');
+  }
+}
+
+function renderUserBox(user) {
+  const userpageUserbox = document.getElementById("userpage-userbox");
+  const userTagRequester = localStorage.getItem("autenticationUserTag");
+  const isAuthenticatedUser = user.userTag === userTagRequester;
+
+  // Verificar se `followersList` é válido
+  const isFollowing = Array.isArray(user.followersList) && user.followersList.includes(userTagRequester);
+
+  // Template comum para exibir informações do usuário
+  const userInfoTemplate = `
+    <div class="userpage-userinfo">
+      <div class="userpage-userinfo-image">
+        <img src="${user.profileImage}" alt="${user.exibitionName}">
+      </div>
+      <div class="userpage-userinfo-name">
+        <h3>${user.exibitionName}</h3>
+        <p>${user.userTag}</p>
+        <p style="margin-top: 5px;">${user.pronouns}</p>
+        <p style="margin-top: 5px;">${user.discussaoAmount} 🗣 | ${user.friendAmount} 👥</p>
+      </div>
+    </div>
+  `;
+
+  // Ações específicas para cada caso
+  let actionsTemplate = "";
+
+  if (isAuthenticatedUser) {
+    actionsTemplate = `
+      <div class="userpage-userbox-actions">
+        <button id="edit-button" onclick="window.location.href='/forum/editar'">Editar</button>
+      </div>
+    `;
+  } else if (isFollowing) {
+    actionsTemplate = `
+      <div class="userpage-userbox-actions">
+        <button id="unfollow-button" onclick="unfollowUser('${user.userTag}')">Unfollow</button>
+      </div>
+    `;
+  } else {
+    actionsTemplate = `
+      <div class="userpage-userbox-actions">
+        <button id="follow-button" onclick="followUser('${user.userTag}')">Follow</button>
+      </div>
+    `;
+  }
+
+  // Renderizar o conteúdo
+  userpageUserbox.innerHTML = `
+    ${userInfoTemplate}
+    ${actionsTemplate}
+  `;
+
+  // Definir a imagem de fundo
+  userpageUserbox.style.backgroundImage = `url(${user.bannerImage})`;
 }
 
 function renderBiografia(user) {
@@ -91,12 +173,35 @@ function renderBiografia(user) {
   }
 }
 
+function renderAmizades(user) {
+  const amizadesContainer = document.getElementById("amizades");
+
+  if (user.friendAmount > 0) {
+    let lista = ''; // Variável para armazenar a lista de amigos
+
+    // Cria um item de lista para cada amigo
+    user.friendList.forEach(friend => {
+      lista += ` <a href='/forum/user?userTag=${friend}' style="text-decoration: none; color: #333;">${friend} </a> `; // Adiciona o nome do amigo (ou o que for relevante) à lista
+    });
+
+    amizadesContainer.innerHTML = `
+      <div class="amizades-info">
+          ${lista} <!-- Renderiza a lista de amigos -->
+      </div>`;
+  } else {
+    amizadesContainer.innerHTML = `
+      <div class="amizades-info">
+          <p>Nem tem amigos ainda XD</p>
+      </div>`;
+  }
+}
+
 function renderDiscussoes(discussoes) {
-    const threadsDiv = document.getElementById('threads');
-    threadsDiv.innerHTML = '';
+    const discussoesDiv = document.getElementById('discussoes');
+    discussoesDiv.innerHTML = '';
 
     if (discussoes.length === 0) {
-      threadsDiv.innerHTML = `
+      discussoesDiv.innerHTML = `
         <div>
           <h2>Ainda não publicou nada :P melhore!</h2>
         </div>
@@ -105,39 +210,57 @@ function renderDiscussoes(discussoes) {
     }
 
     discussoes.forEach(discussao => {
-      const threadDiv = document.createElement('div');
-      threadDiv.classList.add('thread');
+      const discussaoDiv = document.createElement('div');
+      discussaoDiv.classList.add('discussao');
 
       const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
       const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
 
       if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
-        threadDiv.innerHTML = `
+        discussaoDiv.innerHTML = `
         <div>
-          <h3 class="thread-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-          <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
+          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
-          <p class="thread-info">último post ${tempoFormatado}</p>
+          <p class="discussao-info">${tempoFormatado}</p>
           <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoriaId}', '${discussao.discussaoId}', '${discussao.userTag}')">Remover</button>
         </div>
         `;
       }
       else {
-        threadDiv.innerHTML = `
+        discussaoDiv.innerHTML = `
         <div>
-          <h3 class="thread-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-          <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
+          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
-          <p class="thread-info">último post ${tempoFormatado}</p>
+          <p class="discussao-info">${tempoFormatado}</p>
         </div>
       `;
       }
 
       // Adiciona o novo tópico à lista
-      threadsDiv.appendChild(threadDiv);
+      discussoesDiv.appendChild(discussaoDiv);
     });
+}
+
+async function deletaDiscussao(categoriaId, discussaoId, userTag) {
+  try {
+      const response = await fetch(`/API/forum/removerdiscussao`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userTag, categoriaId, discussaoId }),
+      });
+
+      const responseData = await response.json();
+      if (response.ok) {
+      }
+
+    }catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
 }
 
 function searchUserData() {
@@ -153,6 +276,7 @@ function searchUserData() {
     eventSource.onmessage = (event) => {
         try {
             userData = JSON.parse(event.data);
+            renderAmizades(userData);
             renderBiografia(userData);
             renderUserBox(userData); // Renderiza as discussões recebidas
         } catch (error) {

@@ -64,12 +64,15 @@
 }
 
 .media-preview img {
+    min-height: 200px;
+    min-width: 200px;
     max-width: 100%;
     margin-top: 10px;
     border-radius: 8px;
     width: auto;
     height: auto;
     object-fit: contain;
+    border: 2px solid #0d8cd9;
 }
 
 .media-preview video {

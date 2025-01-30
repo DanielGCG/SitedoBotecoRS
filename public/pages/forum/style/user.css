@@ -14,16 +14,16 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    max-width: 250px;
+    max-width: auto;
     font-size: 14px;
     margin-left: 1rem;
-    background-color: #f9f9f95b;
+    background-color: #f9f9f985;
     padding: 5px;
     border-radius: 15px;
 }
 .userpage-userinfo img{
-    width: 80px;
-    height: 80px;
+    width: 85px;
+    height: 85px;
     border-radius: 25%;
 }
 .userpage-userinfo-name {
@@ -36,7 +36,7 @@
     align-items: center;
     margin-right: 1rem;
 }
-#follow-button, #edit-button {
+#follow-button, #edit-button, #unfollow-button {
     background: linear-gradient(90deg, var(--cor-marrom), #feb47b);
     border: none;
     border-radius: 15px;
@@ -50,19 +50,19 @@
     margin-right: 0.5rem;
     margin-left: 0.5rem;
 }
-#follow-button:hover, #edit-button:hover {
+#follow-button:hover, #edit-button:hover, #unfollow-button:hover {
     background: linear-gradient(90deg, #feb47b, var(--cor-marrom));
     transform: scale(1.05);
     box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3);
 }
-#follow-button:active, #edit-button:active {
+#follow-button:active, #edit-button:active, #unfollow-button:active {
     transform: scale(0.95);
     box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.2);
 }
-#edit-button {
+#edit-button, #unfollow-button {
     background: #00000000;
 }
-#edit-button:hover {
+#edit-button:hover, #unfollow-button:hover {
     background: #00000048;
 }
 .userpage-main-layout {
@@ -76,7 +76,7 @@
 .userpage-main-left{
     width: 35%;
 }
-.biografia {
+.left-sided-userarea {
     width: 100%;
     background-color: var(--cor-fundo-caixa-texto);
     border-radius: 15px;

@@ -2,14 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const cors = require('cors');
-const multer = require('./server/config/multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(multer.single('file'));
 
 app.use((req, res, next) => {
     if (req.headers.host === 'boteco.live') {
@@ -25,12 +23,13 @@ app.use(express.static('public'));
 
 // Rotas Fórum
 app.use('/API/forum', require('./server/routes/forum/auth'));
-app.use('/API/forum', require('./server/routes/forum/profile'));
-app.use('/API/forum', require('./server/routes/forum/stream'));
 app.use('/API/forum', require('./server/routes/forum/posts'));
+app.use('/API/forum', require('./server/routes/forum/profile'));
+app.use('/API/forum', require('./server/routes/forum/remove'));
+app.use('/API/forum', require('./server/routes/forum/stream'));
 
 // Rota Cutucar
-app.use('', require('./server/routes/cutucar'));
+app.use('/API/cutucar', require('./server/routes/cutucar'));
 
 // Rota Galeria
 app.use('', require('./server/routes/galeria'));

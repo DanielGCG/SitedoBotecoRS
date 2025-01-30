@@ -30,11 +30,10 @@
 
             <div class="twitter-draft-footer">
                 <div class="twitter-draft-footer-midia">
-                    <!-- Botão para fazer upload de midia -->
+                    <!-- Botão para fazer upload de mídia -->
                     <div class="upload-container">
                         <label for="mediaFile" style="cursor: url('/img/cursor-mao.png'), auto;">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg" 
+                            <svg xmlns="http://www.w3.org/2000/svg" 
                                 viewBox="0 0 24 24" 
                                 fill="#1D9BF0"
                                 width="24" 
@@ -45,12 +44,11 @@
                         </label>
                         <input type="file" id="mediaFile" accept="image/*,video/*" style="display: none;" onchange="previewMedia()" />
                     </div>
-
+            
                     <!-- Botão para fazer upload de gif -->
                     <div class="upload-container">
                         <label for="selectGifButton" style="cursor: url('/img/cursor-mao.png'), auto;">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg" 
+                            <svg xmlns="http://www.w3.org/2000/svg" 
                                 viewBox="0 0 24 24" 
                                 fill="#1D9BF0"
                                 width="24" 
@@ -61,7 +59,16 @@
                             <button id="selectGifButton" style="display: none;"></button>
                         </label>
                     </div>
+            
+                    <!-- Botão para imagem brat -->
+                    <div class="upload-container" style="display: flex; justify-content: center; align-items: center; height: 40px;">
+                        <label for="bratButton" style="cursor: url('/img/cursor-mao.png'), auto;">
+                            <img src="pages/cutucar/brat.png" style="width: 20px; height: 20px; border-radius: 3px;">
+                            <button id="bratButton" style="display: none;" onclick="enableBrat();"></button>
+                        </label>
+                    </div>
                 </div>
+            
                 <!-- Botão para enviar o tweet -->
                 <button id="tweetButton" class="post-button">Cutucar</button>
             </div>
@@ -102,10 +109,15 @@
 <script src="/pages/cutucar/constants.js"></script>
 <!-- --- LÓGICA PARA OS GIFS --- -->
 <script src="/pages/cutucar/gifs.js" defer></script>
+<!-- --- LÓGICA PARA BRAT --- -->
+<script src="/pages/cutucar/brat.js" defer></script>
 <!-- --- LÓGICA PARA AUTENTICAÇÃO DO USUÁRIO --- -->
 <script src="/pages/cutucar/autentication.js" defer></script>
 
 <script>
+    /* ----- Variáveis ----- */
+    let bratEnabled = false;
+
     /* ----- LÓGICA PARA O POST ----- */
     // Lógica para envio de tweet
     document.getElementById('tweetButton').addEventListener('click', async () => {
@@ -128,8 +140,6 @@
             return;
         }
 
-        // Marcamos quando tentamos uma cutucada
-        setLastCutucadaTime();
 
         const tweetText = `☝${mention}, ${messageText}
 
@@ -152,7 +162,7 @@
 
             formData.append('userIp', userIp); // Inclui o IP na requisição para o backend
 
-            const response = await fetch('/tweet-media', {
+            const response = await fetch('/API/cutucar/tweet-media', {
                 method: 'POST',
                 body: formData,
             });
@@ -171,6 +181,8 @@
                 clearMentionInput();
                 previewMedia();
                 OffLoadingScreen();
+                // Marcamos quando tentamos uma cutucada
+                setLastCutucadaTime();
             } else {
                 if (data.message === 'Erro ao postar o tweet: Request failed with code 429' || data.message === 'Erro ao postar tweet:Request failed with code 429'){
                     OffLoadingScreen();
@@ -229,11 +241,11 @@
 
     function clearMidiaInput() {
         document.getElementById('mediaFile').value = '';
+        disableBrat();
 
         if (document.getElementById('media-preview-closebtn') !== null){
             const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
             mediaPreviewCloseBtn.innerHTML = '';
-            document.getElementById('clearMidiaInput').style.display = "none";
         }
 
         // Limpa o preview anterior

@@ -60,8 +60,24 @@
       </div>
     </section>
 <script>
-function removerPost() {
+async function removerPost(postId, categoriaId, discussaoId, userTag) {
+  try {
+    const response = await fetch(`/API/forum/removerdiscussaopost`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId, categoriaId, discussaoId, userTag, userTagCreator }),
+    });
 
+    const responseData = await response.json();
+
+    if (response.ok) {
+      console.log('DiscussaoPost removida com sucesso');
+    } else {
+      console.error(responseData.error || 'Erro ao remover a DiscussaoPost.');
+    }
+  } catch (error) {
+    console.error(`Erro: ${error.message}`);
+  }
 }
 
 function previewMedia() {
@@ -145,14 +161,14 @@ function renderPosts(posts) {
     const postDiv = document.createElement('div');
     postDiv.classList.add('post');
     
-    const timestamp = new Date(post.timestamp);
-    const tempoFormatado = `${timestamp.toLocaleDateString()} ${timestamp.toLocaleTimeString()}`;
+    const time = new Date(post.time);
+    const tempoFormatado = `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`;
     
     if (post.userTag === localStorage.getItem("autenticationUserTag")){
       postDiv.innerHTML = `
       <div class="post-header">
         <button class="edit-button">📝</button>
-        <button class="remove-button">🗑️</button>
+        <button class="remove-button" onclick="removerPost('${post.postId}', '${post.categoriaId}', '${post.discussaoId}', '${post.userTag}')">🗑️</button>
       </div>
       <div class="post-text">${post.text}</div>
       ${post.media ? `<div class="post-media"><img src="${post.media}" alt="Mídia"></div>` : ''}
@@ -220,7 +236,7 @@ document.getElementById('post').addEventListener('click', async () => {
       const response = await fetch(`/API/forum/discussaopost`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, categoriaId, discussaoId, userTag, media, mediaType }),
+        body: JSON.stringify({ text, categoriaId, discussaoId, userTag, userTagCreator, media, mediaType }),
       });
 
       const responseData = await response.json();

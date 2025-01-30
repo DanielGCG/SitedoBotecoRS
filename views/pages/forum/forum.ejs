@@ -7,10 +7,11 @@
 </head>
 
 <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"></div>
-<section class="forum-header">
+<div class="forum-header">
   <input type="text" placeholder="Buscar tópicos ou categorias...">
-  <button id="nova-discussao">Nova Discussão</button>
-</section>
+  <button style="margin-right: 5px;" id="nova-discussao">Nova Discussão</button>
+  <button style="margin-left: 5px;" id="novo-post">Novo Post</button>
+</div>
 
 <div id="popup-nova-discussao" class="popup" style="display: none;">
   <div id="popup-conteudo" class="popup-conteudo">
@@ -23,16 +24,27 @@
   </div>
 </div>
 
-<section class="threads" id="threads">
+<div id="popup-nova-discussao" class="popup" style="display: none;">
+  <div id="popup-conteudo" class="popup-conteudo">
+    <h2>Nova Discussão</h2>
+    <div class="acoes">
+      <input type="text" id="discussao" placeholder="nome da discussão..." style="width: 80%;" required>
+      <button id="post">Publicar</button>
+      <p id="statusMessage"></p>
+    </div>
+  </div>
+</div>
+
+<section class="discussoes" id="discussoes">
 </section>
 
 <script>
 function renderDiscussoes(discussoes) {
-    const threadsDiv = document.getElementById('threads');
-    threadsDiv.innerHTML = '';
+    const discussoesDiv = document.getElementById('discussoes');
+    discussoesDiv.innerHTML = '';
 
     if (discussoes.length === 0) {
-      threadsDiv.innerHTML = `
+      discussoesDiv.innerHTML = `
         <div>
           <h2>Não há discussões ainda</h2>
         </div>
@@ -41,39 +53,39 @@ function renderDiscussoes(discussoes) {
     }
 
     discussoes.forEach(discussao => {
-      const threadDiv = document.createElement('div');
-      threadDiv.classList.add('thread');
+      const discussaoDiv = document.createElement('div');
+      discussaoDiv.classList.add('discussao');
 
       const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
       const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
 
       if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
-        threadDiv.innerHTML = `
+        discussaoDiv.innerHTML = `
         <div>
-          <h3 class="thread-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-          <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
+          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
-          <p class="thread-info">último post ${tempoFormatado}</p>
+          <p class="discussao-info">${tempoFormatado}</p>
           <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoriaId}', '${discussao.discussaoId}', '${discussao.userTag}')">Remover</button>
         </div>
         `;
       }
       else {
-        threadDiv.innerHTML = `
+        discussaoDiv.innerHTML = `
         <div>
-          <h3 class="thread-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-          <p class="thread-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
+          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
         </div>
         <div>
-          <p class="thread-info">último post ${tempoFormatado}</p>
+          <p class="discussao-info">${tempoFormatado}</p>
         </div>
       `;
       }
 
 
       // Adiciona o novo tópico à lista
-      threadsDiv.appendChild(threadDiv);
+      discussoesDiv.appendChild(discussaoDiv);
     });
 }
 
@@ -90,6 +102,29 @@ function listenForDiscussoes(categoriaId) {
         try {
             const discussoes = JSON.parse(event.data);
             renderDiscussoes(discussoes); // Renderiza as discussões recebidas
+        } catch (error) {
+            console.error('Erro ao processar os dados recebidos:', error);
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        eventSource.close();
+    };
+}
+
+function listenForFollowingPublicacoes(userTag) {
+    if (!followingList) {
+        console.error('FollowingList é necessário para escutar mensagens.');
+        return;
+    }
+
+    // Conectar ao servidor de mensagens com parâmetros na URL
+    const eventSource = new EventSource(`/API/forum/stream-followingpublicacoes`);
+
+    eventSource.onmessage = (event) => {
+        try {
+            const publicacoes = JSON.parse(event.data);
+            renderAll(publicacoes);
         } catch (error) {
             console.error('Erro ao processar os dados recebidos:', error);
         }
@@ -168,6 +203,12 @@ window.onload = () => {
     listenForDiscussoes(categoriaPagina);
     
     document.getElementById("titulo-categoria").innerHTML = `<h2>${categoriaPagina}</h2>`;
+
+    if (categoriaPagina === 'Destaques') {
+      document.getElementById("nova-discussao").style.display = 'none';
+    } else {
+      document.getElementById("nova-discussao").style.display = '';
+    }
 }
 </script>
 </html>

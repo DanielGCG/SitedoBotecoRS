@@ -201,6 +201,14 @@ router.get('/teste3', (req, res) => {
     res.render('pages/experimentais/teste3', { locals: locals });
 });
 
+router.get('/teste4', (req, res) => {
+    const locals = {
+        title: "teste",
+        description: "testetesteteste"
+    }
+    res.render('pages/experimentais/teste4', { locals: locals });
+});
+
 router.get('/mensages', (req, res) => {
     const locals = {
         title: "teste",
