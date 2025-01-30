@@ -57,9 +57,8 @@ async function enviarLog(text, userIp, currentDate) {
 }
 // Rota para postar no Twitter com mídia
 router.post('/tweet-media', upload.single('media'), async (req, res) => {
-  const { text, userIp, media } = req.body; // Captura o IP do usuário enviado do frontend
-
-  console.log('Recebido:', req.body);
+  const { text, userIp } = req.body; // Captura o IP do usuário enviado do frontend
+  const media = req.file; // Mídia recebida
 
   const currentDate = new Date().toISOString(); // Obtém a data atual
   try {

@@ -71,12 +71,14 @@ function generateImage() {
 }
 
 function enableBrat () {
+  bratEnabled = true;
   generateImage();
   previewMedia();
   document.getElementById("messageText").addEventListener("input", generateImage);
 }
 
 function disableBrat() {
+  bratEnabled = false;
   document.getElementById("messageText").removeEventListener("input", generateImage);
 }
 

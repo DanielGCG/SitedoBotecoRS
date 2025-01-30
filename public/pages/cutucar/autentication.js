@@ -60,12 +60,12 @@ function checkUserLastCutucadaTime() {
 
         console.log("Diferença de tempo em segundos:", timeDifferenceInSeconds);
 
-        // Verifica se já passaram pelo menos 45 segundos
-        if (timeDifferenceInSeconds >= 45) {
-            console.log("Mais de 45 segundos passaram. Validação: true");
+        // Verifica se já passaram pelo menos 30 segundos
+        if (timeDifferenceInSeconds >= 30) {
+            console.log("Mais de 30 segundos passaram. Validação: true");
             return true; // Valida a pessoa
         } else {
-            console.log("Menos de 45 segundos. Validação: false");
+            console.log("Menos de 30 segundos. Validação: false");
             return false; // Não valida a pessoa
         }
     }

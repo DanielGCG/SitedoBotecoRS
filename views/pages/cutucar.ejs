@@ -135,7 +135,7 @@
         const messageText = document.getElementById('messageText').value.trim();
         const mediaFile = document.getElementById('mediaFile').files[0];
 
-        if (!mention || !messageText) {
+        if (!mention || !(messageText || mediaFile)) {
             alert('Por favor, preencha ambos os campos.');
             return;
         }
@@ -146,7 +146,10 @@
 🔗https://www.botecors.me/cutucar`;
 
         const formData = new FormData();
-        formData.append('text', tweetText);
+
+        if (!bratEnabled){
+            formData.append('text', tweetText);
+        }
 
         if (mediaFile) {
             formData.append('media', mediaFile); // Adicionar mídia somente se for enviada
