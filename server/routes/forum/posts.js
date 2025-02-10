@@ -143,6 +143,7 @@ router.post('/criardiscussao', async (req, res) => {
 
   try {
     const postAmount = 0;
+    const type = "discussao";
 
     // Referência para o nó da discussão
     const discussaoHeaderRef = dbRef(database, `forum/publicacoes/headers/discussoes/${categoriaId}/${discussaoId}`);
@@ -154,6 +155,7 @@ router.post('/criardiscussao', async (req, res) => {
 
     // Dados da discussão
     const discussaoData = {
+      type,
       userTag,
       categoriaId,
       discussaoId,

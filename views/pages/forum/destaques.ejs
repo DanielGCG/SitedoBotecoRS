@@ -1,0 +1,204 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/pages/forum/style/forum.css">
+    <link rel="stylesheet" href="/pages/forum/style/novadiscussao.css">
+    <link rel="stylesheet" href="/geral/popup.css">
+  </head>
+  
+  <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"></div>
+  <div class="forum-header">
+    <input type="text" placeholder="Buscar tópicos ou categorias...">
+    <button style="margin-right: 5px;" id="nova-discussao">Nova Discussão</button>
+    <button style="margin-left: 5px;" id="novo-post">Novo Post</button>
+  </div>
+  
+  <div id="popup-nova-discussao" class="popup" style="display: none;">
+    <div id="popup-conteudo" class="popup-conteudo">
+      <h2>Nova Discussão</h2>
+      <div class="acoes">
+        <input type="text" id="discussao" placeholder="nome da discussão..." style="width: 80%;" required>
+        <button id="post">Publicar</button>
+        <p id="statusMessage"></p>
+      </div>
+    </div>
+  </div>
+  
+  
+  <section class="discussoes" id="discussoes">
+  </section>
+  
+  <script>
+  function renderPublicacoes(publicacoes) {
+      const discussoesDiv = document.getElementById('discussoes');
+      discussoesDiv.innerHTML = '';
+  
+      if (discussoes.length === 0) {
+        discussoesDiv.innerHTML = `
+          <div>
+            <h2>Não há discussões ainda</h2>
+          </div>
+        `;
+        return;
+      }
+  
+      discussoes.forEach(discussao => {
+        const discussaoDiv = document.createElement('div');
+        discussaoDiv.classList.add('discussao');
+  
+        const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
+        const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
+  
+        if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
+          discussaoDiv.innerHTML = `
+          <div>
+            <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
+            <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          </div>
+          <div>
+            <p class="discussao-info">${tempoFormatado}</p>
+            <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoriaId}', '${discussao.discussaoId}', '${discussao.userTag}')">Remover</button>
+          </div>
+          `;
+        }
+        else {
+          discussaoDiv.innerHTML = `
+          <div>
+            <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
+            <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          </div>
+          <div>
+            <p class="discussao-info">${tempoFormatado}</p>
+          </div>
+        `;
+        }
+  
+  
+        // Adiciona o novo tópico à lista
+        discussoesDiv.appendChild(discussaoDiv);
+      });
+  }
+  
+  function listenForDiscussoes(categoriaId) {
+      if (!categoriaId) {
+          console.error('Código de categoria é necessário para escutar mensagens.');
+          return;
+      }
+  
+      // Conectar ao servidor de mensagens com parâmetros na URL
+      const eventSource = new EventSource(`/API/forum/stream-discussoes?categoriaId=${categoriaId}`);
+  
+      eventSource.onmessage = (event) => {
+          try {
+              const discussoes = JSON.parse(event.data);
+              renderDiscussoes(discussoes); // Renderiza as discussões recebidas
+          } catch (error) {
+              console.error('Erro ao processar os dados recebidos:', error);
+          }
+      };
+  
+      eventSource.onerror = (error) => {
+          eventSource.close();
+      };
+  }
+  
+  function listenForFollowingPublicacoes(userTag) {
+      if (!followingList) {
+          console.error('FollowingList é necessário para escutar mensagens.');
+          return;
+      }
+  
+      // Conectar ao servidor de mensagens com parâmetros na URL
+      const eventSource = new EventSource(`/API/forum/stream-followingpublicacoes`);
+  
+      eventSource.onmessage = (event) => {
+          try {
+              const publicacoes = JSON.parse(event.data);
+              renderAll(publicacoes);
+          } catch (error) {
+              console.error('Erro ao processar os dados recebidos:', error);
+          }
+      };
+  
+      eventSource.onerror = (error) => {
+          eventSource.close();
+      };
+  }
+  
+  async function deletaDiscussao(categoriaId, discussaoId, userTag) {
+    try {
+        const response = await fetch(`/API/forum/removerdiscussao`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userTag, categoriaId, discussaoId }),
+        });
+  
+        const responseData = await response.json();
+        if (response.ok) {
+        }
+  
+      }catch (error) {
+      console.error('Erro ao salvar no Firebase:', error);
+      res.status(500).json({ error: 'Erro interno do servidor.' });
+    }
+  }
+  
+  document.getElementById('nova-discussao').addEventListener('click', function() {
+    document.getElementById('popup-nova-discussao').style.display = '';
+  });
+  
+  // Postar nova mensagem
+  document.getElementById('post').addEventListener('click', async () => {
+      const discussaoId = document.getElementById('discussao').value.trim();
+      const userTag = localStorage.getItem("autenticationUserTag");
+      const categoriaId = categoriaPagina;
+  
+      console.log (`[${categoriaId}, ${discussaoId}, ${userTag}]`);
+  
+      if (!discussaoId || !userTag || !categoriaId) {
+          document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem discussao e/ou autor e/ou categoria.';
+          return;
+      }
+  
+      try {
+          const response = await fetch(`/API/forum/criardiscussao`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userTag, categoriaId, discussaoId }),
+          });
+  
+          const responseData = await response.json();
+          if (response.ok) {
+              document.getElementById('statusMessage').textContent = 'Mensagem publicada com sucesso.';
+              document.getElementById('discussao').value = ''; // Limpar o campo de entrada
+              document.getElementById('categoria').value = ''; // Limpar o campo de entrada
+          } else {
+          document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
+          }
+      } catch (error) {
+          document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
+      }
+      document.getElementById('popup-nova-discussao').style.display = 'none';
+      window.location.href = `/forum/discussao?categoriaId=${categoriaId}&discussaoId=${discussaoId}&userTagCreator=${userTag}`;
+  });
+  
+  let categoriaPagina;
+  
+  window.onload = () => {
+      // Recuperando os parâmetros da URL
+      const urlParams = new URLSearchParams(window.location.search);
+      categoriaPagina = urlParams.get('categoriaId');
+  
+      // Atribuindo os valores recuperados nas variáveis globais
+      listenForDiscussoes(categoriaPagina);
+      
+      document.getElementById("titulo-categoria").innerHTML = `<h2>${categoriaPagina}</h2>`;
+  
+      if (categoriaPagina === 'Destaques') {
+        document.getElementById("nova-discussao").style.display = 'none';
+      } else {
+        document.getElementById("nova-discussao").style.display = '';
+      }
+  }
+  </script>
+  </html>

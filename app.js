@@ -23,6 +23,7 @@ app.use(express.static('public'));
 
 // Rotas Fórum
 app.use('/API/forum', require('./server/routes/forum/auth'));
+app.use('/API/forum', require('./server/routes/forum/get'));
 app.use('/API/forum', require('./server/routes/forum/posts'));
 app.use('/API/forum', require('./server/routes/forum/profile'));
 app.use('/API/forum', require('./server/routes/forum/remove'));

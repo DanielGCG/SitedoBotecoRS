@@ -234,7 +234,19 @@ router.get('/forum', (req, res) => {
         description: "forumforumforum"
     };
 
-    res.render('pages/forum/forum', {
+    res.render('pages/forum/destaques', {
+        layout: 'layouts/forum-esq-dir',
+        locals: locals
+    });
+});
+
+router.get('/discussoes', (req, res) => {
+    const locals = {
+        title: "forum",
+        description: "forumforumforum"
+    };
+
+    res.render('pages/forum/discussoes', {
         layout: 'layouts/forum-esq-dir',
         locals: locals
     });

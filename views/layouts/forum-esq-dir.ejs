@@ -45,10 +45,10 @@
                     <a class="sidebar-link" href="/forum?categoriaId=Destaques" id="Destaques"><h3 class="sidebar-title" style="color: black;">Destaques</h3></a>
                     <hr class="divisoria-sidebar">
                     <h3>Discussões</h3>
-                    <a class="sidebar-link" href="/forum?categoriaId=Fofoca" id="Fofoca">Fofoca 💅</a>
-                    <a class="sidebar-link" href="/forum?categoriaId=BSMP" id="BSMP">BSMP</a>
-                    <a class="sidebar-link" href="/forum?categoriaId=Computaria" id="Computaria">Computaria</a>
-                    <a class="sidebar-link" href="/forum?categoriaId=RPG" id="RPG">RPG</a>
+                    <a class="sidebar-link" href="/discussoes?categoriaId=Fofoca" id="Fofoca">Fofoca 💅</a>
+                    <a class="sidebar-link" href="/discussoes?categoriaId=BSMP" id="BSMP">BSMP</a>
+                    <a class="sidebar-link" href="/discussoes?categoriaId=Computaria" id="Computaria">Computaria</a>
+                    <a class="sidebar-link" href="/discussoes?categoriaId=RPG" id="RPG">RPG</a>
                 </div>
                 <hr class="divisoria-sidebar">
                 <div class="links-uteis">
@@ -100,7 +100,7 @@ function renderSidebarDireita(userDataForSidebar) {
         <div class="user-box-action">
         <a class="right-sidebar-link" href="/forum/editar"><p>📝 editar perfil</p></a>
         <hr class="divisoria-sidebar"> <!-- Linha divisória -->
-        <button style="none" onclick="logout()"><p>💡logout</p></button>
+        <button style="all: unset;" onclick="logout()"><p class="right-sidebar-link">💡 logout</p></button>
         </div>
     </div>`;
 }
