@@ -292,11 +292,11 @@ router.get('/stream-publicacoes', async (req, res) => {
   }
 });
 
-router.get('/stream-user', (req, res) => {
-  const { userTag } = req.query; // Obtém o userTag via query
+router.get('/stream-user', async (req, res) => { // Agora a rota é async
+  let { userId, userTag } = req.query; // Obtém o userTag via query
 
-  if (!userTag) {
-    res.status(400).json({ error: 'userTag é obrigatório.' });
+  if (!userId && !userTag) {
+    res.status(400).json({ error: 'userId ou userTag é obrigatório.' });
     return;
   }
 
@@ -304,8 +304,34 @@ router.get('/stream-user', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
+  if (!userId && userTag) {
+    // Referência ao nó de usuários no banco de dados
+    const usersRef = dbRef(database, 'forum/usuarios');
+
+    // Criar consulta para buscar o usuário com o userTag correspondente
+    const userQuery = query(usersRef, orderByChild('userTag'), equalTo(userTag));
+
+    try {
+      // Obter os dados da consulta
+      const snapshot = await get(userQuery);
+
+      if (snapshot.exists()) {
+        // Recuperamos o userId
+        const userData = Object.values(snapshot.val())[0]; // Pega o primeiro usuário
+        userId = userData.userId; // Atribui o userId encontrado
+      } else {
+        res.status(404).json({ error: 'Usuário não encontrado.' });
+        return;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar o usuário:', error);
+      res.status(500).json({ error: 'Erro ao buscar o usuário.' });
+      return;
+    }
+  }
+
   // Referência para o nó 'users' no Firebase Realtime Database
-  const userRef = dbRef(database, `forum/usuarios/${userTag}`);
+  const userRef = dbRef(database, `forum/usuarios/${userId}`);
 
   // Escutando mudanças em tempo real no Firebase
   const listener = onValue(
