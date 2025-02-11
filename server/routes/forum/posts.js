@@ -44,13 +44,22 @@ router.post('/discussaocomment', async (req, res) => {
   }
 });
 
-/* FINALIZADO */
+/* EDITANDO */
 router.post('/discussaoeditcomment', async (req, res) => {
   const { userId, discussaoCommentId, publicacaoId, text, media } = req.body;
 
   // Validação dos dados recebidos
   if (!userId || !discussaoCommentId || (!text && !media)) {
     return res.status(400).json({ error: 'O conteúdo precisa de userId, discussaoCommentId e (texto ou midia).' });
+  }
+
+  // Verificamos se o userId do solicitante bate com o do comentário
+  const comentarioRef = dbRef(database, `/forum/discussoesComments/${discussaoCommentId}`);
+
+  const snapComentario = await get(comentarioRef);
+
+  if (!snapComentario.exists() || !(userId === snapComentario.val().userId)){
+    return res.status(400).json({ error: 'Usuário autor do comentário não encontrado ou não bate com o do solicitante.' });
   }
 
   try {
@@ -188,6 +197,7 @@ router.post('/criarpost', async (req, res) => {
   }
 });
 
+/* FINALIZADO */
 router.post('/postComment', async (req, res) => {
   const { userId, publicacaoId, text, media } = req.body;
 

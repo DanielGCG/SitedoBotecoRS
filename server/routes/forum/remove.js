@@ -3,25 +3,29 @@ const { ref: dbRef, update, push, get, set, remove } = require('firebase/databas
 const { database } = require('../../config/firebase');
 const router = express.Router();
 
+/* FINALIZADA */
 router.post('/removerdiscussao', async (req, res) => {
-    const { userTag, categoriaId, discussaoId } = req.body;
+    const { userId, publicacaoId } = req.body;
   
     // Validação dos dados de entrada
-    if (!userTag || !categoriaId || !discussaoId) {
-      return res.status(400).json({ error: 'O conteúdo precisa de userTag, categoriaId e discussaoId.' });
+    if (!userId || !publicacaoId) {
+      return res.status(400).json({ error: 'O conteúdo precisa de userId e publicacaoId.' });
     }
-  
+    
+    // Verificamos se o userId do solicitante bate com o da discussao
+    const publicacaoRef = dbRef(database, `/forum/discussoesComments/${publicacaoId}`);
+
+    const snapPublicacao = await get(publicacaoRef);
+
+    if (!snapPublicacao.exists() || !(userId === snapPublicacao.val().userId)){
+      return res.status(400).json({ error: 'Publicação não encontrada ou usuário solicitante não bate com usuário autor da discussão.' });
+    }
+
     try {
-      // Referências no Firebase
-      const discussaoHeaderRef = dbRef(database, `forum/publicacoes/headers/discussoes/${categoriaId}/${discussaoId}`);
-      const discussaoRef = dbRef(database, `forum/publicacoes/${userTag}/discussoes/${categoriaId}/${discussaoId}`);
-      const userRef = dbRef(database, `/forum/usuarios/${userTag}`);
-      const dicussaoHeaderInUsersRef = dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes/${categoriaId}/${discussaoId}`);
+      const userRef = dbRef(database, `/forum/usuarios/${userId}`);
   
       // Remoção da discussão
-      await remove(discussaoHeaderRef);
-      await remove(dicussaoHeaderInUsersRef);
-      await remove(discussaoRef);
+      await remove(publicacaoRef);
   
       // Atualização do discussaoAmount no usuário
       const userSnapshot = await get(userRef);
@@ -42,7 +46,8 @@ router.post('/removerdiscussao', async (req, res) => {
       res.status(500).json({ error: 'Erro interno do servidor.' });
     }
 });
-  
+
+
 router.post('/removerdiscussaopost', async (req, res) => {
     const { postId, categoriaId, discussaoId, userTag, userTagCreator } = req.body;
 
