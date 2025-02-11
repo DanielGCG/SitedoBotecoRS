@@ -58,11 +58,15 @@ router.post('/register', async (req, res) => {
     // Enviar e-mail de verificação
     await sendEmailVerification(user);
 
+    /* Gera um UUID para a userId */
+    const userId = crypto.randomUUID();
+
     // Criar um novo usuário no Realtime Database
-    const userRef = dbRef(database, `forum/usuarios/${userTag}`);
+    const userRef = dbRef(database, `forum/usuarios/${userId}`);
     await set(userRef, {
       exibitionName: exibitionName,
       userTag: userTag,
+      userId,
       email: user.email,
       biography: '',
       pronouns: '',
@@ -87,7 +91,7 @@ router.post('/register', async (req, res) => {
     });
 
     res.status(201).json({
-      message: 'Usuário cadastrado com sucesso. Um e-mail de verificação foi enviado.'
+      message: 'Um e-mail de verificação foi enviado. Após verificar email, faça o login!'
     });
   } catch (error) {
     res.status(400).json({ error: error.message });

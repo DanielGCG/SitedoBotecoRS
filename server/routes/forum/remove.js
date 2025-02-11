@@ -11,17 +11,17 @@ router.post('/removerdiscussao', async (req, res) => {
     if (!userId || !publicacaoId) {
       return res.status(400).json({ error: 'O conteúdo precisa de userId e publicacaoId.' });
     }
-    
-    // Verificamos se o userId do solicitante bate com o da discussao
-    const publicacaoRef = dbRef(database, `/forum/discussoesComments/${publicacaoId}`);
-
-    const snapPublicacao = await get(publicacaoRef);
-
-    if (!snapPublicacao.exists() || !(userId === snapPublicacao.val().userId)){
-      return res.status(400).json({ error: 'Publicação não encontrada ou usuário solicitante não bate com usuário autor da discussão.' });
-    }
 
     try {
+      // Verificamos se o userId do solicitante bate com o da discussao
+      const publicacaoRef = dbRef(database, `/forum/publicacoes/${publicacaoId}`);
+
+      const snapPublicacao = await get(publicacaoRef);
+
+      if (!snapPublicacao.exists() || !(userId === snapPublicacao.val().userId)){
+        return res.status(400).json({ error: 'Publicação não encontrada ou usuário solicitante não bate com usuário autor da discussão.' });
+      }
+
       const userRef = dbRef(database, `/forum/usuarios/${userId}`);
   
       // Remoção da discussão
@@ -47,50 +47,135 @@ router.post('/removerdiscussao', async (req, res) => {
     }
 });
 
-
-router.post('/removerdiscussaopost', async (req, res) => {
-    const { postId, categoriaId, discussaoId, userTag, userTagCreator } = req.body;
+/* FINALIZADA */
+router.post('/removerdiscussaocomment', async (req, res) => {
+    const { userId, publicacaoId, discussaoCommentId } = req.body;
 
     // Validação dos dados de entrada
-    if (!postId || !categoriaId || !discussaoId || !userTag) {
-        return res.status(400).json({ error: 'O conteúdo precisa de postId, categoriaId, discussaoId e userTag.' });
+    if (!userId || !publicacaoId || !discussaoCommentId) {
+        return res.status(400).json({ error: 'O conteúdo precisa de userId, publicacaoId e discussaoCommentId.' });
     }
 
     try {
-        // Referências no Firebase
-        const discussaoHeaderRef = dbRef(
-        database,
-        `forum/publicacoes/headers/discussoes/${categoriaId}/${discussaoId}`
-        );
-        const dicussaoHeaderInUsersRef = dbRef(
-        database,
-        `forum/publicacoes/headers/users/${userTagCreator}/discussoes/${categoriaId}/${discussaoId}`
-        );
-        const discussaoPostRef = dbRef(
-        database,
-        `forum/publicacoes/${userTagCreator}/discussoes/${categoriaId}/${discussaoId}/${postId}`
-        );
+        // Verificamos se o userId do solicitante bate com o autor do comentário da discussao
+        const discussaoCommentRef = dbRef(database, `/forum/discussoesComments/${discussaoCommentId}`);
 
-        // Remoção do post
-        await remove(discussaoPostRef);
+        const snapDiscussaoComment = await get(discussaoCommentRef);
 
-        // Atualização do postAmount nas headers
-        const userSnapshot = await get(dicussaoHeaderInUsersRef);
-
-        if (userSnapshot.exists()) {
-        const currentAmount = parseInt(userSnapshot.val().postAmount, 10) || 0;
-        const newAmount = Math.max(currentAmount - 1, 0); // Garante que não fique negativo
-
-        await update(discussaoHeaderRef, { postAmount: newAmount });
-        await update(dicussaoHeaderInUsersRef, { postAmount: newAmount });
+        if (!snapDiscussaoComment.exists() || !(userId === snapDiscussaoComment.val().userId)){
+          return res.status(400).json({ error: 'Comentário da discussão não encontrada ou usuário solicitante não bate com usuário autor do comentário.' });
         }
 
-        res.status(200).json({ message: 'DiscussaoPost removida com sucesso.' });
+        // Remoção do comentario
+        await remove(discussaoCommentRef);
+
+        // Atualização do commentAmount da discussao
+        const publicacaoRef = dbRef(database, `forum/publicacoes/${publicacaoId}`);
+
+        const snapPublicacao = await get(publicacaoRef);
+
+        if (snapPublicacao.exists()) {
+        const currentAmount = parseInt(snapPublicacao.val().commentAmount, 10) || 0;
+        const newAmount = Math.max(currentAmount - 1, 0); // Garante que não fique negativo
+
+        await update (publicacaoRef, { commentAmount: newAmount });
+        }
+
+        res.status(200).json({ message: 'Comentário da discussão removida com sucesso.' });
     } catch (error) {
         console.error('Erro ao remover no Firebase:', error);
         res.status(500).json({ error: 'Erro interno do servidor.' });
     }
 });
 
+/* FINALIZADA */
+router.post('/removerpost', async (req, res) => {
+    const { userId, publicacaoId } = req.body;
+
+    // Validação dos dados de entrada
+    if (!userId || !publicacaoId ) {
+      return res.status(400).json({ error: 'O conteúdo precisa de userId e publicacaoId.' });
+    }
+
+    try {
+      // Verificamos se o userId do solicitante bate com o autor do post
+      const postRef = dbRef(database, `/forum/publicacoes/${publicacaoId}`);
+
+      const snapPost = await get(postRef);
+
+      if (!snapPost.exists() || !(userId === snapPost.val().userId)){
+        return res.status(400).json({ error: 'Post não existe ou usuário solicitante não bate com autor do post.' });
+      }
+
+      // Remoção do post
+      await remove(postRef);
+
+      // Atualização no perfil do usuário
+      const userSnapshot = await get(userRef);
+
+      if (userSnapshot.exists()) {
+        // Obtém o valor atual e garante que seja um número válido
+        const currentAmount = parseInt(userSnapshot.val().postAmount, 10) || 0;
+        
+        // Garante que o valor não fique negativo
+        const newAmount = Math.max(0, currentAmount - 1);
+
+        await update(userRef, { postAmount: newAmount });
+      } else {
+        // Inicializa o valor se o nó não existir
+        await update(userRef, { postAmount: 0 });
+      }
+
+      res.status(200).json({ message: 'Post removido com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao remover no Firebase:', error);
+        res.status(500).json({ error: 'Erro interno do servidor.' });
+    }
+});
+
+router.post('/removerpostcomment', async (req, res) => {
+  const { userId, publicacaoId, postCommentId } = req.body;
+
+  // Validação dos dados de entrada
+  if (!userId || !publicacaoId || !postCommentId ) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userId, publicacaoId e postCommentId.' });
+  }
+
+  try {
+    // Verificamos se o userId do solicitante bate com o autor do comentário do post
+    const postCommentRef = dbRef(database, `/forum/postsComments/${postCommentId}`);
+
+    const snapPostComment = await get(postCommentRef);
+
+    if (!snapPostComment.exists() || !(userId === snapPostComment.val().userId)){
+      return res.status(400).json({ error: 'Comentário do post não existe ou usuário solicitante não bate com autor do comentário.' });
+    }
+
+    // Remoção do comentário do post
+    await remove(postCommentRef);
+    
+    // Atualização no post
+    const publicacaoRef = dbRef(database, `forum/publicacoes/${publicacaoId}`)
+    const snapPublicacao = await get(publicacaoRef);
+
+    if (snapPublicacao.exists()) {
+      // Obtém o valor atual e garante que seja um número válido
+      const currentAmount = parseInt(snapPublicacao.val().commentAmount, 10) || 0;
+      
+      // Garante que o valor não fique negativo
+      const newAmount = Math.max(0, currentAmount - 1);
+
+      await update(publicacaoRef, { commentAmount: newAmount });
+    } else {
+      // Inicializa o valor se o nó não existir
+      await update(publicacaoRef, { commentAmount: 0 });
+    }
+
+    res.status(200).json({ message: 'Comentário do post removido com sucesso.' });
+  } catch (error) {
+      console.error('Erro ao remover no Firebase:', error);
+      res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
 
 module.exports = router;
