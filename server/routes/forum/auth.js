@@ -4,10 +4,10 @@ const { ref: dbRef, set, get } = require('firebase/database');
 const { auth, database } = require('../../config/firebase');
 const router = express.Router();
 
-
 // Rota de login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
