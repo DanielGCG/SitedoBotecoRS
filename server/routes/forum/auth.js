@@ -1,6 +1,6 @@
 const express = require('express');
 const { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } = require('firebase/auth');
-const { ref: dbRef, set, get } = require('firebase/database');
+const { ref: dbRef, set, get, query, orderByChild, equalTo } = require('firebase/database');
 const { auth, database } = require('../../config/firebase');
 const router = express.Router();
 
@@ -13,32 +13,26 @@ router.post('/login', async (req, res) => {
     const user = userCredential.user;
 
     if (user.emailVerified) {
-      // Buscar o usuário pelo email no banco de dados
-      const usersRef = dbRef(database, 'forum/usuarios'); // Referência para todos os usuários
-      const snapshot = await get(usersRef);
+      // Referência ao nó de usuários no banco de dados
+      const usersRef = dbRef(database, 'forum/usuarios');
+
+      // Criar consulta para buscar o usuário com o email correspondente
+      const userQuery = query(usersRef, orderByChild('email'), equalTo(email));
+
+      const snapshot = await get(userQuery);
 
       if (snapshot.exists()) {
-        let userTag = null;
+        // O snapshot.val() retorna um objeto onde as chaves são os IDs dos usuários
+        const userData = Object.values(snapshot.val())[0]; // Pegar o primeiro usuário encontrado
 
-        // Percorrer todos os usuários e procurar pelo email correspondente
-        snapshot.forEach((userData) => {
-          const userInfo = userData.val();
-          if (userInfo.email === email) {
-            userTag = userInfo.userTag; // Encontrou o userTag correspondente
-          }
+        res.status(200).json({
+          message: 'Login efetuado com sucesso.',
+          success: true,
+          userId: userData.userId,
+          userTag: userData.userTag,
         });
-
-        if (userTag) {
-          res.status(200).json({
-            message: 'Login efetuado com sucesso.',
-            success: true,
-            userTag: userTag,  // Retorne o userTag encontrado
-          });
-        } else {
-          res.status(400).json({ error: 'Usuário não encontrado.' });
-        }
       } else {
-        res.status(400).json({ error: 'Nenhum usuário registrado.' });
+        res.status(400).json({ error: 'Usuário não encontrado.' });
       }
     } else {
       res.status(400).json({ error: 'Por favor, verifique seu e-mail antes de continuar.' });

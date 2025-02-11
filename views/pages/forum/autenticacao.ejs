@@ -26,7 +26,6 @@
     <input type="email" id="loginEmail" placeholder="Email" required>
     <input type="password" id="loginPassword" placeholder="Senha" required>
     <button id="login">Login</button>
-    <button id="logout">Logout</button>
     <div id="statusMessage"></div>
   </div>
 
@@ -68,17 +67,12 @@
       const result = await response.json();
       if (result.success) {
         localStorage.setItem('autenticationUserTag', result.userTag); // Armazenando o userTag no localStorage
+        localStorage.setItem('autenticationUserId', result.userId); // Armazenando o userId no localStorage
       }
       if (localStorage.getItem('autenticationUserTag')) {
         window.location.href = "/forum?categoriaId=Destaques"; // Redireciona para a nova página
       }
       displayStatusMessage(result.message || result.error);
-    });
-
-    // Logout de usuário
-    document.getElementById('logout').addEventListener('click', async () => {
-      localStorage.removeItem('autenticationUserTag'); // Removendo o userTag do localStorage
-      displayStatusMessage(result.message);
     });
 
     document.addEventListener('DOMContentLoaded', function() {

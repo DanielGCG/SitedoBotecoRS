@@ -4,14 +4,45 @@ const { database } = require('../../config/firebase');
 const router = express.Router();
 
 router.post('/getuser', async (req, res) => {
-  const { userTag } = req.body;
+  const { userId } = req.body;
 
   try{
-    const userTagRef = dbRef(database, `forum/usuarios/${userTag}`);
-    const userTagInfo = get(userTagRef);
+    const userRef = dbRef(database, `forum/usuarios/${userId}`);
+    const userInfo = get(userRef);
 
-    res.body = { userTagInfo: userTagInfo };
+    res.body = { userInfo: userInfo };
   }catch (error) {
+    console.error('Erro ao pegar o perfil no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+router.post('/getuserwithusertag', async (req, res) => {
+  const { userTag } = req.body;
+
+  try {
+    // Referência ao nó de usuários no banco de dados
+    const usersRef = dbRef(database, 'forum/usuarios');
+
+    // Criar consulta para buscar o usuário com o userTag correspondente
+    const userQuery = query(usersRef, orderByChild('userTag'), equalTo(userTag));
+
+    // Obter os dados da consulta
+    const snapshot = await get(userQuery);
+
+    if (snapshot.exists()) {
+      // O snapshot.val() retorna um objeto onde as chaves são os IDs dos usuários
+      const userData = Object.values(snapshot.val())[0]; // Pegar o primeiro usuário encontrado
+
+      res.status(200).json({
+        message: 'Usuário encontrado com sucesso.',
+        success: true,
+        userData,  // Retorna os dados do usuário encontrado
+      });
+    } else {
+      res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+  } catch (error) {
     console.error('Erro ao pegar o perfil no Firebase:', error);
     res.status(500).json({ error: 'Erro interno do servidor.' });
   }
