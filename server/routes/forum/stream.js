@@ -209,12 +209,12 @@ router.get('/stream-seguindo', async (req, res) => {
   await Promise.all(userTagList.map(processUserTag));
 });
 
-router.get('/stream-todos', async (req, res) => {
+router.get('/stream-publicacoes', async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  const resultado = [];
+  const resultado = new Map(); // Mapa para evitar duplicatas
 
   try {
     // Obtém a lista de todos os usuários
@@ -229,9 +229,9 @@ router.get('/stream-todos', async (req, res) => {
     const allUsers = Object.keys(usersSnap.val()); // Lista com todas as userTags
 
     const processUserTag = async (userTag) => {
-      const discussoesHeadersRef = query(dbRef(database, `forum/publicacoes/headers/${userTag}/discussoes`), limitToLast(10));
-      const postsHeadersRef = query(dbRef(database, `forum/publicacoes/headers/${userTag}/posts`), limitToLast(10));
-      const threadsHeadersRef = query(dbRef(database, `forum/publicacoes/headers/${userTag}/threads`), limitToLast(10));
+      const discussoesHeadersRef = query(dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes`), limitToLast(10));
+      const postsHeadersRef = query(dbRef(database, `forum/publicacoes/headers/users/${userTag}/posts`), limitToLast(10));
+      const threadsHeadersRef = query(dbRef(database, `forum/publicacoes/headers/users/${userTag}/threads`), limitToLast(10));
 
       try {
         // Obtendo os dados das referências
@@ -245,35 +245,36 @@ router.get('/stream-todos', async (req, res) => {
 
         // Adicionando os dados aos vetores e marcando a origem
         if (discussoesSnap.exists()) {
-          todasPublicacoes.push(...Object.values(discussoesSnap.val()).map(pub => ({ ...pub, tipo: 'discussoes' })));
+          todasPublicacoes.push(...Object.values(discussoesSnap.val()));
         }
         if (postsSnap.exists()) {
-          todasPublicacoes.push(...Object.values(postsSnap.val()).map(pub => ({ ...pub, tipo: 'posts' })));
+          todasPublicacoes.push(...Object.values(postsSnap.val()));
         }
         if (threadsSnap.exists()) {
-          todasPublicacoes.push(...Object.values(threadsSnap.val()).map(pub => ({ ...pub, tipo: 'threads' })));
+          todasPublicacoes.push(...Object.values(threadsSnap.val()));
         }
 
         // Ordenar pelo campo "ultimoUpdate" (do mais recente para o mais antigo)
         todasPublicacoes.sort((a, b) => b.ultimoUpdate - a.ultimoUpdate);
 
-        // Atualizar o array resultado
-        resultado.push(...todasPublicacoes);
+        // Atualizar o mapa de resultados sem duplicatas
+        todasPublicacoes.forEach((pub) => resultado.set(pub.discussaoId, pub));
 
         // Enviar os dados para o cliente via SSE
-        res.write(`data: ${JSON.stringify(resultado)}\n\n`);
+        //res.write(`data: ${JSON.stringify(Array.from(resultado.values()))}\n\n`);
 
         // Criar listener para novas atualizações em tempo real
         [discussoesHeadersRef, postsHeadersRef, threadsHeadersRef].forEach(ref => {
           onValue(ref, (snapshot) => {
             if (snapshot.exists()) {
-              const novasPublicacoes = Object.values(snapshot.val()).map(pub => ({ ...pub, tipo: ref.key }));
-              
-              // Atualizar e ordenar novamente
-              resultado.push(...novasPublicacoes);
-              resultado.sort((a, b) => b.ultimoUpdate - a.ultimoUpdate);
+              const novasPublicacoes = Object.values(snapshot.val());
 
-              res.write(`data: ${JSON.stringify(resultado)}\n\n`);
+              novasPublicacoes.forEach((pub) => resultado.set(pub.discussaoId, pub));
+
+              // Ordenar novamente antes de enviar ao cliente
+              const listaOrdenada = Array.from(resultado.values()).sort((a, b) => b.ultimoUpdate - a.ultimoUpdate);
+              
+              res.write(`data: ${JSON.stringify(listaOrdenada)}\n\n`);
             }
           });
         });
@@ -282,7 +283,6 @@ router.get('/stream-todos', async (req, res) => {
         console.error(`Erro ao buscar dados do usuário ${userTag}:`, error);
       }
     };
-
     // Processar todas as userTags
     await Promise.all(allUsers.map(processUserTag));
 

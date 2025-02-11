@@ -3,7 +3,7 @@ async function checkPassword() {
     const senha = document.getElementById("password").value.trim(); // Obter senha do input
 
     try {
-        const response = await fetch('/verify-senha-cutucar', {
+        const response = await fetch('/API/cutucar/verify-senha-cutucar', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -12,6 +12,7 @@ async function checkPassword() {
         });
 
         const data = await response.json(); // Converter a resposta para JSON
+        
 
         if (data.success) {
             // Marca o usuário como validado

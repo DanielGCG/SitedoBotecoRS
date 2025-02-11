@@ -102,6 +102,7 @@ router.post('/tweet-media', upload.single('media'), async (req, res) => {
 // Verificar Senha Cutucar
 router.post('/verify-senha-cutucar', (req, res) => {
   const { senha } = req.body;
+  console.log(`Tentando senha: ${senha}`)
   const predefinedPassword = process.env.SENHACUTUCAR;
   if (senha === predefinedPassword) {
     res.json({ success: true, message: 'Senha correta!' });

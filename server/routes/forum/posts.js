@@ -188,4 +188,63 @@ router.post('/criardiscussao', async (req, res) => {
   }
 });
 
+router.post('/criarpost', async (req, res) => {
+  const { userTag, text, media } = req.body;
+
+  // Validação dos dados de entrada
+  if (!userTag ) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userTag.' });
+  }
+
+  try {
+    const likeAmount = 0;
+    const commentAmount = 0;
+    const commentList = [];
+    const type = "post";
+
+    // Referência para o nó da discussão
+    const postHeaderRef = dbRef(database, `forum/publicacoes/headers/posts/${userTag}`);
+
+    const postHeaderInUsersRef = dbRef(database, `forum/publicacoes/headers/users/${userTag}/posts`);
+
+    // Referência para o nó do usuário
+    const userRef = dbRef(database, `/forum/usuarios/${userTag}`)
+
+    // Dados da discussão
+    const postData = {
+      type,
+      userTag,
+      text,
+      media,
+      likeAmount,
+      commentAmount,
+      commentList,
+      ultimoUpdate: Date.now(),
+    };
+
+    // Criação da nova header de discussão
+    await set(postHeaderRef, postData);
+
+    // Criação da nova header de discussão em headers/usuarios
+    await set(postHeaderInUsersRef, postData);
+
+    // Incremento seguro de discussaoAmount no usuário
+    const userSnapshot = await get(userRef);
+
+    if (userSnapshot.exists()) {
+      // Incrementa o valor existente
+      const currentAmount = parseInt(userSnapshot.val().postAmount, 10) || 0;
+      await update(userRef, { postAmount: currentAmount + 1 });
+    } else {
+      // Inicializa o valor se o nó não existir
+      await set(userRef, { postAmount: 1 });
+    }
+
+    res.status(201).json({ message: 'Discussão criada com sucesso e associada ao usuário.' });
+  } catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
 module.exports = router;

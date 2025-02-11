@@ -6,16 +6,15 @@
     <link rel="stylesheet" href="/geral/popup.css">
   </head>
   
-  <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"></div>
+  <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"><h2>Destaques</h2></div>
   <div class="forum-header">
     <input type="text" placeholder="Buscar tópicos ou categorias...">
-    <button style="margin-right: 5px;" id="nova-discussao">Nova Discussão</button>
     <button style="margin-left: 5px;" id="novo-post">Novo Post</button>
   </div>
   
-  <div id="popup-nova-discussao" class="popup" style="display: none;">
+  <div id="popup-novo-post" class="popup" style="display: none;">
     <div id="popup-conteudo" class="popup-conteudo">
-      <h2>Nova Discussão</h2>
+      <h2>Novo Post</h2>
       <div class="acoes">
         <input type="text" id="discussao" placeholder="nome da discussão..." style="width: 80%;" required>
         <button id="post">Publicar</button>
@@ -25,73 +24,66 @@
   </div>
   
   
-  <section class="discussoes" id="discussoes">
+  <section class="publicacoes" id="publicacoes">
   </section>
   
   <script>
   function renderPublicacoes(publicacoes) {
-      const discussoesDiv = document.getElementById('discussoes');
-      discussoesDiv.innerHTML = '';
-  
-      if (discussoes.length === 0) {
-        discussoesDiv.innerHTML = `
-          <div>
-            <h2>Não há discussões ainda</h2>
-          </div>
+    const publicacoesDiv = document.getElementById('publicacoes');
+
+    if (publicacoes.length === 0) {
+      publicacoesDiv.innerHTML = `
+        <div>
+          <h2>Não há publicações ainda</h2>
+        </div>
+      `;
+      return;
+    }
+
+    Object.entries(publicacoes[0]).forEach(([key, publicacao]) => {
+      console.log(`${key}: `, publicacao);
+      const publicacaoDiv = document.createElement('div');
+      publicacaoDiv.classList.add('publicacao');
+
+      const ultimaAtualizacao = new Date(publicacao.ultimoUpdate);
+      const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
+
+      if (publicacao.userTag === localStorage.getItem("autenticationUserTag")) {
+        publicacaoDiv.innerHTML = `
+        <div>
+          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${publicacao.categoriaId}&discussaoId=${publicacao.discussaoId}&userTagCreator=${publicacao.userTag}">${publicacao.discussaoId}</a></h3>
+          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a> - ${publicacao.postAmount} respostas</p>
+        </div>
+        <div>
+          <p class="discussao-info">${tempoFormatado}</p>
+          <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.categoriaId}', '${publicacao.discussaoId}', '${publicacao.userTag}')">Remover</button>
+        </div>
         `;
-        return;
+      } else {
+        publicacaoDiv.innerHTML = `
+        <div>
+          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${publicacao.categoriaId}&discussaoId=${publicacao.discussaoId}&userTagCreator=${publicacao.userTag}">${publicacao.discussaoId}</a></h3>
+          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a> - ${publicacao.postAmount} respostas</p>
+        </div>
+        <div>
+          <p class="discussao-info">${tempoFormatado}</p>
+        </div>
+      `;
       }
-  
-      discussoes.forEach(discussao => {
-        const discussaoDiv = document.createElement('div');
-        discussaoDiv.classList.add('discussao');
-  
-        const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
-        const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
-  
-        if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
-          discussaoDiv.innerHTML = `
-          <div>
-            <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-            <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
-          </div>
-          <div>
-            <p class="discussao-info">${tempoFormatado}</p>
-            <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoriaId}', '${discussao.discussaoId}', '${discussao.userTag}')">Remover</button>
-          </div>
-          `;
-        }
-        else {
-          discussaoDiv.innerHTML = `
-          <div>
-            <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-            <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
-          </div>
-          <div>
-            <p class="discussao-info">${tempoFormatado}</p>
-          </div>
-        `;
-        }
-  
-  
-        // Adiciona o novo tópico à lista
-        discussoesDiv.appendChild(discussaoDiv);
-      });
+
+      // Adiciona a publicação à lista
+      publicacoesDiv.appendChild(publicacaoDiv);
+    });
   }
   
-  function listenForDiscussoes(categoriaId) {
-      if (!categoriaId) {
-          console.error('Código de categoria é necessário para escutar mensagens.');
-          return;
-      }
-  
+  function listenForPublicacoes() {
       // Conectar ao servidor de mensagens com parâmetros na URL
-      const eventSource = new EventSource(`/API/forum/stream-discussoes?categoriaId=${categoriaId}`);
-  
+      const eventSource = new EventSource(`/API/forum/stream-publicacoes`);
+
       eventSource.onmessage = (event) => {
           try {
-              const discussoes = JSON.parse(event.data);
-              renderDiscussoes(discussoes); // Renderiza as discussões recebidas
+              const publicacoes = JSON.parse(event.data);
+              renderPublicacoes(publicacoes); // Renderiza as publicacoes recebidas
           } catch (error) {
               console.error('Erro ao processar os dados recebidos:', error);
           }
@@ -142,21 +134,17 @@
       res.status(500).json({ error: 'Erro interno do servidor.' });
     }
   }
-  
-  document.getElementById('nova-discussao').addEventListener('click', function() {
-    document.getElementById('popup-nova-discussao').style.display = '';
-  });
+
+document.getElementById('novo-post').addEventListener('click', function() {
+  document.getElementById('popup-novo-post').style.display = '';
+});
   
   // Postar nova mensagem
   document.getElementById('post').addEventListener('click', async () => {
-      const discussaoId = document.getElementById('discussao').value.trim();
       const userTag = localStorage.getItem("autenticationUserTag");
-      const categoriaId = categoriaPagina;
   
-      console.log (`[${categoriaId}, ${discussaoId}, ${userTag}]`);
-  
-      if (!discussaoId || !userTag || !categoriaId) {
-          document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem discussao e/ou autor e/ou categoria.';
+      if (!userTag) {
+          document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem userTag.';
           return;
       }
   
@@ -178,27 +166,13 @@
       } catch (error) {
           document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
       }
-      document.getElementById('popup-nova-discussao').style.display = 'none';
-      window.location.href = `/forum/discussao?categoriaId=${categoriaId}&discussaoId=${discussaoId}&userTagCreator=${userTag}`;
+      document.getElementById('popup-novo-post').style.display = 'none';
   });
   
   let categoriaPagina;
   
   window.onload = () => {
-      // Recuperando os parâmetros da URL
-      const urlParams = new URLSearchParams(window.location.search);
-      categoriaPagina = urlParams.get('categoriaId');
-  
-      // Atribuindo os valores recuperados nas variáveis globais
-      listenForDiscussoes(categoriaPagina);
-      
-      document.getElementById("titulo-categoria").innerHTML = `<h2>${categoriaPagina}</h2>`;
-  
-      if (categoriaPagina === 'Destaques') {
-        document.getElementById("nova-discussao").style.display = 'none';
-      } else {
-        document.getElementById("nova-discussao").style.display = '';
-      }
+    listenForPublicacoes();
   }
   </script>
   </html>
