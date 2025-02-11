@@ -87,14 +87,13 @@ router.post('/criardiscussao', async (req, res) => {
 
   try {
     /* Gera um UUID para a chave do nó */
-      const uuid = crypto.randomUUID();
+      const publicacaoId = crypto.randomUUID();
     /* Constantes pertinentes a uma nova discussão */
       const commentAmount = 0;
       const type = "discussao";
-      const publicacaoId = uuid
 
     // Referência para o nó da discussão
-    const discussaoRef = dbRef(database, `forum/publicacoes/${uuid}`);
+    const discussaoRef = dbRef(database, `forum/publicacoes/${publicacaoId}`);
 
     // Dados da discussão
     const discussaoData = {
@@ -143,15 +142,14 @@ router.post('/criarpost', async (req, res) => {
 
   try {
     /* Gera um UUID para a chave do nó */
-      const uuid = crypto.randomUUID();
+      const publicacaoId = crypto.randomUUID();
     /* Constantes pertinentes a criação de um post */
       const likeAmount = 0;
       const commentAmount = 0;
       const type = "post";
-      const publicacaoId = uuid;
 
     // Referência para o nó do post
-    const postRef = dbRef(database, `forum/publicacoes/${uuid}`);
+    const postRef = dbRef(database, `forum/publicacoes/${publicacaoId}`);
 
     // Referência para o nó do usuário
     const userRef = dbRef(database, `/forum/usuarios/${userId}`)
@@ -184,6 +182,38 @@ router.post('/criarpost', async (req, res) => {
     }
 
     res.status(201).json({ message: 'Discussão criada com sucesso e associada ao usuário.' });
+  } catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+router.post('/postComment', async (req, res) => {
+  const { userId, publicacaoId, text, media } = req.body;
+
+  // Validação dos dados de entrada
+  if (!userId ) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userId.' });
+  }
+
+  try {
+    /* Gera um UUID para a chave do nó */
+    const postCommentId = crypto.randomUUID();
+    /* Constantes pertinentes a criação de um post */
+
+    // Referência para o nó do do comentário do post
+    const postCommentRef = dbRef(database, `forum/postsComments/${postCommentId}`);
+
+    await set(postCommentRef, {
+      publicacaoId,
+      postCommentId,
+      text,
+      media,
+      userId,
+      time: Date.now(),
+    });
+
+    res.status(201).json({ message: 'Comentário de post criado com sucesso.' });
   } catch (error) {
     console.error('Erro ao salvar no Firebase:', error);
     res.status(500).json({ error: 'Erro interno do servidor.' });
