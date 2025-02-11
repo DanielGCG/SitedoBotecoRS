@@ -156,7 +156,7 @@ router.get('/velas', (req, res) => {
         title: "Velas",
         description: "VelasVelasVelasVelasVelasVelasVelas"
     }
-    res.render('pages/eastereggs/velas', { locals: locals });
+    res.render('pages/experimentais/eastereggs/velas', { locals: locals });
 });
 
 router.get('/carolls', (req, res) => {
@@ -164,7 +164,7 @@ router.get('/carolls', (req, res) => {
         title: "carolls",
         description: "carollscarollscarollscarolls"
     }
-    res.render('pages/eastereggs/carolls', { locals: locals });
+    res.render('pages/experimentais/eastereggs/carolls', { locals: locals });
 });
 
 router.get('/pokebsmp', (req, res) => {

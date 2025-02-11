@@ -271,7 +271,7 @@ function searchUserData() {
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/API/forum/stream-user?userId=${userTag}`);
+    const eventSource = new EventSource(`/API/forum/stream-user?userTag=${userTag}`);
 
     eventSource.onmessage = (event) => {
         try {

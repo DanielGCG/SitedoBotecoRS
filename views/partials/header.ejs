@@ -1,3 +1,6 @@
+<!-- Material Design Icons -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
 <style>
   /* Reset básico */
   * {
@@ -42,22 +45,82 @@
     display: flex;
     gap: 1em;
     transition: max-height 0.35s ease-in-out;
-    overflow: hidden;
     width: auto;  /* Garante que a largura seja apenas o necessário para o conteúdo */
   }
 
-  .navbar-links a {
+  .navbar-item {
+    --hover-active-bg: #ffffff34;
+    display: flex;
+    gap: 8px;
+    align-items: center;
     color: #fff;
-    text-decoration: none;
-    padding: 0.5em;
+    padding: 10px 14px;
     transition: background-color 0.35s;
     cursor: url('/img/cursor-mao.png'), auto;
-  }
-
-  .navbar-links a:hover {
-    background-color: #ffffff34;
+    font-size: 0.9rem;
     border-radius: 5px;
   }
+
+  .navbar-item:hover {
+    background-color: var(--hover-active-bg);
+  }
+
+  .navbar-links a {
+    /* A maioria dos estilos foram movidos para .navbar-item */
+    text-decoration: none;
+  }
+
+  .navbar-icon {
+    font-size: 1.2rem;
+  }
+
+  /* || Dropdown */
+
+  .navbar-dropdown {
+    position: relative;
+  }
+
+  .navbar-dropdown[data-open] {
+    background-color: var(--hover-active-bg);
+  }
+
+  .navbar-dropdown-arrow {
+    transform: rotate(0);
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .navbar-dropdown[data-open] .navbar-dropdown-arrow {
+    transform: rotate(180deg);
+  }
+
+  .navbar-dropdown-list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    flex-direction: column;
+    background-color: #fff;
+    width: 100%;
+    border-radius: 0 0 4px 4px;
+  }
+
+  .navbar-dropdown[data-open] .navbar-dropdown-list {
+    display: flex;
+  }
+
+  .navbar-dropdown-item {
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    color: black;
+    transition: background 0.2s ease-in-out;
+  }
+
+  .navbar-dropdown-item:hover {
+    background-color: rgba(0 0 0 / 3%)
+  }
+
+  /* || Hamburguer */
 
   /* Botão hambúrguer para modo mobile */
   .hamburger {
@@ -65,7 +128,7 @@
     font-size: 1.5em;
     cursor: url('/img/cursor-mao.png'), auto;
   }
-  
+
   /* Responsivo */
   @media (max-width: 768px) {
     .navbar-links {
@@ -101,24 +164,67 @@
       <a href="/" class="navbar-logo-link"><span>Boteco do R$</span></a>
     </div>
     <div class="navbar-links" id="navbar-links">
-      <a href="/cutucar">Cutucar</a>
-      <a href="/forum?categoriaId=Destaques">Forum (testes)</a>
-      <a href="/watchlist">WatchList</a>
-      <a href="/galeria">Galeria</a>
-      <a href="/minigames">Minigames</a>
-      <a href="/filmedagalera">Filme da Galera</a>
-      <a href="/about">Sobre</a>
+      <div class="navbar-item navbar-dropdown">
+        <span class="navbar-icon material-symbols-outlined">construction</span>
+        <span class="navbar-dropdown-label">Ferramentas</span>
+        <span class="navbar-dropdown-arrow material-symbols-outlined">keyboard_arrow_down</span>
+
+        <div class="navbar-dropdown-list">
+          <a class="navbar-dropdown-item" href="/cutucar">
+            <span class="navbar-icon material-symbols-outlined">touch_long</span>
+            Cutucar
+          </a>
+          <a class="navbar-dropdown-item" href="/manutencao">
+            <span class="navbar-icon material-symbols-outlined">apparel</span>
+            BSMP Skins
+          </a>
+        </div>
+      </div>
+      <a class="navbar-item" href="/forum?categoriaId=Destaques">
+        <span class="navbar-icon material-symbols-outlined">diversity_3</span>
+        Forum (testes)
+      </a>
+      
+      <a class="navbar-item" href="/watchlist">
+        <span class="navbar-icon material-symbols-outlined">movie</span>
+        WatchList
+      </a>
+      <a class="navbar-item" href="/galeria">
+        <span class="navbar-icon material-symbols-outlined">gallery_thumbnail</span>
+        Galeria
+      </a>
+      <a class="navbar-item" href="/minigames">
+        <span class="navbar-icon material-symbols-outlined">joystick</span>
+        Minigames
+      </a>
+      <a class="navbar-item" href="/filmedagalera">
+        <span class="navbar-icon material-symbols-outlined">videocam</span>
+        Filme da Galera
+      </a>
+      <a class="navbar-item" href="/about">
+        <span class="navbar-icon material-symbols-outlined">info</span>
+        Sobre
+      </a>
     </div>
-    <div class="hamburger" onclick="toggleMenu()">
+    <div class="hamburger" id="hamburger">
       &#9776;
     </div>
   </nav>
 </body>
 
 <script>
-  function toggleMenu() {
-    const links = document.getElementById("navbar-links");
-    links.classList.toggle("active");
-  }
-</script>
+  window.addEventListener("load", function () {
+    // Atribuindo a função do menu hamburguer
+    document.getElementById("hamburger").onclick = function () {
+        const links = document.getElementById("navbar-links");
+        links.classList.toggle("active");
+    };
 
+    // Fazendo os dropdowns funcionarem
+    document
+        .querySelectorAll(".navbar-dropdown")
+        .forEach(dropdown => {
+          dropdown.onclick = () => dropdown.toggleAttribute("data-open");
+        });
+  });
+</script>

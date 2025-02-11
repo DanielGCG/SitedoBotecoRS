@@ -79,7 +79,7 @@ if (categoriaSidebar) {
     }
 }
 
-searchUserDataForSidebar(localStorage.getItem('autenticationUserTag'));
+searchUserDataForSidebar(localStorage.getItem('autenticationUserId'));
 
 function renderSidebarDireita(userDataForSidebar) {
     document.getElementById("right-sidebar").innerHTML =
@@ -110,15 +110,17 @@ function logout () {
     window.location.href = "/forum/autenticacao";
 }
 
-function searchUserDataForSidebar(userTag) {
-    if (!userTag) {
-        console.error('precisamos do userTag do usuário para localiza-lo.');
+function searchUserDataForSidebar(userId) {
+    if (!userId) {
+        console.error('precisamos do userId do usuário para localiza-lo.');
         alert('precisamos do email do usuário para localiza-lo.');
         return;
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/API/forum/stream-user?userTag=${userTag}`);
+    console.log(`Procurando em: /API/forum/stream-user?userId=${userId}`);
+    const eventSource = new EventSource(`/API/forum/stream-user?userId=${userId}`);
+    
 
     eventSource.onmessage = (event) => {
         try {
@@ -134,6 +136,7 @@ function searchUserDataForSidebar(userTag) {
         eventSource.close();
     };
 }
+
 document.addEventListener('DOMContentLoaded', function() {
     if (!localStorage.getItem('autenticationUserTag')) {
     window.location.href = "/forum/autenticacao";
