@@ -44,14 +44,14 @@ function renderDiscussoes(discussoes) {
       const discussaoDiv = document.createElement('div');
       discussaoDiv.classList.add('discussao');
 
-      const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
+      const ultimaAtualizacao = new Date(discussao.time);
       const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
 
-      if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
+      if (discussao.userId === localStorage.getItem("autenticationUserId")){
         discussaoDiv.innerHTML = `
         <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoTitle}</a></h3>
+          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.commentAmount} respostas</p>
         </div>
         <div>
           <p class="discussao-info">${tempoFormatado}</p>
@@ -62,8 +62,8 @@ function renderDiscussoes(discussoes) {
       else {
         discussaoDiv.innerHTML = `
         <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
+          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoTitle}</a></h3>
+          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.commentAmount} respostas</p>
         </div>
         <div>
           <p class="discussao-info">${tempoFormatado}</p>

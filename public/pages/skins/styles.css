@@ -1,0 +1,26 @@
+.skins-explorer {
+    list-style: none;
+    margin: 0;
+}
+
+.skins-explorer li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 32px;
+    font-size: 1.5rem;
+    border-radius: 16px;
+    cursor: pointer;
+    background-color: white;
+    color: black;
+    margin-bottom: 12px;
+    transition: background .2s cubic-bezier(0.265, 1.130, 0.395, 1.325), transform .2s cubic-bezier(0.265, 1.130, 0.395, 1.325);
+}
+.skins-explorer li:hover {
+    background-color: #f1f1f1;
+    transform: scale(1.007) translateY(-2px);
+}
+
+.skins-explorer li span {
+    font-size: 2rem;
+}

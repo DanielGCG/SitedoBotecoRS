@@ -21,6 +21,7 @@
     background: linear-gradient(130deg, rgba(156,105,58,1) 50%, rgba(117,67,23,1) 51%);
     padding: 1em;
     color: #fff;
+    user-select: none;
   }
 
   /* Logo */
@@ -55,7 +56,7 @@
     gap: 8px;
     align-items: center;
     color: #fff;
-    padding: 10px 14px;
+    padding: 8px 14px;
     transition: background-color 0.35s;
     cursor: url('/img/cursor-mao.png'), auto;
     font-size: 0.9rem;
@@ -111,18 +112,7 @@
 
   .navbar-dropdown[data-open] .navbar-dropdown-list {
     display: flex;
-    animation: dropdown-list-open 0.2s cubic-bezier(0.265, 1.130, 0.395, 1.325) forwards;
-  }
-
-  @keyframes dropdown-list-open {
-    from {
-      opacity: 0;
-      transform: scale(0.5);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    animation: pop-open 0.2s cubic-bezier(0.265, 1.130, 0.395, 1.325) forwards;
   }
 
   .navbar-dropdown-item {
@@ -151,20 +141,48 @@
 
   /* Responsivo */
   @media (max-width: 768px) {
+    .navbar {
+      position: relative;
+    }
+
     .navbar-links {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin: 0;
       display: none;
       flex-direction: column;
-      width: auto; /* Garante que os links tenham o tamanho adequado */
+      width: 100%;
       max-height: 0; /* Começa fechado */
+      background-color: var(--cor-marrom);
+      transform-origin: top center;
+      box-shadow: 0 4px 4px rgba(0 0 0 / 15%);
     }
 
     .navbar-links.active {
       max-height: 500px; /* Ajuste conforme a quantidade de links */
       display: flex;
+      animation: pop-open 0.2s cubic-bezier(0.265, 1.130, 0.395, 1.325) forwards;
+    }
+
+    .navbar-dropdown-list {
+      left: 0;
+      width: 100%;
     }
 
     .hamburger {
       display: block;
+    }
+  }
+
+  @keyframes pop-open {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
 
@@ -176,6 +194,7 @@
   .navbar-logo-link span {
     font-size: 1em;
   }
+  
 
 </style>
 

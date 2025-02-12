@@ -216,7 +216,7 @@ function renderPublicacoes(publicacoes) {
       const publicacaoDiv = document.createElement('div');
       publicacaoDiv.classList.add('publicacao');
 
-      const ultimaAtualizacao = new Date(publicacao.ultimoUpdate);
+      const ultimaAtualizacao = new Date(publicacao.time);
       const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
 
       if (publicacao.userId === localStorage.getItem("autenticationUserId")) {
@@ -224,12 +224,10 @@ function renderPublicacoes(publicacoes) {
           publicacaoDiv.innerHTML = `
             <div>
               <h3 class="discussao-title">
-                <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}">${publicacao.titulo}</a>
+                <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}">${publicacao.discussaoTitle}</a>
               </h3>
-              <p class="discussao-info">Por 
-                <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}">
-                  <strong>${publicacao.userTag}</strong>
-                </a> - ${publicacao.commentAmount} respostas
+              <p class="discussao-info">
+                </a>${publicacao.commentAmount} respostas
               </p>
             </div>
             <div>
@@ -249,12 +247,10 @@ function renderPublicacoes(publicacoes) {
           publicacaoDiv.innerHTML = `
             <div>
               <h3 class="discussao-title">
-                <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}">${publicacao.titulo}</a>
+                <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}">${publicacao.discussaoTitle}</a>
               </h3>
-              <p class="discussao-info">Por 
-                <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}">
-                  <strong>${publicacao.userTag}</strong>
-                </a> - ${publicacao.commentAmount} respostas
+              <p class="discussao-info">
+                </a>${publicacao.commentAmount} respostas
               </p>
             </div>
             <div>
@@ -293,7 +289,7 @@ async function deletaDiscussao(categoriaId, discussaoId, userTag) {
   }
 }
 
-function searchUserData() {
+function searchUserData(userTag) {
     if (!userTag) {
         console.error('precisamos da userTag do usuário para localiza-lo.');
         alert('Precisamos da userTag do usuário para localiza-lo.');
@@ -308,7 +304,8 @@ function searchUserData() {
             userData = JSON.parse(event.data);
             renderAmizades(userData);
             renderBiografia(userData);
-            renderUserBox(userData); // Renderiza as discussões recebidas
+            renderUserBox(userData);
+            searchUserPublicacoes(userData.userId);
         } catch (error) {
             console.error('Erro ao processar os dados recebidos:', error);
         }
@@ -320,19 +317,22 @@ function searchUserData() {
     };
 }
 
-function searchUserPublicacoes() {
-    if (!userTag) {
-        console.error('precisamos do email do usuário para localiza-lo.');
-        alert('precisamos do email do usuário para localiza-lo.');
+function searchUserPublicacoes(userId) {
+    if (!userId) {
+        console.error('precisamos do userId localiza-lo.');
+        alert('Você precisa estar logado!');
         return;
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
     const eventSource = new EventSource(`/API/forum/stream-publicacoesbyuserid?userId=${userId}`);
 
+    console.log(`procurando por publicações de ${userId}`);
+
     eventSource.onmessage = (event) => {
         try {
           userPublicacoes = JSON.parse(event.data);
+          console.log(userPublicacoes);
           renderPublicacoes(userPublicacoes);
         } catch (error) {
             console.error('Erro ao processar os dados recebidos:', error);
@@ -345,10 +345,7 @@ function searchUserPublicacoes() {
     };
 }
 
-let userTag;
-let userId = localStorage.getItem("autenticationUserId");
 let userData;
-let userDiscussoes;
 
 window.onload = () => {
     // Recuperando os parâmetros da URL
@@ -356,7 +353,6 @@ window.onload = () => {
     userTag = urlParams.get('userTag');
 
     // Atribuindo os valores recuperados nas variáveis globais
-    searchUserData();
-    searchUserPublicacoes();
+    searchUserData(userTag);
 }
 </script>

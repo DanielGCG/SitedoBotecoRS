@@ -28,51 +28,66 @@
   </section>
   
   <script>
-  function renderPublicacoes(publicacoes) {
+function renderPublicacoes(publicacoes) {
     const publicacoesDiv = document.getElementById('publicacoes');
+    publicacoesDiv.innerHTML = ''; // Limpa o conteúdo anterior
 
-    if (publicacoes.length === 0) {
-      publicacoesDiv.innerHTML = `
-        <div>
-          <h2>Não há publicações ainda</h2>
-        </div>
-      `;
-      return;
+    if (!publicacoes || Object.keys(publicacoes).length === 0) {
+        publicacoesDiv.innerHTML = `
+            <div>
+                <h2>Não há publicações ainda</h2>
+            </div>
+        `;
+        return;
     }
 
-    Object.entries(publicacoes[0]).forEach(([key, publicacao]) => {
-      console.log(`${key}: `, publicacao);
-      const publicacaoDiv = document.createElement('div');
-      publicacaoDiv.classList.add('publicacao');
+    // Transforma o objeto em um array de publicações
+    const publicacoesArray = Object.values(publicacoes);
 
-      const ultimaAtualizacao = new Date(publicacao.ultimoUpdate);
-      const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
+    publicacoesArray.forEach((publicacao) => {
+        if (!publicacao || typeof publicacao !== 'object') {
+            console.warn("Publicação inválida encontrada:", publicacao);
+            return;
+        }
 
-      if (publicacao.userTag === localStorage.getItem("autenticationUserTag")) {
-        publicacaoDiv.innerHTML = `
-        <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${publicacao.categoriaId}&discussaoId=${publicacao.discussaoId}&userTagCreator=${publicacao.userTag}">${publicacao.discussaoId}</a></h3>
-          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a> - ${publicacao.postAmount} respostas</p>
-        </div>
-        <div>
-          <p class="discussao-info">${tempoFormatado}</p>
-          <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.categoriaId}', '${publicacao.discussaoId}', '${publicacao.userTag}')">Remover</button>
-        </div>
+        const publicacaoDiv = document.createElement('div');
+        publicacaoDiv.classList.add('publicacao');
+
+        const ultimaAtualizacao = new Date(publicacao.time || Date.now());
+        const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
+
+        const autenticacaoUserId = localStorage.getItem("autenticationUserId");
+
+        let conteudoHTML = `
+            <div>
+                <h3 class="discussao-title">
+                    <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}&discussaoId=${publicacao.discussaoId}&userTagCreator=${publicacao.userTag}">
+                        ${publicacao.discussaoTitle}
+                    </a>
+                </h3>
+                <p class="discussao-info">
+                    Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}">
+                        <strong>${publicacao.userTag}</strong>
+                    </a> - ${publicacao.commentAmount || 0} respostas
+                </p>
+            </div>
+            <div>
+                <p class="discussao-info">${tempoFormatado}</p>
         `;
-      } else {
-        publicacaoDiv.innerHTML = `
-        <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${publicacao.categoriaId}&discussaoId=${publicacao.discussaoId}&userTagCreator=${publicacao.userTag}">${publicacao.discussaoId}</a></h3>
-          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a> - ${publicacao.postAmount} respostas</p>
-        </div>
-        <div>
-          <p class="discussao-info">${tempoFormatado}</p>
-        </div>
-      `;
-      }
 
-      // Adiciona a publicação à lista
-      publicacoesDiv.appendChild(publicacaoDiv);
+        if (publicacao.userId === autenticacaoUserId) {
+            conteudoHTML += `
+                <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.categoriaId}', '${publicacao.discussaoId}', '${publicacao.userTag}')">
+                    Remover
+                </button>
+            `;
+        }
+
+        conteudoHTML += `</div>`;
+        publicacaoDiv.innerHTML = conteudoHTML;
+
+        // Adiciona a publicação à lista
+        publicacoesDiv.appendChild(publicacaoDiv);
     });
   }
   
