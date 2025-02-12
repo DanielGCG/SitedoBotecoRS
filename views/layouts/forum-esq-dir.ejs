@@ -118,7 +118,6 @@ function searchUserDataForSidebar(userId) {
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    console.log(`Procurando em: /API/forum/stream-user?userId=${userId}`);
     const eventSource = new EventSource(`/API/forum/stream-user?userId=${userId}`);
     
 

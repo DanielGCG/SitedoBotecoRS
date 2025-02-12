@@ -317,6 +317,16 @@ router.get('/filmedagalera/match', (req, res) => {
     res.render('pages/filmedagalera/match', { locals: locals });
 });
 
+/* ------ BSMP Skins ------*/
+
+router.get('/skins/', (req, res) => {
+    const locals = {
+        title: "BSMP Skins",
+        description: "Estilize seus personagens e sua história!"
+    }
+    res.render('pages/skins/skins', { locals });
+});
+
 /* ------ SEM HEADER ------*/
 
 router.get('/noheader/galeria/pokebsmp', (req, res) => {

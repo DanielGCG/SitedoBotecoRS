@@ -15,9 +15,10 @@
     position: sticky;
     top: 0;
     z-index: 999999;
+    box-shadow: 0 4px 4px rgba(0 0 0 / 15%);
     justify-content: space-between;
     align-items: center;
-    background-color: var(--cor-marrom);
+    background: linear-gradient(130deg, rgba(156,105,58,1) 50%, rgba(117,67,23,1) 51%);
     padding: 1em;
     color: #fff;
   }
@@ -97,27 +98,46 @@
     display: none;
     position: absolute;
     top: 100%;
-    left: 0;
+    right: 0;
     flex-direction: column;
-    background-color: #fff;
-    width: 100%;
-    border-radius: 0 0 4px 4px;
+    background-color: var(--cor-marrom);
+    width: 150%;
+    border-radius: 8px 0 8px 8px;
+    overflow: hidden;
+    transform-origin: top right;
+    box-shadow: 0 4px 4px rgba(0 0 0 / 15%);
+    z-index: 50;
   }
 
   .navbar-dropdown[data-open] .navbar-dropdown-list {
     display: flex;
+    animation: dropdown-list-open 0.2s cubic-bezier(0.265, 1.130, 0.395, 1.325) forwards;
+  }
+
+  @keyframes dropdown-list-open {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .navbar-dropdown-item {
     padding: 12px;
     display: flex;
     gap: 8px;
-    color: black;
-    transition: background 0.2s ease-in-out;
+    color: white;
+    cursor: url('/img/cursor-mao.png'), auto;
+    transform-origin: top center;
+    transition: background 0.2s ease-in-out, padding 0.2s ease-in-out;
   }
 
   .navbar-dropdown-item:hover {
-    background-color: rgba(0 0 0 / 3%)
+    background-color: rgba(0 0 0 / 3%);
+    padding-left: 16px;
   }
 
   /* || Hamburguer */
@@ -132,6 +152,7 @@
   /* Responsivo */
   @media (max-width: 768px) {
     .navbar-links {
+      display: none;
       flex-direction: column;
       width: auto; /* Garante que os links tenham o tamanho adequado */
       max-height: 0; /* Começa fechado */
@@ -139,6 +160,7 @@
 
     .navbar-links.active {
       max-height: 500px; /* Ajuste conforme a quantidade de links */
+      display: flex;
     }
 
     .hamburger {
@@ -163,7 +185,12 @@
       <img src="/img/icon-192x192.png">
       <a href="/" class="navbar-logo-link"><span>Boteco do R$</span></a>
     </div>
+
     <div class="navbar-links" id="navbar-links">
+      <a class="navbar-item" href="/forum?categoriaId=Destaques">
+        <span class="navbar-icon material-symbols-outlined">diversity_3</span>
+        Forum (testes)
+      </a>
       <div class="navbar-item navbar-dropdown">
         <span class="navbar-icon material-symbols-outlined">construction</span>
         <span class="navbar-dropdown-label">Ferramentas</span>
@@ -174,33 +201,37 @@
             <span class="navbar-icon material-symbols-outlined">touch_long</span>
             Cutucar
           </a>
-          <a class="navbar-dropdown-item" href="/manutencao">
+          <a class="navbar-dropdown-item" href="/skins">
             <span class="navbar-icon material-symbols-outlined">apparel</span>
             BSMP Skins
           </a>
         </div>
       </div>
-      <a class="navbar-item" href="/forum?categoriaId=Destaques">
-        <span class="navbar-icon material-symbols-outlined">diversity_3</span>
-        Forum (testes)
-      </a>
+      <div class="navbar-item navbar-dropdown">
+        <span class="navbar-icon material-symbols-outlined">play_arrow</span>
+        <span class="navbar-dropdown-label">Media</span>
+        <span class="navbar-dropdown-arrow material-symbols-outlined">keyboard_arrow_down</span>
+
+        <div class="navbar-dropdown-list">
+          <a class="navbar-dropdown-item" href="/watchlist">
+            <span class="navbar-icon material-symbols-outlined">movie</span>
+            WatchList
+          </a>
+          <a class="navbar-dropdown-item" href="/galeria">
+            <span class="navbar-icon material-symbols-outlined">gallery_thumbnail</span>
+            Galeria
+          </a>
+          <a class="navbar-dropdown-item" href="/filmedagalera">
+            <span class="navbar-icon material-symbols-outlined">videocam</span>
+            Filme da Galera
+          </a>
+          <a class="navbar-dropdown-item" href="/minigames">
+            <span class="navbar-icon material-symbols-outlined">joystick</span>
+            Minigames
+          </a>
+        </div>
+      </div>
       
-      <a class="navbar-item" href="/watchlist">
-        <span class="navbar-icon material-symbols-outlined">movie</span>
-        WatchList
-      </a>
-      <a class="navbar-item" href="/galeria">
-        <span class="navbar-icon material-symbols-outlined">gallery_thumbnail</span>
-        Galeria
-      </a>
-      <a class="navbar-item" href="/minigames">
-        <span class="navbar-icon material-symbols-outlined">joystick</span>
-        Minigames
-      </a>
-      <a class="navbar-item" href="/filmedagalera">
-        <span class="navbar-icon material-symbols-outlined">videocam</span>
-        Filme da Galera
-      </a>
       <a class="navbar-item" href="/about">
         <span class="navbar-icon material-symbols-outlined">info</span>
         Sobre
@@ -224,7 +255,8 @@
     document
         .querySelectorAll(".navbar-dropdown")
         .forEach(dropdown => {
-          dropdown.onclick = () => dropdown.toggleAttribute("data-open");
+          dropdown.onmouseenter = () => dropdown.toggleAttribute("data-open", true);
+          dropdown.onmouseleave = () => dropdown.toggleAttribute("data-open", false);
         });
   });
 </script>

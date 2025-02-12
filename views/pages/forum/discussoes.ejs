@@ -147,14 +147,15 @@ document.getElementById('nova-discussao').addEventListener('click', function() {
 
 // Postar nova mensagem
 document.getElementById('post').addEventListener('click', async () => {
-    const discussaoId = document.getElementById('discussao').value.trim();
-    const userTag = localStorage.getItem("autenticationUserTag");
+    const discussaoTitle = document.getElementById('discussao').value.trim();
+    const userId = localStorage.getItem("autenticationUserId");
     const categoriaId = categoriaPagina;
+    let publicacaoIdEndereco;
 
-    console.log (`[${categoriaId}, ${discussaoId}, ${userTag}]`);
+    console.log (`[${categoriaId}, ${userId}, ${discussaoTitle}]`);
 
-    if (!discussaoId || !userTag || !categoriaId) {
-        document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem discussao e/ou autor e/ou categoria.';
+    if (!categoriaId || !userId || !discussaoTitle) {
+        document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem categoriaId, userId ou discussaoTitle.';
         return;
     }
 
@@ -162,7 +163,7 @@ document.getElementById('post').addEventListener('click', async () => {
         const response = await fetch(`/API/forum/criardiscussao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userTag, categoriaId, discussaoId }),
+        body: JSON.stringify({ userId, categoriaId, discussaoTitle }),
         });
 
         const responseData = await response.json();
@@ -170,6 +171,7 @@ document.getElementById('post').addEventListener('click', async () => {
             document.getElementById('statusMessage').textContent = 'Mensagem publicada com sucesso.';
             document.getElementById('discussao').value = ''; // Limpar o campo de entrada
             document.getElementById('categoria').value = ''; // Limpar o campo de entrada
+            publicacaoIdEndereco = response.publicacaoId;
         } else {
         document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
         }
@@ -177,7 +179,7 @@ document.getElementById('post').addEventListener('click', async () => {
         document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
     }
     document.getElementById('popup-nova-discussao').style.display = 'none';
-    window.location.href = `/forum/discussao?categoriaId=${categoriaId}&discussaoId=${discussaoId}&userTagCreator=${userTag}`;
+    window.location.href = `/forum/discussao?categoriaId=${categoriaId}&publicacaoId=${publicacaoIdEndereco}`;
 });
 
 let categoriaPagina;

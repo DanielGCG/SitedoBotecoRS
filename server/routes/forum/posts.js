@@ -9,7 +9,7 @@ router.post('/discussaocomment', async (req, res) => {
 
   // Validação dos dados recebidos
   if (!userId || (!text && !media)) {
-    return res.status(400).json({ error: 'O conteúdo precisa de userId, userTagCreator e (texto ou midia).' });
+    return res.status(400).json({ error: 'O conteúdo precisa de userId e (texto ou midia).' });
   }
 
   try {
@@ -133,7 +133,7 @@ router.post('/criardiscussao', async (req, res) => {
       await update(userRef, { discussaoAmount: 1 });
     }
 
-    res.status(201).json({ message: 'Discussão criada com sucesso e associada ao usuário.' });
+    res.status(201).json({ message: 'Discussão criada com sucesso e associada ao usuário.', publicacaoId: publicacaoId });
   } catch (error) {
     console.error('Erro ao salvar no Firebase:', error);
     res.status(500).json({ error: 'Erro interno do servidor.' });

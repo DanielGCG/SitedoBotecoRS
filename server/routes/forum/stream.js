@@ -51,72 +51,38 @@ router.get('/stream-posts', (req, res) => {
 });
 
 router.get('/stream-discussoes', (req, res) => {
-  const { categoriaId, userTag } = req.query;
+  const { categoriaId } = req.query;
+
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  // Se existe um userTag, filtra as discussões
-  if (userTag) {
+  // Referência ao Firebase para as publicações, com filtro pela categoriaId
+  const discussoesRef = dbRef(database, `forum/publicacoes`);
+  const discussaoQuery = query(discussoesRef, orderByChild('categoriaId'), equalTo(categoriaId));
 
-    const dicussaoHeaderInUsersRef = dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes`);
-    
-    const listener = onValue(
-      dicussaoHeaderInUsersRef,
-      (snapshot) => {
-        const discussoes = [];
-        snapshot.forEach((childSnapshot) => {
-          // Acessa o filho do filho, caso as discussões estejam aninhadas nesse nível
-          const discussoesData = childSnapshot.val();
-          if (discussoesData) {
-            // Se existir outro nível de dados dentro de cada discussão, acessa diretamente
-            Object.values(discussoesData).forEach((subDiscussoes) => {
-              discussoes.push(subDiscussoes);
-            });
-          }
-        });
-        // Envia os dados atualizados para o cliente
-        res.write(`data: ${JSON.stringify(discussoes)}\n\n`);
-      },
-      (error) => {
-        console.error('Erro ao escutar mudanças no Firebase:', error);
-        res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar discussoes' })}\n\n`);
-      }
-    );
-
-      // Fechar conexão e remover o listener ao desconectar
-      req.on('close', () => {
-        listener(); // Remove o listener do Firebase
+  // Ouvir mudanças nas discussões com a query
+  const listener = onValue(
+    discussaoQuery,
+    (snapshot) => {
+      const discussoes = [];
+      snapshot.forEach((childSnapshot) => {
+        discussoes.push(childSnapshot.val());
       });
-    } else {
-    // Caso não seja necessário filtrar por userTag, busca por categoriaId específica
-    if (categoriaId) {
 
-      const discussoesRef = dbRef(database, `forum/publicacoes/headers/discussoes/${categoriaId}`);
-
-      const listener = onValue(
-        discussoesRef,
-        (snapshot) => {
-          const discussoes = [];
-          snapshot.forEach((childSnapshot) => {
-            discussoes.push(childSnapshot.val());
-          });
-
-          // Envia os dados atualizados para o cliente
-          res.write(`data: ${JSON.stringify(discussoes)}\n\n`);
-        },
-        (error) => {
-          console.error('Erro ao escutar mudanças no Firebase:', error);
-          res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar posts' })}\n\n`);
-        }
-      );
-
-      // Fechar conexão e remover o listener ao desconectar
-      req.on('close', () => {
-        listener(); // Remove o listener do Firebase
-      });
+      // Envia os dados atualizados para o cliente
+      res.write(`data: ${JSON.stringify(discussoes)}\n\n`);
+    },
+    (error) => {
+      console.error('Erro ao escutar mudanças no Firebase:', error);
+      res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar discussoes' })}\n\n`);
     }
-  }
+  );
+
+  // Fechar conexão e remover o listener ao desconectar
+  req.on('close', () => {
+    listener(); // Remove o listener do Firebase
+  });
 });
 
 router.get('/stream-seguindo', async (req, res) => {
@@ -210,84 +176,87 @@ router.get('/stream-seguindo', async (req, res) => {
 });
 
 router.get('/stream-publicacoes', async (req, res) => {
+  let { amount } = req.query;
+
+  if (!amount) {
+    amount = 20; // Valor padrão
+  }
+
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  const resultado = new Map(); // Mapa para evitar duplicatas
-
   try {
-    // Obtém a lista de todos os usuários
-    const usersRef = dbRef(database, "forum/usuarios");
-    const usersSnap = await get(usersRef);
+    // Query para obter as últimas 'amount' publicações
+    const publicacoesQuery = query(dbRef(database, `forum/publicacoes`), limitToLast(amount));
 
-    if (!usersSnap.exists()) {
-      res.write(`data: ${JSON.stringify([])}\n\n`);
-      return;
+    // Obtendo as publicações da base de dados
+    const snapshot = await get(publicacoesQuery);
+
+    if (snapshot.exists()) {
+      // Envia as publicações iniciais
+      const todasPublicacoes = snapshot.val();
+      res.write(`data: ${JSON.stringify(todasPublicacoes)}\n\n`);
     }
 
-    const allUsers = Object.keys(usersSnap.val()); // Lista com todas as userTags
-
-    const processUserTag = async (userTag) => {
-      const discussoesHeadersRef = query(dbRef(database, `forum/publicacoes/headers/users/${userTag}/discussoes`), limitToLast(10));
-      const postsHeadersRef = query(dbRef(database, `forum/publicacoes/headers/users/${userTag}/posts`), limitToLast(10));
-      const threadsHeadersRef = query(dbRef(database, `forum/publicacoes/headers/users/${userTag}/threads`), limitToLast(10));
-
-      try {
-        // Obtendo os dados das referências
-        const [discussoesSnap, postsSnap, threadsSnap] = await Promise.all([
-          get(discussoesHeadersRef),
-          get(postsHeadersRef),
-          get(threadsHeadersRef)
-        ]);
-
-        const todasPublicacoes = [];
-
-        // Adicionando os dados aos vetores e marcando a origem
-        if (discussoesSnap.exists()) {
-          todasPublicacoes.push(...Object.values(discussoesSnap.val()));
-        }
-        if (postsSnap.exists()) {
-          todasPublicacoes.push(...Object.values(postsSnap.val()));
-        }
-        if (threadsSnap.exists()) {
-          todasPublicacoes.push(...Object.values(threadsSnap.val()));
-        }
-
-        // Ordenar pelo campo "ultimoUpdate" (do mais recente para o mais antigo)
-        todasPublicacoes.sort((a, b) => b.ultimoUpdate - a.ultimoUpdate);
-
-        // Atualizar o mapa de resultados sem duplicatas
-        todasPublicacoes.forEach((pub) => resultado.set(pub.discussaoId, pub));
-
-        // Enviar os dados para o cliente via SSE
-        //res.write(`data: ${JSON.stringify(Array.from(resultado.values()))}\n\n`);
-
-        // Criar listener para novas atualizações em tempo real
-        [discussoesHeadersRef, postsHeadersRef, threadsHeadersRef].forEach(ref => {
-          onValue(ref, (snapshot) => {
-            if (snapshot.exists()) {
-              const novasPublicacoes = Object.values(snapshot.val());
-
-              novasPublicacoes.forEach((pub) => resultado.set(pub.discussaoId, pub));
-
-              // Ordenar novamente antes de enviar ao cliente
-              const listaOrdenada = Array.from(resultado.values()).sort((a, b) => b.ultimoUpdate - a.ultimoUpdate);
-              
-              res.write(`data: ${JSON.stringify(listaOrdenada)}\n\n`);
-            }
-          });
-        });
-
-      } catch (error) {
-        console.error(`Erro ao buscar dados do usuário ${userTag}:`, error);
+    // Criar listener para novas publicações em tempo real
+    const publicacoesRef = dbRef(database, 'forum/publicacoes');
+    const listener = onValue(publicacoesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const novasPublicacoes = snapshot.val();
+        res.write(`data: ${JSON.stringify(novasPublicacoes)}\n\n`);
       }
-    };
-    // Processar todas as userTags
-    await Promise.all(allUsers.map(processUserTag));
+    });
 
+    // Fechar conexão e remover o listener ao desconectar
+    req.on('close', () => {
+      listener(); // Remove o listener do Firebase
+    });
   } catch (error) {
-    console.error("Erro ao buscar a lista de usuários:", error);
+    console.error("Erro ao buscar a lista de publicações:", error);
+    res.status(500).json({ error: "Erro interno ao obter publicações." });
+  }
+});
+
+router.get('/stream-publicacoesbyuserid', async (req, res) => {
+  let { userId, amount } = req.query;
+
+  if (!amount) {
+    amount = 20; // Valor padrão
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  try {
+    // Query para obter as últimas 'amount' publicações
+    const publicacoesQuery = query(dbRef(database, `forum/publicacoes`), orderByChild('userId'), equalTo(userId), limitToLast(amount));
+
+    // Obtendo as publicações da base de dados
+    const snapshot = await get(publicacoesQuery);
+
+    if (snapshot.exists()) {
+      // Envia as publicações iniciais
+      const todasPublicacoes = snapshot.val();
+      res.write(`data: ${JSON.stringify(todasPublicacoes)}\n\n`);
+    }
+
+    // Criar listener para novas publicações em tempo real
+    const publicacoesRef = dbRef(database, 'forum/publicacoes');
+    const listener = onValue(publicacoesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const novasPublicacoes = snapshot.val();
+        res.write(`data: ${JSON.stringify(novasPublicacoes)}\n\n`);
+      }
+    });
+
+    // Fechar conexão e remover o listener ao desconectar
+    req.on('close', () => {
+      listener(); // Remove o listener do Firebase
+    });
+  } catch (error) {
+    console.error("Erro ao buscar a lista de publicações:", error);
     res.status(500).json({ error: "Erro interno ao obter publicações." });
   }
 });

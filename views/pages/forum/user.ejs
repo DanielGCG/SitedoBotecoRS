@@ -11,7 +11,7 @@
         <!-- Lado esquerdo (posts) -->
         <div class="userpage-main-right">
           <h2 style="text-align: center; font-size: 14px; margin: 10px;">Publicações</h2>
-          <div class="discussoes" id="discussoes">
+          <div class="discussoes" id="publicacoes">
           </div>
         </div>
         <!-- Lado direito (biografia) -->
@@ -196,12 +196,12 @@ function renderAmizades(user) {
   }
 }
 
-function renderDiscussoes(discussoes) {
-    const discussoesDiv = document.getElementById('discussoes');
-    discussoesDiv.innerHTML = '';
+function renderPublicacoes(publicacoes) {
+    const publicacoesDiv = document.getElementById('publicacoes');
+    publicacoesDiv.innerHTML = '';
 
-    if (discussoes.length === 0) {
-      discussoesDiv.innerHTML = `
+    if (!publicacoes || Object.keys(publicacoes).length === 0) {
+      publicacoesDiv.innerHTML = `
         <div>
           <h2>Ainda não publicou nada :P melhore!</h2>
         </div>
@@ -209,39 +209,69 @@ function renderDiscussoes(discussoes) {
       return;
     }
 
-    discussoes.forEach(discussao => {
-      const discussaoDiv = document.createElement('div');
-      discussaoDiv.classList.add('discussao');
+    // Converter objeto em array
+    const publicacoesArray = Object.values(publicacoes);
 
-      const ultimaAtualizacao = new Date(discussao.ultimoUpdate);
+    publicacoesArray.forEach(publicacao => {
+      const publicacaoDiv = document.createElement('div');
+      publicacaoDiv.classList.add('publicacao');
+
+      const ultimaAtualizacao = new Date(publicacao.ultimoUpdate);
       const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
 
-      if (discussao.userTag === localStorage.getItem("autenticationUserTag")){
-        discussaoDiv.innerHTML = `
-        <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
-        </div>
-        <div>
-          <p class="discussao-info">${tempoFormatado}</p>
-          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoriaId}', '${discussao.discussaoId}', '${discussao.userTag}')">Remover</button>
-        </div>
-        `;
-      }
-      else {
-        discussaoDiv.innerHTML = `
-        <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoId}</a></h3>
-          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.postAmount} respostas</p>
-        </div>
-        <div>
-          <p class="discussao-info">${tempoFormatado}</p>
-        </div>
-      `;
+      if (publicacao.userId === localStorage.getItem("autenticationUserId")) {
+        if (publicacao.type === "discussao") {
+          publicacaoDiv.innerHTML = `
+            <div>
+              <h3 class="discussao-title">
+                <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}">${publicacao.titulo}</a>
+              </h3>
+              <p class="discussao-info">Por 
+                <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}">
+                  <strong>${publicacao.userTag}</strong>
+                </a> - ${publicacao.commentAmount} respostas
+              </p>
+            </div>
+            <div>
+              <p class="discussao-info">${tempoFormatado}</p>
+              <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.categoriaId}', '${publicacao.discussaoId}', '${publicacao.userTag}')">Remover</button>
+            </div>
+          `;
+        }
+        if (publicacao.type === "post") {
+          publicacaoDiv.innerHTML = `<div><h1>Post</h1></div>`; 
+        }
+        if (publicacao.type === "thread") {
+          publicacaoDiv.innerHTML = `<div><h1>Thread</h1></div>`; 
+        }
+      } else {
+        if (publicacao.type === "discussao") {
+          publicacaoDiv.innerHTML = `
+            <div>
+              <h3 class="discussao-title">
+                <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}">${publicacao.titulo}</a>
+              </h3>
+              <p class="discussao-info">Por 
+                <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}">
+                  <strong>${publicacao.userTag}</strong>
+                </a> - ${publicacao.commentAmount} respostas
+              </p>
+            </div>
+            <div>
+              <p class="discussao-info">${tempoFormatado}</p>
+            </div>
+          `;
+        }
+        if (publicacao.type === "post") {
+          publicacaoDiv.innerHTML = `<div><h1>Post</h1></div>`; 
+        }
+        if (publicacao.type === "thread") {
+          publicacaoDiv.innerHTML = `<div><h1>Thread</h1></div>`; 
+        }
       }
 
       // Adiciona o novo tópico à lista
-      discussoesDiv.appendChild(discussaoDiv);
+      publicacoesDiv.appendChild(publicacaoDiv);
     });
 }
 
@@ -290,7 +320,7 @@ function searchUserData() {
     };
 }
 
-function searchUserDiscussoes() {
+function searchUserPublicacoes() {
     if (!userTag) {
         console.error('precisamos do email do usuário para localiza-lo.');
         alert('precisamos do email do usuário para localiza-lo.');
@@ -298,12 +328,12 @@ function searchUserDiscussoes() {
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/API/forum/stream-discussoes?userTag=${userTag}`);
+    const eventSource = new EventSource(`/API/forum/stream-publicacoesbyuserid?userId=${userId}`);
 
     eventSource.onmessage = (event) => {
         try {
-          userDiscussoes = JSON.parse(event.data);
-          renderDiscussoes(userDiscussoes);
+          userPublicacoes = JSON.parse(event.data);
+          renderPublicacoes(userPublicacoes);
         } catch (error) {
             console.error('Erro ao processar os dados recebidos:', error);
         }
@@ -316,6 +346,7 @@ function searchUserDiscussoes() {
 }
 
 let userTag;
+let userId = localStorage.getItem("autenticationUserId");
 let userData;
 let userDiscussoes;
 
@@ -326,6 +357,6 @@ window.onload = () => {
 
     // Atribuindo os valores recuperados nas variáveis globais
     searchUserData();
-    searchUserDiscussoes();
+    searchUserPublicacoes();
 }
 </script>

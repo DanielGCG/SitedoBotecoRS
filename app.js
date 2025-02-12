@@ -32,6 +32,9 @@ app.use('/API/forum', require('./server/routes/forum/stream'));
 // Rota Cutucar
 app.use('/API/cutucar', require('./server/routes/cutucar'));
 
+// Rota BSMP Skins
+app.use('/API/skins', require('./server/routes/skins'));
+
 // Rota Galeria
 app.use('', require('./server/routes/galeria'));
 

@@ -77,21 +77,22 @@
   }
   
   function listenForPublicacoes() {
-      // Conectar ao servidor de mensagens com parâmetros na URL
-      const eventSource = new EventSource(`/API/forum/stream-publicacoes`);
+    // Conectar ao servidor de mensagens com parâmetros na URL
+    const eventSource = new EventSource(`/API/forum/stream-publicacoes`);
+    eventSource.onmessage = (event) => {
+        try {
+            const publicacoes = JSON.parse(event.data);
+            console.log(publicacoes);  // Verifica as publicações recebidas
+            renderPublicacoes(publicacoes); // Renderiza as publicações recebidas
+        } catch (error) {
+            console.error('Erro ao processar os dados recebidos:', error);
+        }
+    };
 
-      eventSource.onmessage = (event) => {
-          try {
-              const publicacoes = JSON.parse(event.data);
-              renderPublicacoes(publicacoes); // Renderiza as publicacoes recebidas
-          } catch (error) {
-              console.error('Erro ao processar os dados recebidos:', error);
-          }
-      };
-  
-      eventSource.onerror = (error) => {
-          eventSource.close();
-      };
+    eventSource.onerror = (error) => {
+        console.error('Erro na conexão com o servidor:', error);
+        eventSource.close();
+    };
   }
   
   function listenForFollowingPublicacoes(userTag) {
