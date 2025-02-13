@@ -29,8 +29,6 @@ router.post('/discussaocomment', async (req, res) => {
 
     let publicacaoSnapshot = await get(dbRef(database, `forum/publicacoes/${publicacaoId}`));
 
-    const userRef = dbRef(database, `/forum/usuarios/${userId}`)
-
     if (publicacaoSnapshot.exists()) {
       // Incrementa o valor existente
       const currentAmount = parseInt(publicacaoSnapshot.val().commentAmount, 10) || 0;

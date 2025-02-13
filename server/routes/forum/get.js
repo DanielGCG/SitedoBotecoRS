@@ -7,8 +7,6 @@ const router = express.Router();
 router.get('/getpublicacao', async (req, res) => {
     let { publicacaoId } = req.query;
 
-    console.log(publicacaoId);
-
     if (!publicacaoId) {
         res.status(400).json({ error: 'publicacaoId é obrigatório.' });
         return;
