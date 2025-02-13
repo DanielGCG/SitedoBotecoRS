@@ -11,7 +11,7 @@
     <section class="send-messagearea">
         <div class="twitter-draft-container">
           <!-- Campo de texto -->
-          <textarea class="tweet-input-grande" id="messageText" placeholder="resto da mensagem..." maxlength="440"></textarea>
+          <textarea class="tweet-input-grande" id="messageText" placeholder="escrever comentário..." maxlength="440"></textarea>
           <div id="char-count" class="char-count">
               <span id="char-count-text">0/440</span>
           </div>
@@ -133,18 +133,57 @@ document.getElementById("messageText").addEventListener("input", function() {
 });
 
 function clearMidiaInput() {
-    document.getElementById('mediaFile').value = '';
+  document.getElementById('mediaFile').value = '';
 
-    if (document.getElementById('media-preview-closebtn') !== null){
-        const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
-        mediaPreviewCloseBtn.innerHTML = '';
-        document.getElementById('clearMidiaInput').style.display = "none";
+  if (document.getElementById('media-preview-closebtn') !== null){
+      const mediaPreviewCloseBtn = document.getElementById('media-preview-closebtn');
+      mediaPreviewCloseBtn.innerHTML = '';
+      document.getElementById('clearMidiaInput').style.display = "none";
+  }
+
+  // Limpa o preview anterior
+  const previewContainer = document.getElementById('media-preview');
+  previewContainer.innerHTML = '';
+}
+
+async function editComment(commentElement, discussaoCommentId) {
+  const originalText = commentElement.querySelector('.post-text').innerText;
+  commentElement.innerHTML += `
+    <textarea class="tweet-input-pequeno" id="editText" placeholder="escrever comentário..." maxlength="440">${originalText}</textarea>
+    <div id="char-count" class="char-count">
+        <span id="char-count-text">0/440</span>
+    </div>
+    <button id="saveEdit" class="post-button">Editar</button>
+  `;
+
+  document.getElementById('saveEdit').addEventListener('click', async () => {
+    const text = document.getElementById('editText').value.trim();
+    const userId = localStorage.getItem("autenticationUserId");
+
+    if (!userId || !text) {
+      document.getElementById('statusMessage').textContent = 'O comentário não pode estar vazio.';
+      return;
     }
 
-    // Limpa o preview anterior
-    const previewContainer = document.getElementById('media-preview');
-    previewContainer.innerHTML = '';
-    
+    try {
+      const response = await fetch(`/API/forum/discussaoeditcomment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, discussaoCommentId, publicacaoId, text, media: null }),
+      });
+
+      const responseData = await response.json();
+      if (response.ok) {
+        commentElement.querySelector('.post-text').innerText = text;
+        document.getElementById('editText').remove();
+        document.getElementById('saveEdit').remove();
+      } else {
+        console.log(responseData.error || 'Erro ao editar o comentário.');
+      }
+    } catch (error) {
+      console.log(`Erro: ${error.message}`);
+    }
+  });
 }
 
 function renderComments(comments) {
@@ -161,31 +200,73 @@ function renderComments(comments) {
     postDiv.classList.add('post');
     
     const time = new Date(comment.time);
-    const tempoFormatado = `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`;
+    const now = new Date();
+    const isToday = now.toDateString() === time.toDateString();
+    const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === time.toDateString();
+    const daysOfWeek = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+    let tempoFormatado;
+
+    if (isToday) {
+      tempoFormatado = time.toLocaleTimeString();
+    } else if (isYesterday) {
+      tempoFormatado = `ontem ${time.toLocaleTimeString()}`;
+    } else if (now - time < 7 * 24 * 60 * 60 * 1000) {
+      tempoFormatado = `${daysOfWeek[time.getDay()]} ${time.toLocaleTimeString()}`;
+    } else {
+      tempoFormatado = `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`;
+    }
     
     if (comment.userId === localStorage.getItem("autenticationUserId")){
-      postDiv.innerHTML = `
-      <div class="post-header">
-        <button class="edit-button">📝</button>
-        <button class="remove-button" onclick="removerPost('${comment.userId}', '${comment.publicacaoId}', '${comment.discussaoCommentId}')">🗑️</button>
-      </div>
-      <div class="post-text">${comment.text}</div>
-      ${comment.media ? `<div class="post-media"><img src="${comment.media}" alt="Mídia"></div>` : ''}
-      <div class="post-info">
-        <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${comment.userTag}"><strong>${comment.userTag}</strong></a></p>
-        <p>${tempoFormatado}</p>
-      </div>
-    `;
+      if(comment.edited) {
+        postDiv.innerHTML = `
+        <div class="post-header">
+          <button class="edit-button" onclick="editComment(this.closest('.post'), '${comment.discussaoCommentId}')">📝</button>
+          <button class="remove-button" onclick="removerPost('${comment.userId}', '${comment.publicacaoId}', '${comment.discussaoCommentId}')">🗑️</button>
+        </div>
+        <div class="post-text">${comment.text}</div>
+        ${comment.media ? `<div class="post-media"><img src="${comment.media}" alt="Mídia"></div>` : ''}
+        <div class="post-info">
+          <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${comment.userTag}"><strong>${comment.userTag}</strong></a></p>
+          <p>${tempoFormatado} - editado</p>
+        </div>
+      `;
+      }
+      else{
+        postDiv.innerHTML = `
+          <div class="post-header">
+            <button class="edit-button" onclick="editComment(this.closest('.post'), '${comment.discussaoCommentId}')">📝</button>
+            <button class="remove-button" onclick="removerPost('${comment.userId}', '${comment.publicacaoId}', '${comment.discussaoCommentId}')">🗑️</button>
+          </div>
+          <div class="post-text">${comment.text}</div>
+          ${comment.media ? `<div class="post-media"><img src="${comment.media}" alt="Mídia"></div>` : ''}
+          <div class="post-info">
+            <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${comment.userTag}"><strong>${comment.userTag}</strong></a></p>
+            <p>${tempoFormatado}</p>
+          </div>
+        `;
+      }
     }
     else{
-      postDiv.innerHTML = `
-      <div class="post-text">${comment.text}</div>
-      ${comment.media ? `<div class="post-media"><img src="${comment.media}" alt="Mídia"></div>` : ''}
-      <div class="post-info">
-                <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${comment.userTag}"><strong>${comment.userTag}</strong></a></p>
-        <p>${tempoFormatado}</p>
-      </div>
-    `;
+      if(comment.edited) {
+        postDiv.innerHTML = `
+          <div class="post-text">${comment.text}</div>
+          ${comment.media ? `<div class="post-media"><img src="${comment.media}" alt="Mídia"></div>` : ''}
+          <div class="post-info">
+                    <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${comment.userTag}"><strong>${comment.userTag}</strong></a></p>
+            <p>${tempoFormatado} - editado</p>
+          </div>
+        `;
+      }
+      else{
+        postDiv.innerHTML = `
+          <div class="post-text">${comment.text}</div>
+          ${comment.media ? `<div class="post-media"><img src="${comment.media}" alt="Mídia"></div>` : ''}
+          <div class="post-info">
+                    <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${comment.userTag}"><strong>${comment.userTag}</strong></a></p>
+            <p>${tempoFormatado}</p>
+          </div>
+        `;
+      }
     }
 
     messagesDiv.appendChild(postDiv);

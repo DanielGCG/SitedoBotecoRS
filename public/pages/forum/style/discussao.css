@@ -78,6 +78,17 @@
     resize:vertical;
     font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji";
 }
+.tweet-input-pequeno {
+    margin-top: 1rem;
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 16px;
+    resize:vertical;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji";
+}
 .char-count {
     font-size: 12px;
     color: #666;

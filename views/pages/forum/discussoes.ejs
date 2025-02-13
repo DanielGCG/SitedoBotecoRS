@@ -44,8 +44,24 @@ function renderDiscussoes(discussoes) {
       const discussaoDiv = document.createElement('div');
       discussaoDiv.classList.add('discussao');
 
-      const ultimaAtualizacao = new Date(discussao.time);
-      const tempoFormatado = `${ultimaAtualizacao.toLocaleDateString()} ${ultimaAtualizacao.toLocaleTimeString()}`;
+      const time = new Date(discussao.time);
+      const now = new Date();
+      const isToday = now.toDateString() === time.toDateString();
+      const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === time.toDateString();
+      const daysOfWeek = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+      let tempoFormatado;
+
+      const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+      if (isToday) {
+          tempoFormatado = time.toLocaleTimeString([], timeOptions);
+      } else if (isYesterday) {
+          tempoFormatado = `ontem ${time.toLocaleTimeString([], timeOptions)}`;
+      } else if (now - time < 7 * 24 * 60 * 60 * 1000) {
+          tempoFormatado = `${daysOfWeek[time.getDay()]} ${time.toLocaleTimeString([], timeOptions)}`;
+      } else {
+          tempoFormatado = `${time.toLocaleDateString()} ${time.toLocaleTimeString([], timeOptions)}`;
+      }
 
       if (discussao.userId === localStorage.getItem("autenticationUserId")){
         discussaoDiv.innerHTML = `
