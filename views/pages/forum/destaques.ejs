@@ -3,23 +3,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/pages/forum/style/forum.css">
     <link rel="stylesheet" href="/pages/forum/style/novadiscussao.css">
-    <link rel="stylesheet" href="/geral/popup.css">
+    
+    <link rel="stylesheet" href="/geral/better-popup/better-popup.css">
   </head>
   
   <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"><h2>Destaques</h2></div>
   <div class="forum-header">
     <input type="text" placeholder="Buscar tópicos ou categorias...">
-    <button style="margin-left: 5px;" id="novo-post">Novo Post</button>
+    <button style="margin-left: 5px;" data-popup="novo-post-popup">Novo Post</button>
   </div>
   
-  <div id="popup-novo-post" class="popup" style="display: none;">
-    <div id="popup-conteudo" class="popup-conteudo">
-      <h2>Novo Post</h2>
-      <div class="acoes">
-        <input type="text" id="discussao" placeholder="nome da discussão..." style="width: 80%;" required>
-        <button id="post">Publicar</button>
-        <p id="statusMessage"></p>
-      </div>
+  <div class="better-popup" id="novo-post-popup">
+    <div class="better-popup-content">
+        <button class="better-popup-close">X</button>
+        <h2>Novo Post</h2>
+        <form class="acoes" id="novo-post-form">
+            <input type="text" id="discussao" placeholder="nome da discussão..." required>
+            <button id="post">Publicar</button>
+            <p id="statusMessage"></p>
+        </form>
     </div>
   </div>
   
@@ -27,6 +29,8 @@
   <section class="publicacoes" id="publicacoes">
   </section>
   
+  <script src="/geral/better-popup/better-popup.js"></script>
+
   <script>
 function renderPublicacoes(publicacoes) {
     const publicacoesDiv = document.getElementById('publicacoes');
@@ -61,7 +65,7 @@ function renderPublicacoes(publicacoes) {
         let conteudoHTML = `
             <div>
                 <h3 class="discussao-title">
-                    <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}&discussaoId=${publicacao.discussaoId}&userTagCreator=${publicacao.userTag}">
+                    <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">
                         ${publicacao.discussaoTitle}
                     </a>
                 </h3>
@@ -77,7 +81,7 @@ function renderPublicacoes(publicacoes) {
 
         if (publicacao.userId === autenticacaoUserId) {
             conteudoHTML += `
-                <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.categoriaId}', '${publicacao.discussaoId}', '${publicacao.userTag}')">
+                <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.publicacaoId}', '${publicacao.userId}')">
                     Remover
                 </button>
             `;
@@ -133,12 +137,12 @@ function renderPublicacoes(publicacoes) {
       };
   }
   
-  async function deletaDiscussao(categoriaId, discussaoId, userTag) {
+  async function deletaDiscussao(publicacaoId, userId) {
     try {
         const response = await fetch(`/API/forum/removerdiscussao`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userTag, categoriaId, discussaoId }),
+          body: JSON.stringify({ userId, publicacaoId }),
         });
   
         const responseData = await response.json();
@@ -150,10 +154,6 @@ function renderPublicacoes(publicacoes) {
       res.status(500).json({ error: 'Erro interno do servidor.' });
     }
   }
-
-document.getElementById('novo-post').addEventListener('click', function() {
-  document.getElementById('popup-novo-post').style.display = '';
-});
   
   // Postar nova mensagem
   document.getElementById('post').addEventListener('click', async () => {

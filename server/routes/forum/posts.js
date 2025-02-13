@@ -25,22 +25,26 @@ router.post('/discussaocomment', async (req, res) => {
       time: Date.now(),
     });
 
+    const publicacaoRef = dbRef(database, `forum/publicacoes/${publicacaoId}`)
+
     let publicacaoSnapshot = await get(dbRef(database, `forum/publicacoes/${publicacaoId}`));
+
+    const userRef = dbRef(database, `/forum/usuarios/${userId}`)
 
     if (publicacaoSnapshot.exists()) {
       // Incrementa o valor existente
       const currentAmount = parseInt(publicacaoSnapshot.val().commentAmount, 10) || 0;
-      await update(userRef, { commentAmount: currentAmount + 1 });
+      await update(publicacaoRef, { commentAmount: currentAmount + 1 });
     } else {
       // Inicializa o valor se o nó não existir
-      await update(userRef, { commentAmount: 1 });
+      await update(publicacaoRef, { commentAmount: 1 });
     }
 
     // Retorna sucesso se tudo ocorreu bem
     res.status(201).json({ message: 'Comentario na discussao criado com sucesso e tempo da discussão atualizado.' });
   } catch (error) {
     console.error('Erro ao salvar no Firebase:', error);
-    res.status(500).json({ error: 'Erro interno do servidor.' });
+    res.status(500).json({ error: 'Erro de envio do comentário da discussão ao servidor.' });
   }
 });
 

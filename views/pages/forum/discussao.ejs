@@ -60,18 +60,18 @@
       </div>
     </section>
 <script>
-async function removerPost(postId, categoriaId, discussaoId, userTag) {
+async function removerPost(userId, publicacaoId, discussaoCommentId) {
   try {
-    const response = await fetch(`/API/forum/removerdiscussaopost`, {
+    const response = await fetch(`/API/forum/removerdiscussaocomment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ postId, categoriaId, discussaoId, userTag, userTagCreator }),
+      body: JSON.stringify({ userId, publicacaoId, discussaoCommentId }),
     });
 
     const responseData = await response.json();
 
     if (response.ok) {
-      console.log('DiscussaoPost removida com sucesso');
+      console.log('Comentário removido com sucesso');
     } else {
       console.error(responseData.error || 'Erro ao remover a DiscussaoPost.');
     }
@@ -148,42 +148,42 @@ function clearMidiaInput() {
     
 }
 
-function renderPosts(posts) {
+function renderComments(comments) {
   const messagesDiv = document.getElementById('postarea');
   messagesDiv.innerHTML = ''; // Limpa os posts existentes
 
-  if (posts.length === 0) {
-    messagesDiv.innerHTML = '<div class="post">Nenhum post publicado ainda.</div>';
+  if (comments.length === 0) {
+    messagesDiv.innerHTML = '<div class="post">Nenhum comentário ainda.</div>';
     return;
   }
 
-  posts.forEach(post => {
+  comments.forEach(comment => {
     const postDiv = document.createElement('div');
     postDiv.classList.add('post');
     
-    const time = new Date(post.time);
+    const time = new Date(comment.time);
     const tempoFormatado = `${time.toLocaleDateString()} ${time.toLocaleTimeString()}`;
     
-    if (post.userTag === localStorage.getItem("autenticationUserTag")){
+    if (comment.userId === localStorage.getItem("autenticationUserId")){
       postDiv.innerHTML = `
       <div class="post-header">
         <button class="edit-button">📝</button>
-        <button class="remove-button" onclick="removerPost('${post.postId}', '${post.categoriaId}', '${post.discussaoId}', '${post.userTag}')">🗑️</button>
+        <button class="remove-button" onclick="removerPost('${comment.userId}', '${comment.publicacaoId}', '${comment.discussaoCommentId}')">🗑️</button>
       </div>
-      <div class="post-text">${post.text}</div>
-      ${post.media ? `<div class="post-media"><img src="${post.media}" alt="Mídia"></div>` : ''}
+      <div class="post-text">${comment.text}</div>
+      ${comment.media ? `<div class="post-media"><img src="${comment.media}" alt="Mídia"></div>` : ''}
       <div class="post-info">
-        <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${post.userTag}"><strong>${post.userTag}</strong></a></p>
+        <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${comment.userTag}"><strong>${comment.userTag}</strong></a></p>
         <p>${tempoFormatado}</p>
       </div>
     `;
     }
     else{
       postDiv.innerHTML = `
-      <div class="post-text">${post.text}</div>
-      ${post.media ? `<div class="post-media"><img src="${post.media}" alt="Mídia"></div>` : ''}
+      <div class="post-text">${comment.text}</div>
+      ${comment.media ? `<div class="post-media"><img src="${comment.media}" alt="Mídia"></div>` : ''}
       <div class="post-info">
-                <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${post.userTag}"><strong>${post.userTag}</strong></a></p>
+                <p><a style="text-decoration: none; color: #777;" href="/forum/user?userTag=${comment.userTag}"><strong>${comment.userTag}</strong></a></p>
         <p>${tempoFormatado}</p>
       </div>
     `;
@@ -197,19 +197,19 @@ function renderPosts(posts) {
 }
 
 // Conectar ao servidor de mensagens
-function listenForPosts(categoriaId, discussaoId, userTagCreator) {
-    if (!categoriaId || !discussaoId) {
-        console.error('categoriaId e discussaoId são necessários para escutar mensagens.');
+function listenForComments(publicacaoId) {
+    if (!publicacaoId) {
+        console.error('publicacaoId é necessário para escutar comentários.');
         return;
     }
 
     // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/API/forum/stream-posts?categoriaId=${categoriaId}&discussaoId=${discussaoId}&userTagCreator=${userTagCreator}`);
+    const eventSource = new EventSource(`/API/forum/stream-discussoesComments?publicacaoId=${publicacaoId}`);
     
     eventSource.onmessage = (event) => {
         try {
         const posts = JSON.parse(event.data);
-        renderPosts(posts); // Renderizar as mensagens no frontend
+        renderComments(posts); // Renderizar as mensagens no frontend
         } catch (error) {
         console.error('Erro ao processar os dados recebidos:', error);
         }
@@ -222,80 +222,95 @@ function listenForPosts(categoriaId, discussaoId, userTagCreator) {
 
 // Postar novo post
 document.getElementById('post').addEventListener('click', async () => {
-    const text = document.getElementById('messageText').value.trim();
-    const userTag = localStorage.getItem("autenticationUserTag");
-    if (!text) {
-      document.getElementById('statusMessage').textContent = 'O post não pode estar vazio.';
-      return;
+  const text = document.getElementById('messageText').value.trim();
+  const userId = localStorage.getItem("autenticationUserId");
+  const media = document.getElementById('mediaFile').files[0] ? URL.createObjectURL(document.getElementById('mediaFile').files[0]) : null;
+
+  if (!userId || (!text && !media)) {
+    document.getElementById('statusMessage').textContent = 'O post não pode estar vazio.';
+    return;
+  }
+
+  try {
+    const response = await fetch(`/API/forum/discussaocomment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, publicacaoId, text, media }),
+    });
+
+    const responseData = await response.json();
+    if (response.ok) {
+    document.getElementById('messageText').value = ''; // Limpar o campo de entrada
+    document.getElementById('mediaFile').value = ''; // Limpar o campo de mídia
+    document.getElementById('media-preview').innerHTML = ''; // Limpar o preview de mídia
+
+    // Atualizar a lista de comments e rolar para o final
+    renderComments(responseData.comments);
+
+    // Fazer a rolagem ir para o final
+    const messagesDiv = document.getElementById('postarea');
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    } else {
+    console.log(responseData.error || 'Erro ao publicar.');
     }
-
-    try {
-      /* Enquanto não finaliso o evio de midias */
-      const media = null;
-      const mediaType = null;
-      const response = await fetch(`/API/forum/discussaopost`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, categoriaId, discussaoId, userTag, userTagCreator, media, mediaType }),
-      });
-
-      const responseData = await response.json();
-      if (response.ok) {
-        document.getElementById('messageText').value = ''; // Limpar o campo de entrada
-
-        // Atualizar a lista de posts e rolar para o final
-        const posts = await response.json(); // Obter os posts atualizados
-        renderPosts(posts);
-
-        // Fazer a rolagem ir para o final
-        const messagesDiv = document.getElementById('postarea');
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-      }
-      else {
-        console.log(`responseData.error || 'Erro ao publicar.`);
-      }
-    } catch (error) {
-      console.log(`Erro: ${error.message}`);
-    }
+  } catch (error) {
+    console.log(`Erro: ${error.message}`);
+  }
 });
 
-// Declarando as variáveis fora do escopo da função
-let categoriaId;
-let discussaoId;
-let userTagCreator;
+let publicacaoId;
 
-window.onload = () => {
-    document.getElementById('messageText').value = ''; // Limpar o campo de entrada
+window.onload = async () => {
+  document.getElementById('messageText').value = ''; // Limpar o campo de entrada
 
-    // Recuperando os parâmetros da URL
-    const urlParams = new URLSearchParams(window.location.search);
+  // Recuperando os parâmetros da URL
+  const urlParams = new URLSearchParams(window.location.search);
 
-    // Atribuindo os valores recuperados nas variáveis globais
-    categoriaId = urlParams.get('categoriaId');
-    discussaoId = urlParams.get('discussaoId');
-    userTagCreator = urlParams.get('userTagCreator');
+  // Atribuindo os valores recuperados nas variáveis globais
+  publicacaoId = urlParams.get('publicacaoId');
 
-    // Adiciona titulo à página
-    document.getElementById("titulo-categoria-discussao").innerHTML = `
-      <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-        <button id="back-button" onclick="window.location.href='/discussoes?categoriaId=${categoriaId}'">
-          <svg fill="#000000" height="16px" width="16px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-            viewBox="0 0 26.676 26.676" xml:space="preserve" style="margin-right: 5px;">
-            <path d="M26.105,21.891c-0.229,0-0.439-0.131-0.529-0.346l0,0c-0.066-0.156-1.716-3.857-7.885-4.59
-              c-1.285-0.156-2.824-0.236-4.693-0.25v4.613c0,0.213-0.115,0.406-0.304,0.508c-0.188,0.098-0.413,0.084-0.588-0.033L0.254,13.815
-              C0.094,13.708,0,13.528,0,13.339c0-0.191,0.094-0.365,0.254-0.477l11.857-7.979c0.175-0.121,0.398-0.129,0.588-0.029
-              c0.19,0.102,0.303,0.295,0.303,0.502v4.293c2.578,0.336,13.674,2.33,13.674,11.674c0,0.271-0.191,0.508-0.459,0.562
-              C26.18,21.891,26.141,21.891,26.105,21.891z"/>
-          </svg>
-        </button>        
-        <!-- Texto com categoria e discussão -->
-        <strong style="font-size: 18px;">
-          <a href="/forum?categoriaId=${categoriaId}" style="color: inherit; text-decoration: underline; text-decoration-color: currentColor;">${categoriaId}</a> / ${discussaoTitle}
-        </strong>
-      </div>
-      `;
+  let response;
+  try{
+    response = await fetch(`/API/forum/getpublicacao?publicacaoId=${publicacaoId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+    });
 
-    // Chama a função listenForPosts com os parâmetros
-    listenForPosts(categoriaId, discussaoId, userTagCreator);
+    if (!response.ok) {
+    throw new Error('Erro ao buscar a publicação.');
+    }
+
+    response = await response.json();
+
+    console.log(response);
+
+  }catch(error){
+    console.error(`Erro: ${error.message}`);
+    return;
+  }
+
+  console.log(response);
+  // Adiciona titulo à página
+  document.getElementById("titulo-categoria-discussao").innerHTML = `
+    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+    <button id="back-button" onclick="window.location.href='/discussoes?categoriaId=${response.publicacao.categoriaId}'">
+      <svg fill="#000000" height="16px" width="16px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+      viewBox="0 0 26.676 26.676" xml:space="preserve" style="margin-right: 5px;">
+      <path d="M26.105,21.891c-0.229,0-0.439-0.131-0.529-0.346l0,0c-0.066-0.156-1.716-3.857-7.885-4.59
+        c-1.285-0.156-2.824-0.236-4.693-0.25v4.613c0,0.213-0.115,0.406-0.304,0.508c-0.188,0.098-0.413,0.084-0.588-0.033L0.254,13.815
+        C0.094,13.708,0,13.528,0,13.339c0-0.191,0.094-0.365,0.254-0.477l11.857-7.979c0.175-0.121,0.398-0.129,0.588-0.029
+        c0.19,0.102,0.303,0.295,0.303,0.502v4.293c2.578,0.336,13.674,2.33,13.674,11.674c0,0.271-0.191,0.508-0.459,0.562
+        C26.18,21.891,26.141,21.891,26.105,21.891z"/>
+      </svg>
+    </button>        
+    <!-- Texto com categoria e discussão -->
+    <strong style="font-size: 18px;">
+      <a href="/forum?categoriaId=${response.publicacao.categoriaId}" style="color: inherit; text-decoration: underline; text-decoration-color: currentColor;">${response.publicacao.categoriaId}</a> / ${response.publicacao.discussaoTitle}
+    </strong>
+    </div>
+    `;
+
+  // Chama a função listenForPosts com os parâmetros
+  listenForComments(publicacaoId);
 };
 </script>

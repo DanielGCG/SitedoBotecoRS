@@ -232,7 +232,7 @@ function renderPublicacoes(publicacoes) {
             </div>
             <div>
               <p class="discussao-info">${tempoFormatado}</p>
-              <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.categoriaId}', '${publicacao.discussaoId}', '${publicacao.userTag}')">Remover</button>
+              <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.publicacaoId}', '${publicacao.userId}')">Remover</button>
             </div>
           `;
         }
@@ -271,12 +271,12 @@ function renderPublicacoes(publicacoes) {
     });
 }
 
-async function deletaDiscussao(categoriaId, discussaoId, userTag) {
+async function deletaDiscussao(publicacaoId, userId) {
   try {
       const response = await fetch(`/API/forum/removerdiscussao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userTag, categoriaId, discussaoId }),
+        body: JSON.stringify({ userId, publicacaoId }),
       });
 
       const responseData = await response.json();

@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="/pages/skins/styles.css">
+<link rel="stylesheet" href="/geral/better-popup/better-popup.css">
 
 <main>
   <h2 style="text-align: center; margin-bottom: 20px;">BSMP Skins</h2>
@@ -6,4 +7,17 @@
   <ul class="skins-explorer"></ul>
 </main>
 
+<div class="better-popup" id="senha-popup">
+  <div class="better-popup-content">
+      <button class="better-popup-close">X</button>
+      <h2>Esta pasta está trancada!</h2>
+      <form class="acoes" id="novo-post-form">
+          <input type="password" id="senha" placeholder="Insira a senha aqui" required>
+          <button type="submit">Enviar</button>
+          <p class="form-status"></p>
+      </form>
+  </div>
+</div>
+
+<script src="/geral/better-popup/better-popup.js"></script>
 <script type="module" defer src="/pages/skins/script.js"></script> 

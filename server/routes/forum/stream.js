@@ -1,5 +1,5 @@
 const express = require('express');
-const { ref: dbRef, onValue, get, limitToLast, query, orderByChild, equalTo } = require('firebase/database');
+const { ref: dbRef, onValue, get, limitToLast, query, orderByChild, equalTo, off } = require('firebase/database');
 const { database } = require('../../config/firebase');
 const router = express.Router();
 
@@ -10,11 +10,11 @@ const configureSSE = (res) => {
   res.setHeader('Connection', 'keep-alive');
 };
 
-router.get('/stream-posts', (req, res) => {
-  const { categoriaId, userTagCreator, discussaoId } = req.query;
+router.get('/stream-discussoesComments', (req, res) => {
+  const { publicacaoId } = req.query;
 
-  if (!categoriaId || !discussaoId) {
-    res.status(400).json({ error: 'categoriaId e discussão são obrigatórias.' });
+  if (!publicacaoId) {
+    res.status(400).json({ error: 'publicacaoId é obrigatória.' });
     return;
   }
 
@@ -22,31 +22,46 @@ router.get('/stream-posts', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  // Referência para o nó 'posts' no Firebase Realtime Database
-  const postsRef = dbRef(database, `forum/publicacoes/${userTagCreator}/discussoes/${categoriaId}/${discussaoId}`);
+  // Referência para o nó 'discussaocomments' no Firebase Realtime Database
+  const discussaoCommentsRef = dbRef(database, `forum/discussoesComments/`);
+  const discussaoCommentsQuery = query(discussaoCommentsRef, orderByChild('publicacaoId'), equalTo(publicacaoId));
 
   // Escutando mudanças em tempo real no Firebase
   const listener = onValue(
-    postsRef,
-    (snapshot) => {
-      const posts = [];
-      snapshot.forEach((childSnapshot) => {
-        posts.push(childSnapshot.val());
-      });
-      // Tirar o lastPostId da lista para ser enviada
-      posts.pop();
+    discussaoCommentsQuery,
+    async (snapshot) => {
+      const discussaoComments = [];
+
+      for (const childSnapshot of Object.values(snapshot.val() || {})) {
+        const discussaoComment = childSnapshot;
+
+        try {
+          const userRef = dbRef(database, `forum/usuarios/${discussaoComment.userId}`);
+          const userSnapshot = await get(userRef);
+          discussaoComment.userTag = userSnapshot.exists() ? userSnapshot.val().userTag : 'Desconhecido';
+        } catch (error) {
+          console.error('Erro ao buscar usuário:', error);
+          discussaoComment.userTag = 'Erro ao buscar usuário';
+        }
+
+        discussaoComments.push(discussaoComment);
+      }
+
+      // Ordena os comentários pela propriedade 'time' (mais antigos primeiro)
+      discussaoComments.sort((a, b) => a.time - b.time);
+
       // Envia os dados atualizados para o cliente
-      res.write(`data: ${JSON.stringify(posts)}\n\n`);
+      res.write(`data: ${JSON.stringify(discussaoComments)}\n\n`);
     },
     (error) => {
       console.error('Erro ao escutar mudanças no Firebase:', error);
-      res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar posts' })}\n\n`);
+      res.write(`data: ${JSON.stringify({ error: 'Erro ao escutar discussaoComment' })}\n\n`);
     }
   );
 
   // Fechar conexão e remover o listener ao desconectar
   req.on('close', () => {
-    listener(); // Remove o listener do Firebase
+    off(discussaoCommentsRef, 'value', listener); // Remove o listener do Firebase
   });
 });
 
@@ -99,11 +114,7 @@ router.get('/stream-discussoes', (req, res) => {
 });
 
 router.get('/stream-publicacoes', async (req, res) => {
-  let { amount } = req.query;
-
-  if (!amount) {
-    amount = 20; // Valor padrão
-  }
+  let amount = req.query.amount || 20;
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -119,18 +130,29 @@ router.get('/stream-publicacoes', async (req, res) => {
     if (snapshot.exists()) {
       const todasPublicacoes = snapshot.val();
 
+      const usersCache = {};
+
       // Convertendo para um array e buscando os dados dos usuários de forma assíncrona
       const publicacoesArray = await Promise.all(
         Object.entries(todasPublicacoes).map(async ([id, publicacao]) => {
           try {
             // Busca os dados do usuário
-            const userSnapshot = await get(dbRef(database, `forum/usuarios/${publicacao.userId}`));
+            let userSnapshot;
+            
+            if (!usersCache[publicacao.userId]) {
+              userSnapshot = await get(dbRef(database, `forum/usuarios/${publicacao.userId}`));
 
-            if (userSnapshot.exists()) {
-              publicacao.userTag = userSnapshot.val().userTag;
+              if (!userSnapshot.exists()) {
+                publicacao.userTag = "Usuário desconhecido";
+                return;
+              }
+
+              usersCache[publicacao.userId] = userSnapshot.val().userTag;
             } else {
-              publicacao.userTag = "Usuário desconhecido";
+              userSnapshot = usersCache[publicacao.userId];
             }
+
+            publicacao.userTag = userSnapshot;
           } catch (error) {
             console.error(`Erro ao buscar userTag para ${publicacao.userId}:`, error);
             publicacao.userTag = "Erro ao carregar usuário";

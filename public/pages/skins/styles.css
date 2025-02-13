@@ -4,6 +4,7 @@
 }
 
 .skins-explorer li {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -23,4 +24,12 @@
 
 .skins-explorer li span {
     font-size: 2rem;
+}
+
+.locked {
+    position: absolute;
+    top: 50%;
+    right: 32px;
+    transform: translate(0 , -50%);
+    opacity: 0.5;
 }

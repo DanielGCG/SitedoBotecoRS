@@ -50,19 +50,20 @@ router.post('/getuserwithusertag', async (req, res) => {
 
 // Atualiza o perfil do usuário
 router.post('/update-profile', async (req, res) => {
-  const { userTag, bannerImage, biography, exibitionName, profileImage, pronouns, socialMediaLinks } = req.body;
+  const { userId, userTag, bannerImage, biography, exibitionName, profileImage, pronouns, socialMediaLinks } = req.body;
 
   // Validação dos dados recebidos
-  if (!userTag) {
-    return res.status(400).json({ error: 'O campo userTag é obrigatório para atualizar o perfil.' });
+  if (!userId) {
+    return res.status(400).json({ error: 'O campo userId é obrigatório para atualizar o perfil.' });
   }
 
   try {
     // Referência para o nó do usuário no Firebase Realtime Database
-    const userRef = dbRef(database, `forum/usuarios/${userTag}`);
+    const userRef = dbRef(database, `forum/usuarios/${userId}`);
 
     // Dados atualizados do perfil
     const updatedProfileData = {
+      userTag: userTag || null,
       bannerImage: bannerImage || null,
       biography: biography || null,
       exibitionName: exibitionName || null,
@@ -85,79 +86,83 @@ router.post('/update-profile', async (req, res) => {
 // Adiciona Follow em usuário
 router.post('/followuser', async (req, res) => {
   try {
-    const { userTagRequester, userTag } = req.body;
+    const { userIdRequester, userId } = req.body;
 
-    // Referência ao UserTag no banco de dados
-    const UserTagRef = dbRef(database, `forum/usuarios/${userTag}`);
+    // Referência ao User no banco de dados
+    const UserRef = dbRef(database, `forum/usuarios/${userId}`);
 
     // Obtem os dados do usuário
-    const snapshotUserTag = await get(UserTagRef);
+    const snapshotUser = await get(UserRef);
 
-    if (snapshotUserTag.exists()) {
-      const UserTagData = snapshotUserTag.val();
+    if (snapshotUser.exists()) {
+      const UserData = snapshotUser.val();
 
       // Acessar
-      let UserTagfriendAmount = UserTagData.friendAmount || 0;
-      let UserTagfriendList = UserTagData.friendList || [];
-      let UserTagfollowersAmount = UserTagData.followersAmount || 0;
-      let UserTagfollowersList = UserTagData.followersList || [];
-      let UserTagfollowingList = UserTagData.followingList || [];
+      let UserUserTag = UserData.userTag || 0;
+      let UserfriendAmount = UserData.friendAmount || 0;
+      let UserfriendList = UserData.friendList || [];
+      let UserfollowersAmount = UserData.followersAmount || 0;
+      let UserfollowersList = UserData.followersList || [];
+      let UserfollowingList = UserData.followingList || [];
 
-      // Referência ao userTagRequester no banco de dados
-      const userTagRequesterRef = dbRef(database, `forum/usuarios/${userTagRequester}`);
+      // Referência ao userIdRequester no banco de dados
+      const userRequesterRef = dbRef(database, `forum/usuarios/${userIdRequester}`);
 
       // Obtem os dados do usuário
-      const snapshotUserTagRequester = await get(userTagRequesterRef);
+      const snapshotUserRequester = await get(userRequesterRef);
 
-      if (!snapshotUserTagRequester.exists()) {
+      if (!snapshotUserRequester.exists()) {
         return res.status(404).json({ error: 'Usuário solicitante não encontrado.' });
       }
 
-      const UserTagRequesterData = snapshotUserTagRequester.val();
+      const UserRequesterData = snapshotUserRequester.val();
 
       // Acessar
-      let UserTagRequesterfriendAmount = UserTagRequesterData.friendAmount || 0;
-      let UserTagRequesterfriendList = UserTagRequesterData.friendList || [];
-      let UserTagRequesterfollowingAmount = UserTagRequesterData.followingAmount || 0;
-      let UserTagRequesterfollowingList = UserTagRequesterData.followingList || [];
+      let UserRequesterUserTag = UserRequesterData.userTag || 0;
+      let UserRequesterfriendAmount = UserRequesterData.friendAmount || 0;
+      let UserRequesterfriendList = UserRequesterData.friendList || [];
+      let UserRequesterfollowingAmount = UserRequesterData.followingAmount || 0;
+      let UserRequesterfollowingList = UserRequesterData.followingList || [];
 
-      // Adiciona userTag no following de userTagRequester e adiciona userTagRequester no followers de userTag
-      if (!UserTagRequesterfollowingList.includes(userTag)) {
-        UserTagRequesterfollowingList.push(userTag);
-        UserTagRequesterfollowingAmount++;
+      // Adiciona userId no following de userIdRequester e adiciona userIdRequester no followers de userId
+      if (!UserRequesterfollowingList.includes(userId)) {
+        UserRequesterfollowingList.push(userId);
+        UserRequesterfollowingAmount++;
       }
 
-      if (!UserTagfollowersList.includes(userTagRequester)) {
-        UserTagfollowersList.push(userTagRequester);
-        UserTagfollowersAmount++;
+      if (!UserfollowersList.includes(userIdRequester)) {
+        UserfollowersList.push(userIdRequester);
+        UserfollowersAmount++;
       }
 
       // Agora vamos processar a amizade
-      if (UserTagRequesterfollowingList.includes(userTag) && UserTagfollowingList.includes(userTagRequester)) {
-        if (!UserTagRequesterfriendList.includes(userTag)) {
-          UserTagRequesterfriendList.push(userTag);
-          UserTagRequesterfriendAmount++;
+      if (UserRequesterfollowingList.includes(userId) && UserfollowingList.includes(userIdRequester)) {
+        if (!UserRequesterfriendList.includes(userId)) {
+          UserRequesterfriendList.push(userId);
+          UserRequesterfriendAmount++;
         }
       
-        if (!UserTagfriendList.includes(userTagRequester)) {
-          UserTagfriendList.push(userTagRequester);
-          UserTagfriendAmount++;
+        if (!UserfriendList.includes(userIdRequester)) {
+          UserfriendList.push(userIdRequester);
+          UserfriendAmount++;
         }
       }      
 
       // Atualiza os dados no banco de dados
-      await update(UserTagRef, {
-        friendAmount: UserTagfriendAmount,
-        friendList: UserTagfriendList,
-        followersAmount: UserTagfollowersAmount,
-        followersList: UserTagfollowersList,
+      await update(UserRef, {
+        userTag: UserUserTag,
+        friendAmount: UserfriendAmount,
+        friendList: UserfriendList,
+        followersAmount: UserfollowersAmount,
+        followersList: UserfollowersList,
       });
 
-      await update(userTagRequesterRef, {
-        friendAmount: UserTagRequesterfriendAmount,
-        friendList: UserTagRequesterfriendList,
-        followingAmount: UserTagRequesterfollowingAmount,
-        followingList: UserTagRequesterfollowingList,
+      await update(userRequesterRef, {
+        userTag: UserRequesterUserTag,
+        friendAmount: UserRequesterfriendAmount,
+        friendList: UserRequesterfriendList,
+        followingAmount: UserRequesterfollowingAmount,
+        followingList: UserRequesterfollowingList,
       });
 
       res.status(200).json({ message: 'Seguido com sucesso.' });
@@ -173,33 +178,33 @@ router.post('/followuser', async (req, res) => {
 // Remove Follow de usuário
 router.post('/unfollowuser', async (req, res) => {
   try {
-    const { userTagRequester, userTag } = req.body;
+    const { userIdRequester, userId } = req.body;
 
-    // Referência ao UserTag no banco de dados
-    const UserTagRef = dbRef(database, `forum/usuarios/${userTag}`);
+    // Referência ao User no banco de dados
+    const UserRef = dbRef(database, `forum/usuarios/${userId}`);
 
     // Obtem os dados do usuário
-    const snapshotUserTag = await get(UserTagRef);
+    const snapshotUser = await get(UserRef);
 
-    if (snapshotUserTag.exists()) {
-      const UserTagData = snapshotUserTag.val();
+    if (snapshotUser.exists()) {
+      const UserData = snapshotUser.val();
 
       // Acessar dados do usuário
-      let UserTagfriendList = UserTagData.friendList || [];
-      let UserTagfollowersList = UserTagData.followersList || [];
+      let UserfriendList = UserData.friendList || [];
+      let UserfollowersList = UserData.followersList || [];
 
-      // Referência ao userTagRequester no banco de dados
-      const userTagRequesterRef = dbRef(database, `forum/usuarios/${userTagRequester}`);
-      const snapshotUserTagRequester = await get(userTagRequesterRef);
+      // Referência ao userIdRequester no banco de dados
+      const userRequesterRef = dbRef(database, `forum/usuarios/${userIdRequester}`);
+      const snapshotUserRequester = await get(userRequesterRef);
 
-      if (!snapshotUserTagRequester.exists()) {
+      if (!snapshotUserRequester.exists()) {
         return res.status(404).json({ error: 'Usuário solicitante não encontrado.' });
       }
 
-      const UserTagRequesterData = snapshotUserTagRequester.val();
+      const UserRequesterData = snapshotUserRequester.val();
 
-      let UserTagRequesterfriendList = UserTagRequesterData.friendList || [];
-      let UserTagRequesterfollowingList = UserTagRequesterData.followingList || [];
+      let UserRequesterfriendList = UserRequesterData.friendList || [];
+      let UserRequesterfollowingList = UserRequesterData.followingList || [];
 
       // Função utilitária para remoção segura
       const removeFromList = (list, item) => {
@@ -207,31 +212,31 @@ router.post('/unfollowuser', async (req, res) => {
         if (index !== -1) list.splice(index, 1);
       };
 
-      // 1. Remove userTag de following do requester
-      removeFromList(UserTagRequesterfollowingList, userTag);
+      // 1. Remove userId de following do requester
+      removeFromList(UserRequesterfollowingList, userId);
 
-      // 2. Remove userTagRequester de followers do target
-      removeFromList(UserTagfollowersList, userTagRequester);
+      // 2. Remove userIdRequester de followers do target
+      removeFromList(UserfollowersList, userIdRequester);
 
       // 3. Remove amizade se existirem
-      if (UserTagRequesterfriendList.includes(userTag) && UserTagfriendList.includes(userTagRequester)) {
-        removeFromList(UserTagRequesterfriendList, userTag);
-        removeFromList(UserTagfriendList, userTagRequester);
+      if (UserRequesterfriendList.includes(userId) && UserfriendList.includes(userIdRequester)) {
+        removeFromList(UserRequesterfriendList, userId);
+        removeFromList(UserfriendList, userIdRequester);
       }
 
       // Atualiza os dados no banco de dados
-      await update(UserTagRef, {
-        friendList: UserTagfriendList,
-        followersList: UserTagfollowersList,
-        friendAmount: UserTagfriendList.length,
-        followersAmount: UserTagfollowersList.length,
+      await update(UserRef, {
+        friendList: UserfriendList,
+        followersList: UserfollowersList,
+        friendAmount: UserfriendList.length,
+        followersAmount: UserfollowersList.length,
       });
 
-      await update(userTagRequesterRef, {
-        friendList: UserTagRequesterfriendList,
-        followingList: UserTagRequesterfollowingList,
-        friendAmount: UserTagRequesterfriendList.length,
-        followingAmount: UserTagRequesterfollowingList.length,
+      await update(userRequesterRef, {
+        friendList: UserRequesterfriendList,
+        followingList: UserRequesterfollowingList,
+        friendAmount: UserRequesterfriendList.length,
+        followingAmount: UserRequesterfollowingList.length,
       });
 
       res.status(200).json({ message: 'Unfollow realizado com sucesso.' });

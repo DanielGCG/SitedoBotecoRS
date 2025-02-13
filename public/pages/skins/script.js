@@ -30,6 +30,17 @@
         return JSON.parse(b64_cache)[id];
     }
 
+    function addEntitiesToExplorer(id, data) {
+        saveCache(id, data);
+        clearExplorer();
+        let {entidades, parente} = data;
+
+        if (parente !== null) {
+            addEntity({ id: parente, nome: ".." });
+        }
+
+        entidades.forEach(addEntity);
+    }
 
     async function exploreTo(id='') {
         OnLoadingScreen();
@@ -44,38 +55,70 @@
             json = await response.json();
         }
 
-        if (json.success) {
-            saveCache(id, json.data);
-            clearExplorer();
-            let {entidades, parente} = json.data;
-
-            if (parente !== null) {
-                addFolder({ id: parente, nome: ".." });
-            }
-
-            for (let entity of entidades) {
-                let func = entity.tipo === "pasta" ? addFolder : addSkin;
-                func(entity);
-            }
-        }
+        if (json.success) addEntitiesToExplorer(id, json.data)
+        else alert(json.message);
 
         OffLoadingScreen();
     }
 
-    function addFolder({ id, nome }) {
+    function addEntity({ id, nome, tipo = "pasta", trancado = false }) {
+        const icones = { pasta: "folder_open", skin: "image" };
+
         const li = document.createElement("li");
-        li.innerHTML = '<span class="material-symbols-outlined">folder_open</span>';
+        li.innerHTML = `<span class="material-symbols-outlined">${icones[tipo]}</span>`;
         li.append(nome);
+        
+        if (trancado) {
+            li.innerHTML += `<span class="material-symbols-outlined locked">lock</span>`;
+        }
+
         explorer.append(li);
-        li.onclick = () => exploreTo(id);
+
+        if (trancado) {
+            li.onclick = () => {
+                const form = document.getElementById("novo-post-form");
+                form.reset();
+                form.dataset.for = id;
+                abrirBetterPopup("senha-popup");
+            }
+        } else {
+            li.onclick = () => exploreTo(id);
+        }
     }
 
-    function addSkin({ id, nome }) {
-        const li = document.createElement("li");
-        li.innerHTML = '<span class="material-symbols-outlined">image</span>';
-        li.append(nome);
-        explorer.append(li);
-    }
+    window.addEventListener("load", function () {
+        const form = document.getElementById("novo-post-form");
+        const status = form.querySelector('.form-status');
+
+        form.onsubmit = async (ev) => {
+            ev.preventDefault();
+            OnLoadingScreen();
+    
+            const id = form.dataset.for;
+            if (!id) return;
+    
+            const senha = form.querySelector("input").value.trim();
+            if (!senha) {
+                status.innerHTML = 'O campo está vazio<br><span style="font-size: 0.7rem">(espaços não contam como senha)!</span>';
+                OffLoadingScreen();
+                return false;
+            };
+
+            const response = await fetch(`/API/skins?folder=${id}&senha=${senha}`);
+            const json = await response.json();
+
+            if (!json.success) {
+                status.innerHTML = json.message;
+                OffLoadingScreen();
+                return false;
+            }
+
+            addEntitiesToExplorer(id, json.data);
+            
+            fecharBetterPopup("senha-popup");
+            OffLoadingScreen();
+        };
+    });
 
     exploreTo();
 })();

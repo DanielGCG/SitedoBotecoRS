@@ -1,0 +1,88 @@
+.better-popup {
+  position: fixed;
+  display: none;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.288); /* Fundo semi-transparente */
+  z-index: 1500;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px); /* Aplica o efeito de desfoque */
+  overflow: hidden; /* Garante que nada saia da tela */
+  transform-origin: center center;
+}
+
+.better-popup[data-active] {
+  display: flex;
+  animation: pop-open 0.2s cubic-bezier(0.265, 1.130, 0.395, 1.325) forwards;
+}
+
+.better-popup-content {
+  position: relative;
+  background-color: var(--cor-fundo);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.2);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.better-popup-content h2 {
+  max-width: 50vw;
+}
+
+/* || Botão de fechar */
+
+.better-popup-close {
+  background-color: #4CAF50;
+  border: none;
+  font-size: 18px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+  color: white;
+  padding: 0.5rem 0.8rem;
+  border-radius: 5px;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.better-popup-close:hover {
+  background-color: #388E3C; /* Cor mais escura baseada em #4CAF50 */
+  transform: scale(1.1);
+}
+
+/* || Formulários */
+
+.better-popup form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.better-popup form input,
+.better-popup form textarea {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+}
+
+.better-popup form button {
+  padding: 0.5rem 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.better-popup form button:hover {
+  background-color: #388E3C; /* Cor mais escura baseada em #4CAF50 */
+}
+

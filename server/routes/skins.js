@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
     const folder = req.query.folder ? req.query.folder.trim() : '';
+    const senha = req.query.senha;
 
     try {
       const skinsRef = ref(database, "/skins");
@@ -15,7 +16,16 @@ router.get('/', async (req, res) => {
 
       if (folder) {
         const folderSnapshot = await get(child(skinsRef, folder));
-        parente = folderSnapshot.val().parente;
+        const folderData = folderSnapshot.val();
+        parente = folderData.parente;
+
+        const isPasswordValid = (folderPassword, providedPassword) => {
+          return folderPassword.toString() && folderPassword.toString() === providedPassword.toString();
+        };
+
+        if (folderData.password && !isPasswordValid(folderData.password, senha)) {
+          return res.status(403).json({ success: false, message: "Pasta trancada e senha providenciada está incorreta", parente });
+        }
       }
 
       const childrenSnapshot = await get(
@@ -25,8 +35,8 @@ router.get('/', async (req, res) => {
       if (childrenSnapshot.exists()) {
         const entidades = Object
           .entries(childrenSnapshot.val())
-          .map(([id, { nome, tipo }]) => {
-            return { id, nome, tipo };
+          .map(([id, { nome, tipo, password }]) => {
+            return { id, nome, tipo, trancado: !!password };
           })
           .sort((a ,b) => (a.tipo === "pasta" ? -1 : 1));
         
