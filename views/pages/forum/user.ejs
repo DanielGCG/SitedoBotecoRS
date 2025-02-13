@@ -29,8 +29,8 @@
 </body>
 
 <script>
-async function followUser(userTag) {
-  const userTagRequester = localStorage.getItem("autenticationUserTag");
+async function followUser(userId) {
+  const userIdRequester = localStorage.getItem("autenticationUserId");
 
   try {
     const response = await fetch('/API/forum/followuser', {
@@ -38,7 +38,7 @@ async function followUser(userTag) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userTag, userTagRequester }),
+      body: JSON.stringify({ userIdRequester, userId  }),
     });
 
     if (!response.ok) {
@@ -49,14 +49,13 @@ async function followUser(userTag) {
     }
 
     const data = await response.json();
-    console.log('Usuário seguido com sucesso:', data);
 
     // Alterar botão para "Unfollow"
     const button = document.getElementById('follow-button');
     if (button) {
       button.id = 'unfollow-button';
       button.textContent = 'Unfollow';
-      button.setAttribute('onclick', `unfollowUser('${userTag}')`);
+      button.setAttribute('onclick', `unfollowUser('${userId}')`);
     }
   } catch (error) {
     console.error('Erro ao processar os dados:', error);
@@ -64,8 +63,8 @@ async function followUser(userTag) {
   }
 }
 
-async function unfollowUser(userTag) {
-  const userTagRequester = localStorage.getItem("autenticationUserTag");
+async function unfollowUser(userId) {
+  const userIdRequester = localStorage.getItem("autenticationUserId");
 
   try {
     const response = await fetch('/API/forum/unfollowuser', {
@@ -73,7 +72,7 @@ async function unfollowUser(userTag) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userTag, userTagRequester }),
+      body: JSON.stringify({ userIdRequester, userId }),
     });
 
     if (!response.ok) {
@@ -84,14 +83,13 @@ async function unfollowUser(userTag) {
     }
 
     const data = await response.json();
-    console.log('Unfollow realizado com sucesso:', data);
 
     // Alterar botão para "Follow"
     const button = document.getElementById('unfollow-button');
     if (button) {
       button.id = 'follow-button';
       button.textContent = 'Follow';
-      button.setAttribute('onclick', `followUser('${userTag}')`);
+      button.setAttribute('onclick', `followUser('${userId}')`);
     }
 
   } catch (error) {
@@ -102,11 +100,11 @@ async function unfollowUser(userTag) {
 
 function renderUserBox(user) {
   const userpageUserbox = document.getElementById("userpage-userbox");
-  const userTagRequester = localStorage.getItem("autenticationUserTag");
-  const isAuthenticatedUser = user.userTag === userTagRequester;
+  const userIdRequester = localStorage.getItem("autenticationUserId");
+  const isAuthenticatedUser = user.userId === userIdRequester;
 
   // Verificar se `followersList` é válido
-  const isFollowing = Array.isArray(user.followersList) && user.followersList.includes(userTagRequester);
+  const isFollowing = Array.isArray(user.followersList) && user.followersList.includes(userIdRequester);
 
   // Template comum para exibir informações do usuário
   const userInfoTemplate = `
@@ -135,13 +133,13 @@ function renderUserBox(user) {
   } else if (isFollowing) {
     actionsTemplate = `
       <div class="userpage-userbox-actions">
-        <button id="unfollow-button" onclick="unfollowUser('${user.userTag}')">Unfollow</button>
+        <button id="unfollow-button" onclick="unfollowUser('${user.userId}')">Unfollow</button>
       </div>
     `;
   } else {
     actionsTemplate = `
       <div class="userpage-userbox-actions">
-        <button id="follow-button" onclick="followUser('${user.userTag}')">Follow</button>
+        <button id="follow-button" onclick="followUser('${user.userId}')">Follow</button>
       </div>
     `;
   }
@@ -173,25 +171,54 @@ function renderBiografia(user) {
   }
 }
 
-function renderAmizades(user) {
+async function renderAmizades(user) {
   const amizadesContainer = document.getElementById("amizades");
-
-  if (user.friendAmount > 0) {
-    let lista = ''; // Variável para armazenar a lista de amigos
-
-    // Cria um item de lista para cada amigo
-    user.friendList.forEach(friend => {
-      lista += ` <a href='/forum/user?userTag=${friend}' style="text-decoration: none; color: #333;">${friend} </a> `; // Adiciona o nome do amigo (ou o que for relevante) à lista
+  try {
+    const response = await fetch('/API/forum/getuserfriendlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      
+      body: JSON.stringify({ userId: user.userId }),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Erro ao obter lista de amigos:', errorData.error);
+      amizadesContainer.innerHTML = `
+        <div class="amizades-info">
+            <p>Erro ao carregar amigos.</p>
+        </div>`;
+      return;
+    }
+
+    const data = await response.json();
+    const friendList = data.listadeamigosTag;
+
+    if (friendList.length > 0) {
+      let lista = ''; // Variável para armazenar a lista de amigos
+
+      // Cria um item de lista para cada amigo
+      friendList.forEach(friend => {
+        lista += ` <a href='/forum/user?userTag=${friend}' style="text-decoration: none; color: #333;">${friend} </a> `; // Adiciona o nome do amigo (ou o que for relevante) à lista
+      });
+
+      amizadesContainer.innerHTML = `
+        <div class="amizades-info">
+            ${lista} <!-- Renderiza a lista de amigos -->
+        </div>`;
+    } else {
+      amizadesContainer.innerHTML = `
+        <div class="amizades-info">
+            <p>Nem tem amigos ainda XD</p>
+        </div>`;
+    }
+  } catch (error) {
+    console.error('Erro ao processar os dados:', error);
     amizadesContainer.innerHTML = `
       <div class="amizades-info">
-          ${lista} <!-- Renderiza a lista de amigos -->
-      </div>`;
-  } else {
-    amizadesContainer.innerHTML = `
-      <div class="amizades-info">
-          <p>Nem tem amigos ainda XD</p>
+          <p>Erro ao carregar amigos.</p>
       </div>`;
   }
 }
@@ -224,7 +251,7 @@ function renderPublicacoes(publicacoes) {
           publicacaoDiv.innerHTML = `
             <div>
               <h3 class="discussao-title">
-                <a href="/forum/discussao?categoriaId=${publicacao.categoriaId}">${publicacao.discussaoTitle}</a>
+                <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">${publicacao.discussaoTitle}</a>
               </h3>
               <p class="discussao-info">
                 </a>${publicacao.commentAmount} respostas
@@ -327,12 +354,10 @@ function searchUserPublicacoes(userId) {
     // Conectar ao servidor de mensagens com parâmetros na URL
     const eventSource = new EventSource(`/API/forum/stream-publicacoesbyuserid?userId=${userId}`);
 
-    console.log(`procurando por publicações de ${userId}`);
 
     eventSource.onmessage = (event) => {
         try {
           userPublicacoes = JSON.parse(event.data);
-          console.log(userPublicacoes);
           renderPublicacoes(userPublicacoes);
         } catch (error) {
             console.error('Erro ao processar os dados recebidos:', error);

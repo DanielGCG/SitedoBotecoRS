@@ -45,16 +45,20 @@
             <th>Valor</th>
         </tr>
         <tr>
+            <td>Nome de Exibição</td>
+            <td><input type="text" id="exibitionName" placeholder="Nome de exibição"></td>
+        </tr>
+        <tr>
+            <td>userTag</td>
+            <td><input type="text" id="userTag" placeholder="@userTag"></td>
+        </tr>
+        <tr>
             <td>Imagem do Banner (link)</td>
             <td><input type="text" id="bannerImage" placeholder="Link para a imagem do banner"></td>
         </tr>
         <tr>
             <td>Biografia</td>
             <td><textarea id="biography" rows="4" placeholder="Escreva sua biografia"></textarea></td>
-        </tr>
-        <tr>
-            <td>Nome de Exibição</td>
-            <td><input type="text" id="exibitionName" placeholder="Nome de exibição"></td>
         </tr>
         <tr>
             <td>Imagem de Perfil (link)</td>
@@ -85,17 +89,17 @@
     <script>
         let UserDataForProfileEditor = {};
 
-        searchUserDataForProfileEditor(localStorage.getItem("autenticationUserTag"));
+        searchUserDataForProfileEditor(localStorage.getItem("autenticationUserId"));
 
-        function searchUserDataForProfileEditor(userTag) {
-            if (!userTag) {
-                console.error('precisamos do userTag do usuário para localiza-lo.');
+        function searchUserDataForProfileEditor(userId) {
+            if (!userId) {
+                console.error('precisamos do userId do usuário para localiza-lo.');
                 alert('precisamos do email do usuário para localiza-lo.');
                 return;
             }
 
             // Conectar ao servidor de mensagens com parâmetros na URL
-            const eventSource = new EventSource(`/API/forum/stream-user?userTag=${userTag}`);
+            const eventSource = new EventSource(`/API/forum/stream-user?userId=${userId}`);
 
             eventSource.onmessage = (event) => {
                 try {
@@ -113,6 +117,7 @@
         }
 
         function populateFields(data) {
+            document.getElementById("userTag").value = data.userTag || "";
             document.getElementById("bannerImage").value = data.bannerImage || "";
             document.getElementById("biography").value = data.biography || "";
             document.getElementById("exibitionName").value = data.exibitionName || "";
@@ -123,7 +128,8 @@
 
         function saveProfile() {
             const updatedData = {
-                userTag: localStorage.getItem("autenticationUserTag"),
+                userId: localStorage.getItem("autenticationUserId"),
+                userTag: document.getElementById("userTag").value,
                 bannerImage: document.getElementById("bannerImage").value,
                 biography: document.getElementById("biography").value,
                 exibitionName: document.getElementById("exibitionName").value,
@@ -131,8 +137,6 @@
                 pronouns: document.getElementById("pronouns").value,
                 socialMediaLinks: document.getElementById("socialMediaLinks").value,
             };
-
-            console.log("Enviando dados atualizados para o servidor:", updatedData);
 
             fetch('/API/forum/update-profile', {
                 method: 'POST',
@@ -144,7 +148,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = `/forum/user?userTag=${localStorage.getItem("autenticationUserTag")}`;
+                    window.location.href = `/forum/user?userTag=${document.getElementById("userTag").value}`;
                 } else {
                     alert('Erro ao atualizar o perfil.');
                 }

@@ -50,7 +50,7 @@ function renderDiscussoes(discussoes) {
       if (discussao.userId === localStorage.getItem("autenticationUserId")){
         discussaoDiv.innerHTML = `
         <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoTitle}</a></h3>
+          <h3 class="discussao-title"><a href="/forum/discussao?publicacaoId=${discussao.publicacaoId}">${discussao.discussaoTitle}</a></h3>
           <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.commentAmount} respostas</p>
         </div>
         <div>
@@ -62,7 +62,7 @@ function renderDiscussoes(discussoes) {
       else {
         discussaoDiv.innerHTML = `
         <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?categoriaId=${discussao.categoriaId}&discussaoId=${discussao.discussaoId}&userTagCreator=${discussao.userTag}">${discussao.discussaoTitle}</a></h3>
+          <h3 class="discussao-title"><a href="/forum/discussao?publicacaoId=${discussao.publicacaoId}">${discussao.discussaoTitle}</a></h3>
           <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.commentAmount} respostas</p>
         </div>
         <div>
@@ -152,8 +152,6 @@ document.getElementById('post').addEventListener('click', async () => {
     const categoriaId = categoriaPagina;
     let publicacaoIdEndereco;
 
-    console.log (`[${categoriaId}, ${userId}, ${discussaoTitle}]`);
-
     if (!categoriaId || !userId || !discussaoTitle) {
         document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem categoriaId, userId ou discussaoTitle.';
         return;
@@ -167,11 +165,11 @@ document.getElementById('post').addEventListener('click', async () => {
         });
 
         const responseData = await response.json();
-        if (response.ok) {
+        publicacaoIdEndereco = responseData.publicacaoId;
+        if (responseData.publicacaoId) {
             document.getElementById('statusMessage').textContent = 'Mensagem publicada com sucesso.';
             document.getElementById('discussao').value = ''; // Limpar o campo de entrada
             document.getElementById('categoria').value = ''; // Limpar o campo de entrada
-            publicacaoIdEndereco = response.publicacaoId;
         } else {
         document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
         }
@@ -179,7 +177,7 @@ document.getElementById('post').addEventListener('click', async () => {
         document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
     }
     document.getElementById('popup-nova-discussao').style.display = 'none';
-    window.location.href = `/forum/discussao?categoriaId=${categoriaId}&publicacaoId=${publicacaoIdEndereco}`;
+    window.location.href = `/forum/discussao?publicacaoId=${publicacaoIdEndereco}`;
 });
 
 let categoriaPagina;

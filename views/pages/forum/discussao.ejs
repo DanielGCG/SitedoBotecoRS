@@ -71,7 +71,6 @@ async function removerPost(userId, publicacaoId, discussaoCommentId) {
     const responseData = await response.json();
 
     if (response.ok) {
-      console.log('Comentário removido com sucesso');
     } else {
       console.error(responseData.error || 'Erro ao remover a DiscussaoPost.');
     }
@@ -282,14 +281,11 @@ window.onload = async () => {
 
     response = await response.json();
 
-    console.log(response);
-
   }catch(error){
     console.error(`Erro: ${error.message}`);
     return;
   }
 
-  console.log(response);
   // Adiciona titulo à página
   document.getElementById("titulo-categoria-discussao").innerHTML = `
     <div style="display: flex; align-items: center; margin-bottom: 1rem;">

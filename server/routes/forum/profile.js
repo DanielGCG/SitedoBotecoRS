@@ -1,5 +1,5 @@
 const express = require('express');
-const { ref: dbRef, update, get } = require('firebase/database'); // Certifique-se de importar funções corretamente
+const { ref: dbRef, update, get, query, orderByChild, equalTo } = require('firebase/database'); // Certifique-se de importar funções corretamente
 const { database } = require('../../config/firebase');
 const router = express.Router();
 
@@ -38,6 +38,53 @@ router.post('/getuserwithusertag', async (req, res) => {
         message: 'Usuário encontrado com sucesso.',
         success: true,
         userData,  // Retorna os dados do usuário encontrado
+      });
+    } else {
+      res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+  } catch (error) {
+    console.error('Erro ao pegar o perfil no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+router.post('/getuserfriendlist', async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    // Referência ao nó de usuários no banco de dados
+    const usersRef = dbRef(database, `forum/usuarios/${userId}`);
+
+    // Obter os dados da consulta
+    const snapshot = await get(usersRef);
+
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      const listadeamigos = userData.friendList || []; // Verifica se a lista de amigos está vazia
+
+      if (listadeamigos.length === 0) {
+        return res.status(200).json({
+          message: 'Usuário encontrado, mas a lista de amigos está vazia.',
+          success: true,
+          listadeamigosTag: [],
+        });
+      }
+
+      let listadeamigosTag = [];
+
+      await Promise.all(listadeamigos.map(async (friendId) => {
+        const friendRef = dbRef(database, `forum/usuarios/${friendId}`);
+        const friendData = await get(friendRef);
+
+        if (friendData.exists()) {
+          listadeamigosTag.push(friendData.val().userTag);
+        }
+      }));
+
+      res.status(200).json({
+        message: 'Usuário encontrado com sucesso.',
+        success: true,
+        listadeamigosTag,
       });
     } else {
       res.status(404).json({ error: 'Usuário não encontrado.' });
