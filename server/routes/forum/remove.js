@@ -110,12 +110,15 @@ router.post('/removerpost', async (req, res) => {
       // Remoção do post
       await remove(postRef);
 
+      const userRef = dbRef(database, `/forum/usuarios/${userId}`);
+
       // Atualização no perfil do usuário
       const userSnapshot = await get(userRef);
 
       if (userSnapshot.exists()) {
         // Obtém o valor atual e garante que seja um número válido
         const currentAmount = parseInt(userSnapshot.val().postAmount, 10) || 0;
+        console.log(currentAmount);
         
         // Garante que o valor não fique negativo
         const newAmount = Math.max(0, currentAmount - 1);

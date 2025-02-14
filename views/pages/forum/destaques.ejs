@@ -144,28 +144,26 @@ function renderPublicacoes(publicacoes) {
 
         if(publicacao.type === "discussao"){
             conteudoHTML = `
-                <div>
-                    <div class="publicacao-type">
-                        <p>Discussão</p>
-                    </div>
-                    <div class="publicacao-profile-box">
-                        <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></p>
-                    </div>
+            <div>
+                <div class="publicacao-type">
+                    <p>Discussão</p>
                 </div>
-                    <div>                    
-                        <h3 class="discussao-title">
-                            <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">
-                                ${publicacao.discussaoTitle}
-                            </a>
-                        </h3>
-                    <div>
-                    <div class="publicacao-discussao-footer">
-                        <p class="discussao-info">${tempoFormatado}</p>
-                    </div>
+                <div class="publicacao-profile-box">
+                    <img src="${publicacao.profileImage}" class="publicacao-profile-image">
+                    <p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
                 </div>
-
+            </div>
+            <div>
+                <h3 class="discussao-title">
+                    <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">
+                        ${publicacao.discussaoTitle}
+                    </a>
+                </h3>
+                <div class="publicacao-discussao-footer">
+                    <p class="discussao-info">${tempoFormatado} - ${publicacao.commentAmount} 🗨️</p>
+                </div>
+            </div>
             `;
-
             if (publicacao.userId === autenticacaoUserId) {
                 conteudoHTML += `
                     <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.publicacaoId}', '${publicacao.userId}')">
@@ -175,31 +173,64 @@ function renderPublicacoes(publicacoes) {
             }
         }
         if(publicacao.type === "post") {
-            conteudoHTML = `
-                <div>
-                    <div class="publicacao-type">
-                        <p>Post</p>
-                    </div>
-                    <div class="publicacao-profile-box">
-                        <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
-                    </div>
-                </div>
-                <div>
-                    <div class="publicacao-post-text">
-                        <p>${publicacao.text}</p>
+            if(publicacao.media){
+                conteudoHTML = `
+                    <div>
+                        <div class="publicacao-type">
+                            <p>Post</p>
+                        </div>
+                        <div class="publicacao-profile-box">
+                            <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
+                        </div>
                     </div>
                     <div>
-                        <img src="${publicacao.media ? publicacao.media : 'https://mariananardi.com.br/wp-content/uploads/2018/09/Gato-x-leao.jpg'}" class="publicacao-post-image">
+                        <div class="publicacao-post-text">
+                            <p>${publicacao.text}</p>
+                        </div>
+                        <div>
+                            <img src="${publicacao.media ? publicacao.media : 'https://mariananardi.com.br/wp-content/uploads/2018/09/Gato-x-leao.jpg'}" class="publicacao-post-image">
+                        </div>
                     </div>
-                </div>
-                <div class="publicacao-post-footer">
+                    <div class="publicacao-post-footer">
+                        <div>
+                            <button class="publicacao-post-footer-button">${publicacao.commentAmount || 0} 💬</button>
+                            <button class="publicacao-post-footer-button">${publicacao.likeAmount || 0} 👍</button>
+                        </div>
+                        <p class="discussao-info">${tempoFormatado}</p>
+                    </div>
+                `;
+            }
+            else{
+                conteudoHTML = `
                     <div>
-                        <button class="publicacao-post-footer-button">${publicacao.commentAmount || 0} 💬</button>
-                        <button class="publicacao-post-footer-button">${publicacao.likeAmount || 0} 👍</button>
+                        <div class="publicacao-type">
+                            <p>Post</p>
+                        </div>
+                        <div class="publicacao-profile-box">
+                            <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
+                        </div>
                     </div>
-                    <p class="discussao-info">${tempoFormatado}</p>
-                </div>
-            `;
+                    <div>
+                        <div class="publicacao-post-text">
+                            <p>${publicacao.text}</p>
+                        </div>
+                    </div>
+                    <div class="publicacao-post-footer">
+                        <div>
+                            <button class="publicacao-post-footer-button">${publicacao.commentAmount || 0} 💬</button>
+                            <button class="publicacao-post-footer-button">${publicacao.likeAmount || 0} 👍</button>
+                        </div>
+                        <p class="discussao-info">${tempoFormatado}</p>
+                    </div>
+                `;
+            }
+            if (publicacao.userId === autenticacaoUserId) {
+                conteudoHTML += `
+                    <button id="remover-discussao" onclick="deletaPost('${publicacao.publicacaoId}', '${publicacao.userId}')">
+                        Remover
+                    </button>
+                `;
+            }
         }
 
         publicacaoDiv.innerHTML = conteudoHTML;
@@ -254,6 +285,24 @@ function renderPublicacoes(publicacoes) {
   async function deletaDiscussao(publicacaoId, userId) {
     try {
         const response = await fetch(`/API/forum/removerdiscussao`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, publicacaoId }),
+        });
+  
+        const responseData = await response.json();
+        if (response.ok) {
+        }
+  
+      }catch (error) {
+      console.error('Erro ao salvar no Firebase:', error);
+      res.status(500).json({ error: 'Erro interno do servidor.' });
+    }
+  }
+
+  async function deletaPost(publicacaoId, userId) {
+    try {
+        const response = await fetch(`/API/forum/removerpost`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, publicacaoId }),

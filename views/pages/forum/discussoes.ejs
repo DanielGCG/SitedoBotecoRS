@@ -4,6 +4,7 @@
   <link rel="stylesheet" href="/pages/forum/style/forum.css">
   <link rel="stylesheet" href="/pages/forum/style/novadiscussao.css">
   <link rel="stylesheet" href="/geral/popup.css">
+  <link rel="stylesheet" href="/pages/forum/style/publicacoes.css">
 </head>
 
 <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"></div>
@@ -44,7 +45,7 @@ function renderDiscussoes(discussoes) {
       const discussaoDiv = document.createElement('div');
       discussaoDiv.classList.add('discussao');
 
-      const time = new Date(discussao.time);
+      const time = new Date(discussao.ultimoUpdate);
       const now = new Date();
       const isToday = now.toDateString() === time.toDateString();
       const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === time.toDateString();
@@ -63,30 +64,34 @@ function renderDiscussoes(discussoes) {
           tempoFormatado = `${time.toLocaleDateString()} ${time.toLocaleTimeString([], timeOptions)}`;
       }
 
-      if (discussao.userId === localStorage.getItem("autenticationUserId")){
-        discussaoDiv.innerHTML = `
-        <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?publicacaoId=${discussao.publicacaoId}">${discussao.discussaoTitle}</a></h3>
-          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.commentAmount} respostas</p>
-        </div>
-        <div>
-          <p class="discussao-info">${tempoFormatado}</p>
-          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.userId}', '${discussao.publicacaoId}')">Remover</button>
-        </div>
-        `;
-      }
-      else {
-        discussaoDiv.innerHTML = `
-        <div>
-          <h3 class="discussao-title"><a href="/forum/discussao?publicacaoId=${discussao.publicacaoId}">${discussao.discussaoTitle}</a></h3>
-          <p class="discussao-info">Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a> - ${discussao.commentAmount} respostas</p>
-        </div>
-        <div>
-          <p class="discussao-info">${tempoFormatado}</p>
-        </div>
-      `;
-      }
-
+      discussaoDiv.innerHTML = `
+            <div>
+                <div class="publicacao-type">
+                    <p>Discussão</p>
+                </div>
+                <div class="publicacao-profile-box">
+                    <img src="${discussao.profileImage}" class="publicacao-profile-image">
+                    <p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${discussao.userTag}"><strong>${discussao.userTag}</strong></a></p>
+                </div>
+            </div>
+            <div>
+                <h3 class="discussao-title">
+                    <a href="/forum/discussao?publicacaoId=${discussao.publicacaoId}">
+                        ${discussao.discussaoTitle}
+                    </a>
+                </h3>
+                <div class="publicacao-discussao-footer">
+                    <p class="discussao-info">${tempoFormatado} - ${discussao.commentAmount} 🗨️</p>
+                </div>
+            </div>
+            `;
+            if (discussao.userId === localStorage.getItem("autenticationUserId")) {
+                discussaoDiv.innerHTML += `
+                    <button id="remover-discussao" onclick="deletaDiscussao('${discussao.publicacaoId}', '${discussao.userId}')">
+                        Remover
+                    </button>
+                `;
+            }
 
       // Adiciona o novo tópico à lista
       discussoesDiv.appendChild(discussaoDiv);

@@ -92,6 +92,7 @@ router.get('/stream-discussoes', (req, res) => {
           const userRef = dbRef(database, `forum/usuarios/${discussao.userId}`);
           const userSnapshot = await get(userRef);
           discussao.userTag = userSnapshot.exists() ? userSnapshot.val().userTag : 'Desconhecido';
+          discussao.profileImage = userSnapshot.exists() ? userSnapshot.val().profileImage : null;
         } catch (error) {
           console.error('Erro ao buscar usuário:', error);
           discussao.userTag = 'Erro ao buscar usuário';
