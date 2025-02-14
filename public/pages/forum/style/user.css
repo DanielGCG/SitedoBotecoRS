@@ -65,20 +65,18 @@
 #edit-button:hover, #unfollow-button:hover {
     background: #00000048;
 }
-.userpage-main-layout {
+.userpage-main-info {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
 }
-.userpage-main-right {
-    width: 60%;
+.half-box-area {
+    width: 40%;
 }
-.userpage-main-left{
-    width: 35%;
-}
-.left-sided-userarea {
+.user-info-box {
     width: 100%;
     background-color: var(--cor-fundo-caixa-texto);
     border-radius: 15px;
     padding: 16px;
+    font-size: 14px;
 }

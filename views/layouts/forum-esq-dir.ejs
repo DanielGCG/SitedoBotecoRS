@@ -50,13 +50,6 @@
                     <a class="sidebar-link" href="/discussoes?categoriaId=Computaria" id="Computaria">Computaria</a>
                     <a class="sidebar-link" href="/discussoes?categoriaId=RPG" id="RPG">RPG</a>
                 </div>
-                <hr class="divisoria-sidebar">
-                <div class="links-uteis">
-                    <h2>Links Úteis</h2>
-                    <p><a class="sidebar-link" href="#">Como usar o fórum</a></p>
-                    <p><a class="sidebar-link" href="#">Políticas de uso</a></p>
-                    <p><a class="sidebar-link" href="#">Fale conosco</a></p>
-                </div>
             </aside>
             <!-- Conteúdo Principal -->
             <main class="main-content">
@@ -92,8 +85,10 @@ function renderSidebarDireita(userDataForSidebar) {
         </div>        
         <hr class="divisoria-sidebar"> <!-- Linha divisória -->
         <div class="user-box-info">
-        <p>🗣️ ${userDataForSidebar.discussaoAmount} discussões</p>
-        <p>👥 ${userDataForSidebar.friendAmount} amigos</p>
+        <p>🗨️ ${userDataForSidebar.discussaoAmount} discussões</p>
+        <p>👥  ${userDataForSidebar.friendAmount} amigos</p>
+        <p>👤  ${userDataForSidebar.followersAmount} seguidores</p>
+        <p>👤 ${userDataForSidebar.followingAmount} seguindo</p>
         <p>📌 ${userDataForSidebar.pinAmount} pins</p>
         </div>
         <hr class="divisoria-sidebar"> <!-- Linha divisória -->

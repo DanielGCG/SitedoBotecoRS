@@ -71,7 +71,7 @@ function renderDiscussoes(discussoes) {
         </div>
         <div>
           <p class="discussao-info">${tempoFormatado}</p>
-          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.categoriaId}', '${discussao.discussaoId}', '${discussao.userTag}')">Remover</button>
+          <button id="remover-discussao" onclick="deletaDiscussao('${discussao.userId}', '${discussao.publicacaoId}')">Remover</button>
         </div>
         `;
       }
@@ -139,12 +139,12 @@ function listenForFollowingPublicacoes(userTag) {
     };
 }
 
-async function deletaDiscussao(categoriaId, discussaoId, userTag) {
+async function deletaDiscussao(userId, publicacaoId) {
   try {
       const response = await fetch(`/API/forum/removerdiscussao`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userTag, categoriaId, discussaoId }),
+        body: JSON.stringify({ userId, publicacaoId }),
       });
 
       const responseData = await response.json();

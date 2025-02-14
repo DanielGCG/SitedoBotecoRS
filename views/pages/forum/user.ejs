@@ -8,19 +8,23 @@
         </div>
       </section>
       <section class="userpage-main-layout">
-        <!-- Lado esquerdo (posts) -->
-        <div class="userpage-main-right">
-          <h2 style="text-align: center; font-size: 14px; margin: 10px;">Publicações</h2>
-          <div class="discussoes" id="publicacoes">
+        <!-- Informações do perfil -->
+        <div class="userpage-main-info">
+          <div class="half-box-area">
+            <h2 style="text-align: center; font-size: 14px; margin: 10px;">Biografia</h2>
+            <div class="user-info-box" id="biografia">
+            </div>
+          </div>
+          <div class="half-box-area">
+            <h2 style="text-align: center; font-size: 14px; margin: 10px;">Amizades</h2>
+            <div class="user-info-box" id="amizades">
+            </div>
           </div>
         </div>
-        <!-- Lado direito (biografia) -->
-        <div class="userpage-main-left">
-          <h2 style="text-align: center; font-size: 14px; margin: 10px;">Biografia</h2>
-          <div class="left-sided-userarea" id="biografia">
-          </div>
-          <h2 style="text-align: center; font-size: 14px; margin: 10px;">Amizades</h2>
-          <div class="left-sided-userarea" id="amizades">
+        <!-- Publicações -->
+        <div class="userpage-main-publicacoes">
+          <h2 style="text-align: center; font-size: 14px; margin: 10px;">Publicações</h2>
+          <div class="discussoes" id="publicacoes">
           </div>
         </div>
       </section>
@@ -116,7 +120,7 @@ function renderUserBox(user) {
         <h3>${user.exibitionName}</h3>
         <p>${user.userTag}</p>
         <p style="margin-top: 5px;">${user.pronouns}</p>
-        <p style="margin-top: 5px;">${user.discussaoAmount} 🗣 | ${user.friendAmount} 👥</p>
+        <p style="margin-top: 5px;">${user.discussaoAmount} 🗨️ | ${user.postAmount} 📄 | ${user.friendAmount} 👥</p>
       </div>
     </div>
   `;
@@ -211,7 +215,7 @@ async function renderAmizades(user) {
     } else {
       amizadesContainer.innerHTML = `
         <div class="amizades-info">
-            <p>Nem tem amigos ainda XD</p>
+            <p>Não tem amigos XD</p>
         </div>`;
     }
   } catch (error) {
@@ -280,7 +284,7 @@ function renderPublicacoes(publicacoes) {
           `;
         }
         if (publicacao.type === "post") {
-          publicacaoDiv.innerHTML = `<div><h1>Post</h1></div>`; 
+          publicacaoDiv.innerHTML = `<div><h1>Post</h1></div>`;
         }
         if (publicacao.type === "thread") {
           publicacaoDiv.innerHTML = `<div><h1>Thread</h1></div>`; 

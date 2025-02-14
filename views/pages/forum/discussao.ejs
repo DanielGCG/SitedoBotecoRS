@@ -147,13 +147,19 @@ function clearMidiaInput() {
 }
 
 async function editComment(commentElement, discussaoCommentId) {
+  // Verifica se o campo de edição já existe
+  if (commentElement.querySelector('.edit-textarea')) {
+    return;
+  }
+
   const originalText = commentElement.querySelector('.post-text').innerText;
   commentElement.innerHTML += `
-    <textarea class="tweet-input-pequeno" id="editText" placeholder="escrever comentário..." maxlength="440">${originalText}</textarea>
+    <textarea class="tweet-input-pequeno edit-textarea" id="editText" placeholder="escrever comentário..." maxlength="440">${originalText}</textarea>
     <div id="char-count" class="char-count">
         <span id="char-count-text">0/440</span>
     </div>
     <button id="saveEdit" class="post-button">Editar</button>
+    <button id="cancelEdit" class="post-button">Cancelar</button>
   `;
 
   document.getElementById('saveEdit').addEventListener('click', async () => {
@@ -177,12 +183,21 @@ async function editComment(commentElement, discussaoCommentId) {
         commentElement.querySelector('.post-text').innerText = text;
         document.getElementById('editText').remove();
         document.getElementById('saveEdit').remove();
+        document.getElementById('cancelEdit').remove();
+        document.getElementById('char-count').remove();
       } else {
         console.log(responseData.error || 'Erro ao editar o comentário.');
       }
     } catch (error) {
       console.log(`Erro: ${error.message}`);
     }
+  });
+
+  document.getElementById('cancelEdit').addEventListener('click', () => {
+    document.getElementById('editText').remove();
+    document.getElementById('saveEdit').remove();
+    document.getElementById('cancelEdit').remove();
+    document.getElementById('char-count').remove();
   });
 }
 
@@ -323,10 +338,6 @@ document.getElementById('post').addEventListener('click', async () => {
     document.getElementById('messageText').value = ''; // Limpar o campo de entrada
     document.getElementById('mediaFile').value = ''; // Limpar o campo de mídia
     document.getElementById('media-preview').innerHTML = ''; // Limpar o preview de mídia
-
-    
-    // Atualizar a lista de comments e rolar para o final
-    renderComments(responseData.comments);
 
     // Fazer a rolagem ir para o final
     const messagesDiv = document.getElementById('postarea');
