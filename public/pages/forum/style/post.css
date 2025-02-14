@@ -1,8 +1,0 @@
-.post-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    background-color: var(--cor-fundo-caixa-texto);
-    align-items: center;
-    height: 30px;
-}

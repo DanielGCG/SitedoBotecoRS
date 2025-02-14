@@ -324,7 +324,7 @@ router.get('/skins/', (req, res) => {
         title: "BSMP Skins",
         description: "Estilize seus personagens e sua história!"
     }
-    res.render('pages/skins/skins', { locals });
+    res.render('pages/skins', { locals });
 });
 
 /* ------ SEM HEADER ------*/

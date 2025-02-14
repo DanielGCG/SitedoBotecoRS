@@ -1,124 +1,152 @@
-(function () {
-    const initialFolderId = new URL(location.href).searchParams.get('folder');
-
-    const explorer = document.querySelector('.skins-explorer');
+window.addEventListener("load", function () {
+    const getInitialFolder = () => new URL(location.href).searchParams.get('folder');
 
     const CACHE_EXPIRE_TIME = 10000;
 
-    function clearExplorer() {
-        explorer.innerHTML = '';
-    }
+    const Cache = {
+        has(id) {
+            const b64_cache = localStorage.getItem("skins_cache");
+            if (!b64_cache) return false;
+            const cache = JSON.parse(b64_cache);
+            return cache[id] && cache[id].expires && Date.now() <= cache[id].expires;
+        },
 
-    function hasCache(id) {
-        const b64_cache = localStorage.getItem("skins_cache");
-        if (!b64_cache) return false;
-        const cache = JSON.parse(b64_cache);
-        return cache[id] && cache[id].expires && Date.now() <= cache[id].expires;
-    }
-    
-    function saveCache(id, data) {
-        let cache = localStorage.getItem("skins_cache");
-        if (!cache) cache = {};
-        else cache = JSON.parse(cache);
-        cache[id] = { expires: Date.now() + CACHE_EXPIRE_TIME, ...data };
-        localStorage.setItem("skins_cache", JSON.stringify(cache));
-    }
+        save(id, data) {
+            let cache = localStorage.getItem("skins_cache");
+            if (!cache) cache = {};
+            else cache = JSON.parse(cache);
+            cache[id] = { expires: Date.now() + CACHE_EXPIRE_TIME, ...data };
+            localStorage.setItem("skins_cache", JSON.stringify(cache));
+        },
 
-    function getCache(id) {
-        const b64_cache = localStorage.getItem("skins_cache");
-        if (!b64_cache) return false;
-        return JSON.parse(b64_cache)[id];
-    }
-
-    function addEntitiesToExplorer(id, data) {
-        saveCache(id, data);
-        clearExplorer();
-        let {entidades, parente} = data;
-
-        if (parente !== null) {
-            addEntity({ id: parente, nome: ".." });
+        get(id) {
+            const b64_cache = localStorage.getItem("skins_cache");
+            if (!b64_cache) return false;
+            return JSON.parse(b64_cache)[id];
         }
+    };
 
-        entidades.forEach(addEntity);
-    }
+    const API = {
+        /** @private */
+        async _fetch({ id, senha }) {
+            const resource = `/API/skins?folder=${id}&senha=${senha}`;
+            const response = await fetch(resource);
 
-    async function exploreTo(id='') {
-        OnLoadingScreen();
+            //if (!response.ok) 
 
-        let json;
-        if (hasCache(id)) {
-            json = { success: true, data: getCache(id) };
+            return await response.json();
+        },
+
+        fetchUnprotectedFolder(id) {
+            return this._fetch({ id });
+        },
+
+        fetchProtectedFolder(id, senha) {
+            return this._fetch({ id, senha });
         }
+    };
 
-        if (!json) {
-            const response = await fetch(`/API/skins?folder=${id}`);
-            json = await response.json();
-        }
+    const Explorer = {
+        // Por alguma razão, this.element está sendo ignorado completamente
+        // então só tirei ele. Foi mal pelo bad code ;P
 
-        if (json.success) addEntitiesToExplorer(id, json.data)
-        else alert(json.message);
+        clear() {
+            document.querySelector('.skins-explorer').innerHTML = '';
+        },
 
-        OffLoadingScreen();
-    }
+        async goto(id='') {
+            LoadingScreen.Open();
 
-    function addEntity({ id, nome, tipo = "pasta", trancado = false }) {
-        const icones = { pasta: "folder_open", skin: "image" };
-
-        const li = document.createElement("li");
-        li.innerHTML = `<span class="material-symbols-outlined">${icones[tipo]}</span>`;
-        li.append(nome);
-        
-        if (trancado) {
-            li.innerHTML += `<span class="material-symbols-outlined locked">lock</span>`;
-        }
-
-        explorer.append(li);
-
-        if (trancado) {
-            li.onclick = () => {
-                const form = document.getElementById("novo-post-form");
-                form.reset();
-                form.dataset.for = id;
-                abrirBetterPopup("senha-popup");
+            let json;
+            if (Cache.has(id)) {
+                json = { success: true, data: Cache.get(id) };
             }
-        } else {
-            li.onclick = () => exploreTo(id);
+
+            if (!json) json = await API.fetchUnprotectedFolder(id);
+
+            if (json.success) this.addEntities(id, json.data)
+            else alert(json.message);
+
+            LoadingScreen.Close();
+        },
+
+        /** @private */
+        _addEntity({ id, nome, tipo = "pasta", trancado = false }) {
+            const icones = { pasta: "folder_open", skin: "image" };
+
+            const li = document.createElement("li");
+            li.innerHTML = `<span class="material-symbols-outlined">${icones[tipo]}</span>`;
+            li.append(nome);
+            
+            if (trancado) {
+                li.innerHTML += `<span class="material-symbols-outlined locked">lock</span>`;
+            }
+
+            document.querySelector('.skins-explorer').append(li);
+
+            if (trancado) {
+                li.onclick = () => {
+                    const form = document.getElementById("novo-post-form");
+                    form.reset();
+                    form.dataset.for = id;
+                    BetterPopup.abrir("senha-popup");
+                }
+            } else {
+                li.onclick = () => Explorer.goto(id);
+            }
+        },
+
+        addEntities(id, data) {
+            Cache.save(id, data);
+            this.clear();
+
+            let {entidades, parente} = data;
+
+            entidades.forEach(this._addEntity);
         }
-    }
+    };
 
-    window.addEventListener("load", function () {
-        const form = document.getElementById("novo-post-form");
-        const status = form.querySelector('.form-status');
+    const PasswordPopup = {
+        elements: {
+            form: document.getElementById("novo-post-form"),
+            status: document.querySelector('#novo-post-form .form-status'),
+            input: document.querySelector("#novo-post-form input[type=password]")
+        },
 
-        form.onsubmit = async (ev) => {
+        init() {
+            this.elements.form.addEventListener('submit', this._onSubmit);
+        },
+
+        /** @event @private */
+        async _onSubmit(ev) {
             ev.preventDefault();
-            OnLoadingScreen();
+            LoadingScreen.Open();
     
-            const id = form.dataset.for;
+            const id = this.elements.form.dataset.for;
             if (!id) return;
     
-            const senha = form.querySelector("input").value.trim();
+            const senha = this.elements.input.value.trim();
             if (!senha) {
-                status.innerHTML = 'O campo está vazio<br><span style="font-size: 0.7rem">(espaços não contam como senha)!</span>';
-                OffLoadingScreen();
+                this.elements.status.innerHTML = 'O campo está vazio<br><span style="font-size: 0.7rem">(espaços não contam como senha)!</span>';
+                LoadingScreen.Close();
                 return false;
             };
 
-            const response = await fetch(`/API/skins?folder=${id}&senha=${senha}`);
-            const json = await response.json();
+            const json = await API.fetchProtectedFolder(id, senha);
 
             if (!json.success) {
                 status.innerHTML = json.message;
-                OffLoadingScreen();
+                LoadingScreen.Close();
                 return false;
             }
 
-            addEntitiesToExplorer(id, json.data);
+            Explorer.addEntities(id, json.data);
             
-            fecharBetterPopup("senha-popup");
-            OffLoadingScreen();
-        };
-    });
+            BetterPopup.fechar("senha-popup");
+            LoadingScreen.Close();
+        }
+    };
 
-    exploreTo();
-})();
+    PasswordPopup.init();
+    Explorer.goto();
+});

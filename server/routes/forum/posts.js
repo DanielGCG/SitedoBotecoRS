@@ -114,7 +114,8 @@ router.post('/criardiscussao', async (req, res) => {
       publicacaoId,
       discussaoTitle,
       commentAmount,
-      time: Date.now(),
+      creationTime: Date.now(),
+      ultimoUpdate: Date.now(),
     };
 
     // Criação da discussao
@@ -174,6 +175,7 @@ router.post('/criarpost', async (req, res) => {
       media,
       likeAmount,
       commentAmount,
+      creationTime: Date.now(),
       ultimoUpdate: Date.now(),
     };
 

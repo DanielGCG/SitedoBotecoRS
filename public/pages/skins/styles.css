@@ -1,4 +1,7 @@
 .skins-explorer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
     list-style: none;
     margin: 0;
 }

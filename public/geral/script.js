@@ -30,3 +30,8 @@ function OffLoadingScreen() {
         loadingDiv.remove(); // Remove a div do DOM
     }
 }
+
+const LoadingScreen = {
+    Open: OnLoadingScreen,
+    Close: OffLoadingScreen
+};

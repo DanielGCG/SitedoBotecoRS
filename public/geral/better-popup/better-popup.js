@@ -6,6 +6,11 @@ function fecharBetterPopup(id) {
   document.getElementById(id).removeAttribute('data-active');
 }
 
+const BetterPopup = {
+  abrir: abrirBetterPopup,
+  fechar: fecharBetterPopup
+};
+
 window.addEventListener("load", () => {
   document
   .querySelectorAll("[data-popup]")

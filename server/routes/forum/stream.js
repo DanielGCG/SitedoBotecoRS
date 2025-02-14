@@ -144,18 +144,21 @@ router.get('/stream-publicacoes', async (req, res) => {
 
               if (!userSnapshot.exists()) {
                 publicacao.userTag = "Usuário desconhecido";
+                publicacao.profileImage = null;
                 return;
               }
 
-              usersCache[publicacao.userId] = userSnapshot.val().userTag;
+              usersCache[publicacao.userId] = userSnapshot.val();
             } else {
               userSnapshot = usersCache[publicacao.userId];
             }
 
-            publicacao.userTag = userSnapshot;
+            publicacao.userTag = userSnapshot.userTag;
+            publicacao.profileImage = userSnapshot.profileImage;
           } catch (error) {
             console.error(`Erro ao buscar userTag para ${publicacao.userId}:`, error);
             publicacao.userTag = "Erro ao carregar usuário";
+            publicacao.profileImage = null;
           }
 
           return publicacao;
@@ -180,8 +183,10 @@ router.get('/stream-publicacoes', async (req, res) => {
             try {
               const userSnapshot = await get(dbRef(database, `forum/usuarios/${publicacao.userId}`));
               publicacao.userTag = userSnapshot.exists() ? userSnapshot.val().userTag : "Usuário desconhecido";
+              publicacao.profileImage = userSnapshot.exists() ? userSnapshot.val().profileImage : null;
             } catch (error) {
               publicacao.userTag = "Erro ao carregar usuário";
+              publicacao.profileImage = null;
             }
             return publicacao;
           })

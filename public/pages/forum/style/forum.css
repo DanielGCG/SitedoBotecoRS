@@ -102,9 +102,13 @@ body {
     padding: 1rem;
     margin-bottom: 1rem;
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center;
+}
+
+.publicacao > div:first-child {
+    width: fit-content;
 }
 
 .discussao-title a {

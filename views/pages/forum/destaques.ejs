@@ -6,6 +6,7 @@
     
     <link rel="stylesheet" href="/geral/better-popup/better-popup.css">
     <link rel="stylesheet" href="/pages/forum/style/criarpost.css">
+    <link rel="stylesheet" href="/pages/forum/style/publicacoes.css">
   </head>
   
   <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"><h2>Destaques</h2></div>
@@ -74,19 +75,26 @@
                 </div>
             
                 <!-- Botão para enviar o tweet -->
-                <button id="tweetButton" class="post-button">Postar</button>
+                <button id="post" class="post-button">Postar</button>
             </div>
         </div>
     </div>
   </div>
   
   
-  <section class="publicacoes" id="publicacoes">
-  </section>
+<section class="publicacoes" id="publicacoes">
+</section>
   
-  <script src="/geral/better-popup/better-popup.js"></script>
+<script src="/geral/better-popup/better-popup.js"></script>
 
-  <script>
+<!-- --- LÓGICA PARA OS GIFS --- -->
+<script src="/pages/forum/script/gifs.js" defer></script>
+<!-- --- LÓGICA PARA BRAT --- -->
+<script src="/pages/forum/script/brat.js" defer></script>
+<!-- --- LÓGICA PARA PREVIEWMEDIA --- -->
+<script src="/pages/forum/script/auxiliar.js" defer></script>
+
+<script>
 function renderPublicacoes(publicacoes) {
     const publicacoesDiv = document.getElementById('publicacoes');
     publicacoesDiv.innerHTML = ''; // Limpa o conteúdo anterior
@@ -112,7 +120,7 @@ function renderPublicacoes(publicacoes) {
         const publicacaoDiv = document.createElement('div');
         publicacaoDiv.classList.add('publicacao');
 
-        const time = new Date(publicacao.time);
+        const time = new Date(publicacao.ultimoUpdate);
         const now = new Date();
         const isToday = now.toDateString() === time.toDateString();
         const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === time.toDateString();
@@ -132,33 +140,68 @@ function renderPublicacoes(publicacoes) {
         }
 
         const autenticacaoUserId = localStorage.getItem("autenticationUserId");
+        let conteudoHTML
 
-        let conteudoHTML = `
-            <div>
-                <h3 class="discussao-title">
-                    <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">
-                        ${publicacao.discussaoTitle}
-                    </a>
-                </h3>
-                <p class="discussao-info">
-                    Por <a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}">
-                        <strong>${publicacao.userTag}</strong>
-                    </a> - ${publicacao.commentAmount || 0} respostas
-                </p>
-            </div>
-            <div>
-                <p class="discussao-info">${tempoFormatado}</p>
-        `;
+        if(publicacao.type === "discussao"){
+            conteudoHTML = `
+                <div>
+                    <div class="publicacao-type">
+                        <p>Discussão</p>
+                    </div>
+                    <div class="publicacao-profile-box">
+                        <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></p>
+                    </div>
+                </div>
+                    <div>                    
+                        <h3 class="discussao-title">
+                            <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">
+                                ${publicacao.discussaoTitle}
+                            </a>
+                        </h3>
+                    <div>
+                    <div class="publicacao-discussao-footer">
+                        <p class="discussao-info">${tempoFormatado}</p>
+                    </div>
+                </div>
 
-        if (publicacao.userId === autenticacaoUserId) {
-            conteudoHTML += `
-                <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.publicacaoId}', '${publicacao.userId}')">
-                    Remover
-                </button>
+            `;
+
+            if (publicacao.userId === autenticacaoUserId) {
+                conteudoHTML += `
+                    <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.publicacaoId}', '${publicacao.userId}')">
+                        Remover
+                    </button>
+                `;
+            }
+        }
+        if(publicacao.type === "post") {
+            conteudoHTML = `
+                <div>
+                    <div class="publicacao-type">
+                        <p>Post</p>
+                    </div>
+                    <div class="publicacao-profile-box">
+                        <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
+                    </div>
+                </div>
+                <div>
+                    <div class="publicacao-post-text">
+                        <p>${publicacao.text}</p>
+                    </div>
+                    <div>
+                        <img src="${publicacao.media ? publicacao.media : 'https://mariananardi.com.br/wp-content/uploads/2018/09/Gato-x-leao.jpg'}" class="publicacao-post-image">
+                    </div>
+                </div>
+                <div class="publicacao-post-footer">
+                    <div>
+                        <button class="publicacao-post-footer-button">${publicacao.commentAmount || 0} 💬</button>
+                        <button class="publicacao-post-footer-button">${publicacao.likeAmount || 0} 👍</button>
+                    </div>
+                    <p class="discussao-info">${tempoFormatado}</p>
+                </div>
             `;
         }
 
-        conteudoHTML += `</div>`;
         publicacaoDiv.innerHTML = conteudoHTML;
 
         // Adiciona a publicação à lista
@@ -226,35 +269,37 @@ function renderPublicacoes(publicacoes) {
     }
   }
   
-  // Postar nova mensagem
-  document.getElementById('post').addEventListener('click', async () => {
-      const userTag = localStorage.getItem("autenticationUserTag");
-  
-      if (!userTag) {
-          document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem userTag.';
-          return;
-      }
-  
-      try {
-          const response = await fetch(`/API/forum/criardiscussao`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userTag, categoriaId, discussaoId }),
-          });
-  
-          const responseData = await response.json();
-          if (response.ok) {
-              document.getElementById('statusMessage').textContent = 'Mensagem publicada com sucesso.';
-              document.getElementById('discussao').value = ''; // Limpar o campo de entrada
-              document.getElementById('categoria').value = ''; // Limpar o campo de entrada
-          } else {
-          document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
-          }
-      } catch (error) {
-          document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
-      }
-      document.getElementById('popup-novo-post').style.display = 'none';
-  });
+// Postar nova mensagem
+document.getElementById('post').addEventListener('click', async () => {
+    const userId = localStorage.getItem("autenticationUserId");
+
+    if (!userId) {
+        document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem userId.';
+        return;
+    }
+
+    const text = document.getElementById('messageText').value;
+    const media = document.getElementById('mediaFile').files[0] || null;
+
+    try {
+        const response = await fetch(`/API/forum/criarpost`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, text, media }),
+        });
+
+        const responseData = await response.json();
+        if (response.ok) {
+            document.getElementById('messageText').value = ''; // Limpar o campo de entrada
+            document.getElementById('mediaFile').value = ''; // Limpar o campo de entrada
+        } else {
+        document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
+        }
+    } catch (error) {
+        document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
+    }
+    fecharBetterPopup('novo-post-popup');
+});
   
   let categoriaPagina;
   
