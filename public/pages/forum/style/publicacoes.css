@@ -12,7 +12,15 @@
     border-bottom: 2px solid #77777744;
     margin-bottom: 5px;
 }
-.publicacao-post-footer, .publicacao-discussao-footer {
+.publicacao-type-post {
+    border-bottom: 2px solid #474eacc9;
+    margin-bottom: 5px;
+}
+.publicacao-type-discussao {
+    border-bottom: 2px solid #ac4747c9;
+    margin-bottom: 5px;
+}
+.publicacao-post-footer, .publicacao-discussao-footer{
     width: 100%;
     display: flex;
     flex-direction: row;

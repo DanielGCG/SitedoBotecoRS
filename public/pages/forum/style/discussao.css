@@ -1,6 +1,11 @@
 .send-messagearea {
     position: bottom;
     bottom: 0;
+    padding-top: 1rem;
+}
+.main-content {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
 }
 .forum-header input {
     margin-right: 0;
@@ -67,6 +72,7 @@
     border-radius: 8px;
     padding: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
 }
 .tweet-input-grande {
     width: 100%;

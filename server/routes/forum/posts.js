@@ -1,5 +1,9 @@
 const express = require('express');
+const multer = require('multer');
+const { getStorage, ref: stRef, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
 const { ref: dbRef, update, push, get, set, remove } = require('firebase/database'); // Certifique-se de importar corretamente
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 const { database } = require('../../config/firebase');
 const router = express.Router();
 
@@ -144,7 +148,7 @@ router.post('/criardiscussao', async (req, res) => {
 });
 
 /* FINALIZADO */
-router.post('/criarpost', async (req, res) => {
+router.post('/criarpost', upload.single('media'), async (req, res) => {
   const { userId, text, media } = req.body;
 
   // Validação dos dados de entrada

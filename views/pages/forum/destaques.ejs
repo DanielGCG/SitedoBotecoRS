@@ -145,23 +145,22 @@ function renderPublicacoes(publicacoes) {
         if(publicacao.type === "discussao"){
             conteudoHTML = `
             <div>
-                <div class="publicacao-type">
+                <div class="publicacao-type-discussao">
                     <p>Discussão</p>
                 </div>
                 <div class="publicacao-profile-box">
                     <img src="${publicacao.profileImage}" class="publicacao-profile-image">
                     <p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
                 </div>
-            </div>
-            <div>
                 <h3 class="discussao-title">
                     <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">
                         ${publicacao.discussaoTitle}
                     </a>
                 </h3>
-                <div class="publicacao-discussao-footer">
-                    <p class="discussao-info">${tempoFormatado} - ${publicacao.commentAmount} 🗨️</p>
-                </div>
+            </div>
+            <div class="publicacao-discussao-footer">
+                <p>${publicacao.commentAmount} comentários 🗨️</p>
+                <p class="discussao-info">${tempoFormatado}</p>
             </div>
             `;
             if (publicacao.userId === autenticacaoUserId) {
@@ -176,19 +175,21 @@ function renderPublicacoes(publicacoes) {
             if(publicacao.media){
                 conteudoHTML = `
                     <div>
-                        <div class="publicacao-type">
-                            <p>Post</p>
-                        </div>
-                        <div class="publicacao-profile-box">
-                            <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="publicacao-post-text">
-                            <p>${publicacao.text}</p>
+                        <div>
+                            <div class="publicacao-type-post">
+                                <p>Post</p>
+                            </div>
+                            <div class="publicacao-profile-box">
+                                <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
+                            </div>
                         </div>
                         <div>
-                            <img src="${publicacao.media ? publicacao.media : 'https://mariananardi.com.br/wp-content/uploads/2018/09/Gato-x-leao.jpg'}" class="publicacao-post-image">
+                            <div class="publicacao-post-text">
+                                <p>${publicacao.text}</p>
+                            </div>
+                            <div>
+                                <img src="${publicacao.media ? publicacao.media : 'https://mariananardi.com.br/wp-content/uploads/2018/09/Gato-x-leao.jpg'}" class="publicacao-post-image">
+                            </div>
                         </div>
                     </div>
                     <div class="publicacao-post-footer">
@@ -203,7 +204,7 @@ function renderPublicacoes(publicacoes) {
             else{
                 conteudoHTML = `
                     <div>
-                        <div class="publicacao-type">
+                        <div class="publicacao-type-post">
                             <p>Post</p>
                         </div>
                         <div class="publicacao-profile-box">
@@ -320,34 +321,38 @@ function renderPublicacoes(publicacoes) {
   
 // Postar nova mensagem
 document.getElementById('post').addEventListener('click', async () => {
-    const userId = localStorage.getItem("autenticationUserId");
+  const userId = localStorage.getItem("autenticationUserId");
+  if (!userId) {
+    document.getElementById('statusMessage').textContent = 'A mensagem precisa de um userId.';
+    return;
+  }
 
-    if (!userId) {
-        document.getElementById('statusMessage').textContent = 'A mensagem pode estar sem userId.';
-        return;
+  const text = document.getElementById('messageText').value;
+  const mediaFile = document.getElementById('mediaFile').files[0];
+
+  const formData = new FormData();
+  formData.append('userId', userId);
+  formData.append('text', text);
+  if (mediaFile) formData.append('media', mediaFile);
+
+  try {
+    const response = await fetch('/API/forum/criarpost', {
+      method: 'POST',
+      body: formData, // Enviar como FormData para suportar arquivos
+    });
+
+    const responseData = await response.json();
+    if (response.ok) {
+      document.getElementById('messageText').value = '';
+      document.getElementById('mediaFile').value = '';
+    } else {
+      document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
     }
+  } catch (error) {
+    document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
+  }
 
-    const text = document.getElementById('messageText').value;
-    const media = document.getElementById('mediaFile').files[0] || null;
-
-    try {
-        const response = await fetch(`/API/forum/criarpost`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, text, media }),
-        });
-
-        const responseData = await response.json();
-        if (response.ok) {
-            document.getElementById('messageText').value = ''; // Limpar o campo de entrada
-            document.getElementById('mediaFile').value = ''; // Limpar o campo de entrada
-        } else {
-        document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
-        }
-    } catch (error) {
-        document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
-    }
-    fecharBetterPopup('novo-post-popup');
+  fecharBetterPopup('novo-post-popup');
 });
   
   let categoriaPagina;

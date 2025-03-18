@@ -18,7 +18,7 @@
     box-shadow: 0 4px 4px rgba(0 0 0 / 15%);
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(130deg, rgba(156,105,58,1) 50%, rgba(117,67,23,1) 51%);
+    background: rgba(156,105,58,1);
     padding: 1em;
     color: #fff;
     user-select: none;
@@ -274,8 +274,28 @@
     document
         .querySelectorAll(".navbar-dropdown")
         .forEach(dropdown => {
+          // Hover
           dropdown.onmouseenter = () => dropdown.toggleAttribute("data-open", true);
           dropdown.onmouseleave = () => dropdown.toggleAttribute("data-open", false);
+
+          // Click
+          dropdown.onclick = (event) => {
+            event.stopPropagation(); // Prevents click from propagating to parent elements
+            const isOpen = dropdown.hasAttribute("data-open");
+            document
+              .querySelectorAll(".navbar-dropdown[data-open]")
+              .forEach(openDropdown => openDropdown.removeAttribute("data-open"));
+            if (!isOpen) {
+              dropdown.setAttribute("data-open", true);
+            }
+          };
         });
+
+    // Fechar dropdowns ao clicar fora
+    document.body.onclick = () => {
+      document
+        .querySelectorAll(".navbar-dropdown[data-open]")
+        .forEach(openDropdown => openDropdown.removeAttribute("data-open"));
+    };
   });
 </script>
