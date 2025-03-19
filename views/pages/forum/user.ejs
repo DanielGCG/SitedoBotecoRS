@@ -1,6 +1,7 @@
 <head>
     <link rel="stylesheet" href="/pages/forum/style/forum.css">
     <link rel="stylesheet" href="/pages/forum/style/user.css">
+    <link rel="stylesheet" href="/pages/forum/style/publicacoes.css">
 </head>
 <body>
       <section class="userpage-userbox" id="userpage-userbox">
@@ -229,94 +230,149 @@ async function renderAmizades(user) {
 
 function renderPublicacoes(publicacoes) {
     const publicacoesDiv = document.getElementById('publicacoes');
-    publicacoesDiv.innerHTML = '';
+    publicacoesDiv.innerHTML = ''; // Limpa o conteúdo anterior
 
     if (!publicacoes || Object.keys(publicacoes).length === 0) {
-      publicacoesDiv.innerHTML = `
-        <div>
-          <h2>Ainda não publicou nada :P melhore!</h2>
-        </div>
-      `;
-      return;
+        publicacoesDiv.innerHTML = `
+            <div>
+                <h2>Não há publicações ainda</h2>
+            </div>
+        `;
+        return;
     }
 
-    // Converter objeto em array
+    // Transforma o objeto em um array de publicações
     const publicacoesArray = Object.values(publicacoes);
 
-    publicacoesArray.forEach(publicacao => {
-      const publicacaoDiv = document.createElement('div');
-      publicacaoDiv.classList.add('publicacao');
+    publicacoesArray.forEach((publicacao) => {
+        if (!publicacao || typeof publicacao !== 'object') {
+            console.warn("Publicação inválida encontrada:", publicacao);
+            return;
+        }
 
-      const time = new Date(publicacao.time);
-      const now = new Date();
-      const isToday = now.toDateString() === time.toDateString();
-      const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === time.toDateString();
-      const daysOfWeek = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
-      let tempoFormatado;
+        const publicacaoDiv = document.createElement('div');
+        publicacaoDiv.classList.add('publicacao');
 
-      const timeOptions = { hour: '2-digit', minute: '2-digit' };
+        const time = new Date(publicacao.ultimoUpdate);
+        const now = new Date();
+        const isToday = now.toDateString() === time.toDateString();
+        const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === time.toDateString();
+        const daysOfWeek = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+        let tempoFormatado;
 
-      if (isToday) {
-          tempoFormatado = time.toLocaleTimeString([], timeOptions);
-      } else if (isYesterday) {
-          tempoFormatado = `ontem ${time.toLocaleTimeString([], timeOptions)}`;
-      } else if (now - time < 7 * 24 * 60 * 60 * 1000) {
-          tempoFormatado = `${daysOfWeek[time.getDay()]} ${time.toLocaleTimeString([], timeOptions)}`;
-      } else {
-          tempoFormatado = `${time.toLocaleDateString()} ${time.toLocaleTimeString([], timeOptions)}`;
-      }
+        const timeOptions = { hour: '2-digit', minute: '2-digit' };
 
-      if (publicacao.userId === localStorage.getItem("autenticationUserId")) {
-        if (publicacao.type === "discussao") {
-          publicacaoDiv.innerHTML = `
+        if (isToday) {
+            tempoFormatado = time.toLocaleTimeString([], timeOptions);
+        } else if (isYesterday) {
+            tempoFormatado = `ontem ${time.toLocaleTimeString([], timeOptions)}`;
+        } else if (now - time < 7 * 24 * 60 * 60 * 1000) {
+            tempoFormatado = `${daysOfWeek[time.getDay()]} ${time.toLocaleTimeString([], timeOptions)}`;
+        } else {
+            tempoFormatado = `${time.toLocaleDateString()} ${time.toLocaleTimeString([], timeOptions)}`;
+        }
+
+        const autenticacaoUserId = localStorage.getItem("autenticationUserId");
+        let conteudoHTML
+
+        if(publicacao.type === "discussao"){
+            conteudoHTML = `
             <div>
-              <h3 class="discussao-title">
-                <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">${publicacao.discussaoTitle}</a>
-              </h3>
-              <p class="discussao-info">
-                </a>${publicacao.commentAmount} respostas
-              </p>
+                <div class="publicacao-type-discussao">
+                    <p>Discussão</p>
+                </div>
+                <div class="publicacao-profile-box">
+                    <img src="${publicacao.profileImage}" class="publicacao-profile-image">
+                    <p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
+                </div>
+                <h3 class="discussao-title">
+                    <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}" style="text-decoration: underline;">
+                        ${publicacao.discussaoTitle}
+                    </a>
+                </h3>
             </div>
-            <div>
-              <p class="discussao-info">${tempoFormatado}</p>
-              <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.publicacaoId}', '${publicacao.userId}')">Remover</button>
+            <div class="publicacao-discussao-footer">
+                <p>${publicacao.commentAmount} 🗨️</p>
+                <p class="discussao-info">${tempoFormatado}</p>
             </div>
-          `;
+            `;
+            if (publicacao.userId === autenticacaoUserId || publicacao.adminPermissions) {
+                conteudoHTML += `
+                    <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.publicacaoId}', '${publicacao.userId}')">
+                        Remover
+                    </button>
+                `;
+            }
         }
-        if (publicacao.type === "post") {
-          publicacaoDiv.innerHTML = `<div><h1>Post</h1></div>`;
+        if(publicacao.type === "post") {
+            if(publicacao.media){
+                conteudoHTML = `
+                    <div>
+                        <div>
+                            <div class="publicacao-type-post">
+                                <p>Post</p>
+                            </div>
+                            <div class="publicacao-profile-box">
+                                <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="publicacao-post-text">
+                                <p>${publicacao.text}</p>
+                            </div>
+                            <div>
+                                <img src="${publicacao.media ? publicacao.media : 'https://mariananardi.com.br/wp-content/uploads/2018/09/Gato-x-leao.jpg'}" class="publicacao-post-image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="publicacao-post-footer">
+                        <div>
+                            <button class="publicacao-post-footer-button">${publicacao.commentAmount || 0} 💬</button>
+                            <button class="publicacao-post-footer-button">${publicacao.likeAmount || 0} 👍</button>
+                        </div>
+                        <p class="discussao-info">${tempoFormatado}</p>
+                    </div>
+                `;
+            }
+            else{
+                conteudoHTML = `
+                    <div>
+                        <div class="publicacao-type-post">
+                            <p>Post</p>
+                        </div>
+                        <div class="publicacao-profile-box">
+                            <img src="${publicacao.profileImage}" class="publicacao-profile-image"><p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="publicacao-post-text">
+                            <p>${publicacao.text}</p>
+                        </div>
+                    </div>
+                    <div class="publicacao-post-footer">
+                        <div>
+                            <button class="publicacao-post-footer-button">${publicacao.commentAmount || 0} 💬</button>
+                            <button class="publicacao-post-footer-button">${publicacao.likeAmount || 0} 👍</button>
+                        </div>
+                        <p class="discussao-info">${tempoFormatado}</p>
+                    </div>
+                `;
+            }
+            if (publicacao.userId === autenticacaoUserId || publicacao.adminPermissions) {
+                conteudoHTML += `
+                    <button id="remover-discussao" onclick="deletaPost('${publicacao.publicacaoId}', '${publicacao.userId}')">
+                        Remover
+                    </button>
+                `;
+            }
         }
-        if (publicacao.type === "thread") {
-          publicacaoDiv.innerHTML = `<div><h1>Thread</h1></div>`; 
-        }
-      } else {
-        if (publicacao.type === "discussao") {
-          publicacaoDiv.innerHTML = `
-            <div>
-              <h3 class="discussao-title">
-                <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">${publicacao.discussaoTitle}</a>
-              </h3>
-              <p class="discussao-info">
-                </a>${publicacao.commentAmount} respostas
-              </p>
-            </div>
-            <div>
-              <p class="discussao-info">${tempoFormatado}</p>
-            </div>
-          `;
-        }
-        if (publicacao.type === "post") {
-          publicacaoDiv.innerHTML = `<div><h1>Post</h1></div>`; 
-        }
-        if (publicacao.type === "thread") {
-          publicacaoDiv.innerHTML = `<div><h1>Thread</h1></div>`; 
-        }
-      }
 
-      // Adiciona o novo tópico à lista
-      publicacoesDiv.appendChild(publicacaoDiv);
+        publicacaoDiv.innerHTML = conteudoHTML;
+
+        // Adiciona a publicação à lista
+        publicacoesDiv.appendChild(publicacaoDiv);
     });
-}
+  }
 
 async function deletaDiscussao(publicacaoId, userId) {
   try {
@@ -352,7 +408,7 @@ function searchUserData(userTag) {
             renderAmizades(userData);
             renderBiografia(userData);
             renderUserBox(userData);
-            searchUserPublicacoes(userData.userId);
+            searchUserPublicacoes(userData.userId, 50);
         } catch (error) {
             console.error('Erro ao processar os dados recebidos:', error);
         }
@@ -364,30 +420,26 @@ function searchUserData(userTag) {
     };
 }
 
-function searchUserPublicacoes(userId) {
-    if (!userId) {
-        console.error('precisamos do userId localiza-lo.');
-        alert('Você precisa estar logado!');
-        return;
-    }
+async function searchUserPublicacoes(userId, amount) {
+  try {
+        const response = await fetch('/API/forum/getuserpublicacoes', {
+            method: 'POST', // Altera o método para POST
+            headers: {
+                'Content-Type': 'application/json', // Define o tipo de conteúdo como JSON
+            },
+            body: JSON.stringify({ amount, userId, userIdRequester: localStorage.getItem("autenticationUserId") })
+        });
 
-    // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/API/forum/stream-publicacoesbyuserid?userId=${userId}`);
-
-
-    eventSource.onmessage = (event) => {
-        try {
-          userPublicacoes = JSON.parse(event.data);
-          renderPublicacoes(userPublicacoes);
-        } catch (error) {
-            console.error('Erro ao processar os dados recebidos:', error);
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar publicações: ${response.statusText}`);
         }
-    };
 
-    eventSource.onerror = (error) => {
-        console.error('Erro na conexão com o servidor:', error);
-        eventSource.close();
-    };
+        const publicacoes = await response.json();
+        console.log(publicacoes);  // Verifica as publicações recebidas
+        renderPublicacoes(publicacoes); // Renderiza as publicações recebidas
+    } catch (error) {
+        console.error('Erro ao buscar as publicações:', error);
+    }
 }
 
 let userData;

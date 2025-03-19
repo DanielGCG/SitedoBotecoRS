@@ -149,10 +149,11 @@ router.post('/criardiscussao', async (req, res) => {
 
 /* FINALIZADO */
 router.post('/criarpost', upload.single('media'), async (req, res) => {
-  const { userId, text, media } = req.body;
+  const { userId, text, media = null } = req.body;
+
 
   // Validação dos dados de entrada
-  if (!userId ) {
+  if (!userId) {
     return res.status(400).json({ error: 'O conteúdo precisa de userId.' });
   }
 

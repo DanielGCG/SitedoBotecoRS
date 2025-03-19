@@ -153,17 +153,17 @@ function renderPublicacoes(publicacoes) {
                     <p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
                 </div>
                 <h3 class="discussao-title">
-                    <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}">
+                    <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}" style="text-decoration: underline;">
                         ${publicacao.discussaoTitle}
                     </a>
                 </h3>
             </div>
             <div class="publicacao-discussao-footer">
-                <p>${publicacao.commentAmount} comentários 🗨️</p>
+                <p>${publicacao.commentAmount} 🗨️</p>
                 <p class="discussao-info">${tempoFormatado}</p>
             </div>
             `;
-            if (publicacao.userId === autenticacaoUserId) {
+            if (publicacao.userId === autenticacaoUserId || publicacao.adminPermissions) {
                 conteudoHTML += `
                     <button id="remover-discussao" onclick="deletaDiscussao('${publicacao.publicacaoId}', '${publicacao.userId}')">
                         Remover
@@ -225,7 +225,7 @@ function renderPublicacoes(publicacoes) {
                     </div>
                 `;
             }
-            if (publicacao.userId === autenticacaoUserId) {
+            if (publicacao.userId === autenticacaoUserId || publicacao.adminPermissions) {
                 conteudoHTML += `
                     <button id="remover-discussao" onclick="deletaPost('${publicacao.publicacaoId}', '${publicacao.userId}')">
                         Remover
@@ -241,24 +241,27 @@ function renderPublicacoes(publicacoes) {
     });
   }
   
-  function listenForPublicacoes() {
-    // Conectar ao servidor de mensagens com parâmetros na URL
-    const eventSource = new EventSource(`/API/forum/stream-publicacoes`);
-    eventSource.onmessage = (event) => {
-        try {
-            const publicacoes = JSON.parse(event.data);
-            console.log(publicacoes);  // Verifica as publicações recebidas
-            renderPublicacoes(publicacoes); // Renderiza as publicações recebidas
-        } catch (error) {
-            console.error('Erro ao processar os dados recebidos:', error);
-        }
-    };
+  async function getDestaques(amount) {
+    try {
+        const response = await fetch('/API/forum/getdestaques', {
+            method: 'POST', // Altera o método para POST
+            headers: {
+                'Content-Type': 'application/json', // Define o tipo de conteúdo como JSON
+            },
+            body: JSON.stringify({ amount, userId: localStorage.getItem("autenticationUserId") })
+        });
 
-    eventSource.onerror = (error) => {
-        console.error('Erro na conexão com o servidor:', error);
-        eventSource.close();
-    };
-  }
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar publicações: ${response.statusText}`);
+        }
+
+        const publicacoes = await response.json();
+        console.log(publicacoes);  // Verifica as publicações recebidas
+        renderPublicacoes(publicacoes); // Renderiza as publicações recebidas
+    } catch (error) {
+        console.error('Erro ao buscar as publicações:', error);
+    }
+}
   
   function listenForFollowingPublicacoes(userTag) {
       if (!followingList) {
@@ -346,10 +349,10 @@ document.getElementById('post').addEventListener('click', async () => {
       document.getElementById('messageText').value = '';
       document.getElementById('mediaFile').value = '';
     } else {
-      document.getElementById('statusMessage').textContent = responseData.error || 'Erro ao publicar.';
+    console.log(responseData.error || 'Erro ao publicar.');
     }
   } catch (error) {
-    document.getElementById('statusMessage').textContent = `Erro: ${error.message}`;
+    console.log(`Erro: ${error.message}`);
   }
 
   fecharBetterPopup('novo-post-popup');
@@ -358,7 +361,7 @@ document.getElementById('post').addEventListener('click', async () => {
   let categoriaPagina;
   
   window.onload = () => {
-    listenForPublicacoes();
+    getDestaques(20);
   }
   </script>
   </html>

@@ -123,7 +123,7 @@ router.get('/stream-publicacoes', async (req, res) => {
 
   try {
     // Query para obter as últimas 'amount' publicações
-    const publicacoesQuery = query(dbRef(database, `forum/publicacoes`), limitToLast(Number(amount)));
+    const publicacoesQuery = query(dbRef(database, `forum/publicacoes`), orderByChild('ultimoUpdate'), limitToLast(Number(amount)));
 
     // Obtendo as publicações da base de dados
     const snapshot = await get(publicacoesQuery);

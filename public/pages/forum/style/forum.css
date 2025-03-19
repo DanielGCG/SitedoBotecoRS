@@ -62,6 +62,12 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 300px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE e Edge */
+}
+.main-content ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
 }
 
 /* Header do Fórum */
