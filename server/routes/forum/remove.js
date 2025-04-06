@@ -109,49 +109,66 @@ router.post('/removerdiscussaocomment', async (req, res) => {
 
 /* FINALIZADA */
 router.post('/removerpost', async (req, res) => {
-    const { userId, publicacaoId } = req.body;
+  const { userId, publicacaoId } = req.body;
 
-    // Validação dos dados de entrada
-    if (!userId || !publicacaoId ) {
-      return res.status(400).json({ error: 'O conteúdo precisa de userId e publicacaoId.' });
+  // Validação dos dados de entrada
+  if (!userId || !publicacaoId ) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userId e publicacaoId.' });
+  }
+
+  try {
+    // Verificamos se o userId do solicitante bate com o autor do post
+    const postRef = dbRef(database, `/forum/publicacoes/${publicacaoId}`);
+
+    const snapPost = await get(postRef);
+
+    if (!snapPost.exists() || !(userId === snapPost.val().userId)){
+    return res.status(400).json({ error: 'Post não existe ou usuário solicitante não bate com autor do post.' });
     }
 
-    try {
-      // Verificamos se o userId do solicitante bate com o autor do post
-      const postRef = dbRef(database, `/forum/publicacoes/${publicacaoId}`);
+    // Remoção do post
+    await remove(postRef);
 
-      const snapPost = await get(postRef);
+    const userRef = dbRef(database, `/forum/usuarios/${userId}`);
 
-      if (!snapPost.exists() || !(userId === snapPost.val().userId)){
-        return res.status(400).json({ error: 'Post não existe ou usuário solicitante não bate com autor do post.' });
-      }
+    // Atualização no perfil do usuário
+    const userSnapshot = await get(userRef);
 
-      // Remoção do post
-      await remove(postRef);
+    if (userSnapshot.exists()) {
+    // Obtém o valor atual e garante que seja um número válido
+    const currentAmount = parseInt(userSnapshot.val().postAmount, 10) || 0;
+    
+    // Garante que o valor não fique negativo
+    const newAmount = Math.max(0, currentAmount - 1);
 
-      const userRef = dbRef(database, `/forum/usuarios/${userId}`);
-
-      // Atualização no perfil do usuário
-      const userSnapshot = await get(userRef);
-
-      if (userSnapshot.exists()) {
-        // Obtém o valor atual e garante que seja um número válido
-        const currentAmount = parseInt(userSnapshot.val().postAmount, 10) || 0;
-        
-        // Garante que o valor não fique negativo
-        const newAmount = Math.max(0, currentAmount - 1);
-
-        await update(userRef, { postAmount: newAmount });
-      } else {
-        // Inicializa o valor se o nó não existir
-        await update(userRef, { postAmount: 0 });
-      }
-
-      res.status(200).json({ message: 'Post removido com sucesso.' });
-    } catch (error) {
-        console.error('Erro ao remover no Firebase:', error);
-        res.status(500).json({ error: 'Erro interno do servidor.' });
+    await update(userRef, { postAmount: newAmount });
+    } else {
+    // Inicializa o valor se o nó não existir
+    await update(userRef, { postAmount: 0 });
     }
+
+    // Remoção de todos os likes associados ao post
+    const postLikesRef = dbRef(database, `/forum/postsLikes`);
+    const snapPostLikes = await get(postLikesRef);
+
+    if (snapPostLikes.exists()) {
+    const updates = {};
+    snapPostLikes.forEach((childSnap) => {
+      if (childSnap.val().publicacaoId === publicacaoId) {
+      updates[childSnap.key] = null; // Marca para remoção
+      }
+    });
+
+    if (Object.keys(updates).length > 0) {
+      await update(postLikesRef, updates);
+    }
+    }
+
+    res.status(200).json({ message: 'Post e seus likes removidos com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao remover no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
 });
 
 router.post('/removerpostcomment', async (req, res) => {

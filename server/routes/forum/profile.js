@@ -6,12 +6,13 @@ const router = express.Router();
 router.post('/getuser', async (req, res) => {
   const { userId } = req.body;
 
-  try{
+  try {
     const userRef = dbRef(database, `forum/usuarios/${userId}`);
-    const userInfo = get(userRef);
+    const snapshot = await get(userRef);
+    const userInfo = snapshot.val();
 
-    res.body = { userInfo: userInfo };
-  }catch (error) {
+    res.json(userInfo);
+  } catch (error) {
     console.error('Erro ao pegar o perfil no Firebase:', error);
     res.status(500).json({ error: 'Erro interno do servidor.' });
   }
@@ -25,7 +26,7 @@ router.post('/getuserwithusertag', async (req, res) => {
     const usersRef = dbRef(database, 'forum/usuarios');
 
     // Criar consulta para buscar o usuário com o userTag correspondente
-    const userQuery = query(usersRef, orderByChild('userTag'), equalTo(userTag));
+    const userQuery = query(usersRef, orderByChild('userTag'), equalTo('userTag'));
 
     // Obter os dados da consulta
     const snapshot = await get(userQuery);

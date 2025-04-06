@@ -214,7 +214,7 @@ function renderComments(comments) {
     const postDiv = document.createElement('div');
     postDiv.classList.add('post');
     
-    const time = new Date(comment.time);
+    const time = new Date(comment.ultimoUpdate);
     const now = new Date();
     const isToday = now.toDateString() === time.toDateString();
     const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === time.toDateString();

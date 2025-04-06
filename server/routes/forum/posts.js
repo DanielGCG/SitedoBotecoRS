@@ -26,7 +26,8 @@ router.post('/discussaocomment', async (req, res) => {
       userId,
       text,
       media,
-      time: Date.now(),
+      ultimoUpdate: Date.now(),
+      creationTime: Date.now()
     });
 
     const publicacaoRef = dbRef(database, `forum/publicacoes/${publicacaoId}`)
@@ -36,7 +37,7 @@ router.post('/discussaocomment', async (req, res) => {
     if (publicacaoSnapshot.exists()) {
       // Incrementa o valor existente
       const currentAmount = parseInt(publicacaoSnapshot.val().commentAmount, 10) || 0;
-      await update(publicacaoRef, { commentAmount: currentAmount + 1 });
+      await update(publicacaoRef, { commentAmount: currentAmount + 1, ultimoUpdate: Date.now() });
     } else {
       // Inicializa o valor se o nó não existir
       await update(publicacaoRef, { commentAmount: 1 });
@@ -76,11 +77,11 @@ router.post('/discussaoeditcomment', async (req, res) => {
       text,
       media,
       edited,
-      time: Date.now(),
+      ultimoUpdate: Date.now(),
     });
 
     await update(dbRef(database, `forum/publicacoes/${publicacaoId}`), {
-      time: Date.now(),
+      ultimoUpdate: Date.now(),
     });
 
     // Retorna sucesso se tudo ocorreu bem
@@ -229,10 +230,76 @@ router.post('/postComment', async (req, res) => {
       text,
       media,
       userId,
-      time: Date.now(),
+      creationTime: Date.now(),
+      ultimoUpdate: Date.now(),
     });
 
     res.status(201).json({ message: 'Comentário de post criado com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao salvar no Firebase:', error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+});
+
+router.post('/postLike', async (req, res) => {
+  const { userId, publicacaoId } = req.body;
+
+  if (!userId || !publicacaoId) {
+    return res.status(400).json({ error: 'O conteúdo precisa de userId e publicacaoId.' });
+  }
+
+  try {
+    const existingLikeSnapshot = await get(dbRef(database, `forum/postsLikes`));
+    const publicacaoRef = dbRef(database, `forum/publicacoes/${publicacaoId}`);
+    let updatedLikeAmount = 0;
+
+    if (existingLikeSnapshot.exists()) {
+      const likes = existingLikeSnapshot.val();
+      const existingLikeKey = Object.keys(likes).find(
+        (key) => likes[key].userId === userId && likes[key].publicacaoId === publicacaoId
+      );
+
+      if (existingLikeKey) {
+        await remove(dbRef(database, `forum/postsLikes/${existingLikeKey}`));
+
+        const publicacaoSnapshot = await get(publicacaoRef);
+        if (publicacaoSnapshot.exists()) {
+          const currentLikeAmount = parseInt(publicacaoSnapshot.val().likeAmount, 10) || 0;
+          updatedLikeAmount = Math.max(currentLikeAmount - 1, 0);
+          await update(publicacaoRef, { likeAmount: updatedLikeAmount });
+        }
+
+        return res.status(200).json({ 
+          message: 'Like removido com sucesso.',
+          likeAmount: updatedLikeAmount
+        });
+      }
+    }
+
+    const likeId = crypto.randomUUID();
+    const postLikeRef = dbRef(database, `forum/postsLikes/${likeId}`);
+
+    await set(postLikeRef, {
+      publicacaoId,
+      likeId,
+      userId,
+      time: Date.now(),
+    });
+
+    const publicacaoSnapshot = await get(publicacaoRef);
+    if (publicacaoSnapshot.exists()) {
+      const currentLikeAmount = parseInt(publicacaoSnapshot.val().likeAmount, 10) || 0;
+      updatedLikeAmount = currentLikeAmount + 1;
+      await update(publicacaoRef, { likeAmount: updatedLikeAmount });
+    } else {
+      return res.status(404).json({ error: 'Publicação não encontrada.' });
+    }
+
+    res.status(201).json({ 
+      message: 'Like no post criado com sucesso.',
+      likeAmount: updatedLikeAmount
+    });
+
   } catch (error) {
     console.error('Erro ao salvar no Firebase:', error);
     res.status(500).json({ error: 'Erro interno do servidor.' });

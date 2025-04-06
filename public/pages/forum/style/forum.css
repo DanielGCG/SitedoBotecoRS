@@ -1,3 +1,9 @@
+:root {
+    --cor-forum-1:#319c36;
+    --cor-forum-2:#5a9145;
+    --cor-forum-3:#97c984;
+}
+
 body {
     overflow-x: hidden;
 }
@@ -11,7 +17,7 @@ body {
 
 /* Sidebars escondidas por padrão */
 .sidebar, .right-sidebar {
-    --cor-fundo: rgb(151, 201, 132);
+    --cor-fundo: #97c984;
     width: 175px;
     transform: translateX(0);
     transition: transform 0.35s cubic-bezier(0.265, 1.130, 0.395, 1.325); /* Animação suave */
@@ -93,7 +99,7 @@ body {
 
 .forum-header button {
     padding: 0.5rem 1rem;
-    background-color: #4CAF50;
+    background-color: var(--cor-forum-1);
     color: white;
     border: none;
     border-radius: 5px;
@@ -138,7 +144,7 @@ body {
 }
 
 .discussao-title a:hover {
-    color: #4CAF50;
+    color: var(--cor-forum-2);
 }
 
 .discussao-info {

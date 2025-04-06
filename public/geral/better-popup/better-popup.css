@@ -16,14 +16,12 @@
 
 .better-popup[data-active] {
   display: flex;
-  animation: pop-open 0.2s cubic-bezier(0.265, 1.130, 0.395, 1.325) forwards;
 }
 
 .better-popup-content {
   position: relative;
-  background-color: var(--cor-fundo);
   border-radius: 8px;
-  padding: 24px;
+  padding: 0px;
   box-shadow: 0 0 16px rgba(0, 0, 0, 0.2);
   max-width: 90vw;
   max-height: 90vh;
@@ -37,7 +35,7 @@
 /* || Botão de fechar */
 
 .better-popup-close {
-  background-color: #4CAF50;
+  background-color: var(--cor-forum-1);
   border: none;
   font-size: 18px;
   position: absolute;
@@ -51,7 +49,7 @@
 }
 
 .better-popup-close:hover {
-  background-color: #388E3C; /* Cor mais escura baseada em #4CAF50 */
+  background-color: var(--cor-forum-2);
   transform: scale(1.1);
 }
 
@@ -75,7 +73,7 @@
 
 .better-popup form button {
   padding: 0.5rem 1rem;
-  background-color: #4CAF50;
+  background-color: var(--cor-forum-1);
   color: white;
   border: none;
   border-radius: 5px;
@@ -83,6 +81,6 @@
 }
 
 .better-popup form button:hover {
-  background-color: #388E3C; /* Cor mais escura baseada em #4CAF50 */
+  background-color: var(--cor-forum-2);
 }
 

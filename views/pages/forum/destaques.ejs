@@ -12,7 +12,7 @@
   <div id="titulo-categoria" style="text-align: center; margin-bottom: 1rem;"><h2>Destaques</h2></div>
   <div class="forum-header">
     <input type="text" placeholder="Buscar tópicos ou categorias...">
-    <button style="margin-left: 5px;" data-popup="novo-post-popup">Novo Post</button>
+    <button style="margin-left: 5px;" data-popup="novo-post-popup" onclick="renderPopupNovoPost()">Novo Post</button>
   </div>
   
   <div class="better-popup" id="novo-post-popup">
@@ -20,8 +20,8 @@
         <button class="better-popup-close">X</button>
         <div class="twitter-draft-container">
             <div class="header">
-                <img src="pages/cutucar/user-avatar.png" class="avatar">
-                <span class="username">@botdoboteco</span>
+                <img src="pages/cutucar/user-avatar.png" class="avatar" id="popupUserAvatar" alt="Avatar do usuário">
+                <span class="username" id="popupUsername"></span>
             </div>
             <!-- Campo de texto -->
             <textarea class="tweet-input-grande" id="messageText" placeholder="no que está pensando?" maxlength="440"></textarea>
@@ -40,7 +40,7 @@
                         <label for="mediaFile" style="cursor: url('/img/cursor-mao.png'), auto;">
                             <svg xmlns="http://www.w3.org/2000/svg" 
                                 viewBox="0 0 24 24" 
-                                fill="#1D9BF0"
+                                fill="#5a9145"
                                 width="24" 
                                 height="24"
                                 aria-hidden="false">
@@ -55,7 +55,7 @@
                         <label for="selectGifButton" style="cursor: url('/img/cursor-mao.png'), auto;">
                             <svg xmlns="http://www.w3.org/2000/svg" 
                                 viewBox="0 0 24 24" 
-                                fill="#1D9BF0"
+                                fill="#5a9145"
                                 width="24" 
                                 height="24"
                                 aria-hidden="false">
@@ -88,9 +88,9 @@
 <script src="/geral/better-popup/better-popup.js"></script>
 
 <!-- --- LÓGICA PARA OS GIFS --- -->
-<script src="/pages/forum/script/gifs.js" defer></script>
+<script src="/pages/forum/script/gifs.js"></script>
 <!-- --- LÓGICA PARA BRAT --- -->
-<script src="/pages/forum/script/brat.js" defer></script>
+<script src="/pages/forum/script/brat.js"></script>
 <!-- --- LÓGICA PARA PREVIEWMEDIA --- -->
 <script src="/pages/forum/script/auxiliar.js" defer></script>
 
@@ -152,12 +152,12 @@ function renderPublicacoes(publicacoes) {
                     <img src="${publicacao.profileImage}" class="publicacao-profile-image">
                     <p><a style="text-decoration: none; color: #333;" href="/forum/user?userTag=${publicacao.userTag}"><strong>${publicacao.userTag}</strong></a></p>
                 </div>
+            </div>
                 <h3 class="discussao-title">
                     <a href="/forum/discussao?publicacaoId=${publicacao.publicacaoId}" style="text-decoration: underline;">
                         ${publicacao.discussaoTitle}
                     </a>
                 </h3>
-            </div>
             <div class="publicacao-discussao-footer">
                 <p>${publicacao.commentAmount} 🗨️</p>
                 <p class="discussao-info">${tempoFormatado}</p>
@@ -194,8 +194,10 @@ function renderPublicacoes(publicacoes) {
                     </div>
                     <div class="publicacao-post-footer">
                         <div>
-                            <button class="publicacao-post-footer-button">${publicacao.commentAmount || 0} 💬</button>
-                            <button class="publicacao-post-footer-button">${publicacao.likeAmount || 0} 👍</button>
+                            <button class="publicacao-post-footer-button" id="comentario.${publicacao.publicacaoId}">${publicacao.commentAmount || 0} 💬</button>
+                            <button class="publicacao-post-footer-button" id="like.${publicacao.publicacaoId}" onclick="curtir('${publicacao.publicacaoId}', '${localStorage.getItem("autenticationUserId")}')">
+                                ${publicacao.likeAmount || 0} 👍
+                            </button>
                         </div>
                         <p class="discussao-info">${tempoFormatado}</p>
                     </div>
@@ -218,8 +220,10 @@ function renderPublicacoes(publicacoes) {
                     </div>
                     <div class="publicacao-post-footer">
                         <div>
-                            <button class="publicacao-post-footer-button">${publicacao.commentAmount || 0} 💬</button>
-                            <button class="publicacao-post-footer-button">${publicacao.likeAmount || 0} 👍</button>
+                            <button class="publicacao-post-footer-button" id="comentario.${publicacao.publicacaoId}">${publicacao.commentAmount || 0} 💬</button>
+                            <button class="publicacao-post-footer-button" id="like.${publicacao.publicacaoId}" onclick="curtir('${publicacao.publicacaoId}', '${localStorage.getItem("autenticationUserId")}')">
+                                ${publicacao.likeAmount || 0} 👍
+                            </button>
                         </div>
                         <p class="discussao-info">${tempoFormatado}</p>
                     </div>
@@ -235,10 +239,34 @@ function renderPublicacoes(publicacoes) {
         }
 
         publicacaoDiv.innerHTML = conteudoHTML;
+        publicacaoDiv.id = publicacao.publicacaoId;
 
         // Adiciona a publicação à lista
         publicacoesDiv.appendChild(publicacaoDiv);
     });
+  }
+
+  async function renderPopupNovoPost() {
+    console.log("Renderizando popup de novo post...");
+    try {
+        const response = await fetch('/API/forum/getuser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: localStorage.getItem("autenticationUserId") })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar dados do usuário: ${response.statusText}`);
+        }
+
+        const userData = await response.json();
+        document.getElementById("popupUsername").innerHTML = userData.userTag;
+        document.getElementById("popupUserAvatar").src = userData.profileImage;
+    } catch (error) {
+        console.error('Erro ao buscar os dados do usuário:', error);
+    }
   }
   
   async function getDestaques(amount) {
@@ -296,6 +324,7 @@ function renderPublicacoes(publicacoes) {
   
         const responseData = await response.json();
         if (response.ok) {
+            document.getElementById(publicacaoId).remove(); // Remove a publicação do DOM
         }
   
       }catch (error) {
@@ -314,6 +343,26 @@ function renderPublicacoes(publicacoes) {
   
         const responseData = await response.json();
         if (response.ok) {
+            document.getElementById(publicacaoId).remove(); // Remove a publicação do DOM
+        }
+  
+      }catch (error) {
+      console.error('Erro ao salvar no Firebase:', error);
+      res.status(500).json({ error: 'Erro interno do servidor.' });
+    }
+  }
+  
+  async function curtir(publicacaoId, userId) {
+    try {
+        const response = await fetch(`/API/forum/postLike`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, publicacaoId }),
+        });
+  
+        const responseData = await response.json();
+        if (response.ok) {
+            document.getElementById("like." + publicacaoId).innerHTML = responseData.likeAmount + " 👍"; // Atualiza o número de likes
         }
   
       }catch (error) {
