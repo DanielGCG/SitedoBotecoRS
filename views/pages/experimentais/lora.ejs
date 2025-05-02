@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Notificações LoRa</title>
+    <style>
+        h1 {
+            color: #333;
+        }
+        #notificacoes {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .mensagem {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>📡 Notificações LoRa</h1>
+    <div id="notificacoes">Carregando...</div>
+
+    <script>
+        async function buscarMensagens() {
+            try {
+                const res = await fetch('/API/lora/lora_notifications');
+                const dados = await res.json();
+
+                const div = document.getElementById('notificacoes');
+                div.innerHTML = ''; // limpa conteúdo
+
+                const mensagens = Object.values(dados).sort((a, b) => b.timestamp - a.timestamp);
+
+                if (mensagens.length === 0) {
+                    div.innerHTML = "<p>Nenhuma notificação recebida ainda.</p>";
+                    return;
+                }
+
+                mensagens.forEach(m => {
+                    const el = document.createElement('div');
+                    el.classList.add('mensagem');
+                    el.innerHTML = `
+                        <strong>🆔 ${m.mensagemID}</strong><br>
+                        <p>${m.mensagem}</p>
+                        <small>🕒 ${new Date(m.timestamp).toLocaleString()}</small>
+                    `;
+                    div.appendChild(el);
+                });
+
+            } catch (err) {
+                console.error('Erro ao buscar notificações:', err);
+                document.getElementById('notificacoes').innerHTML = 'Erro ao carregar mensagens.';
+            }
+        }
+
+        // Atualiza a cada 5 segundos
+        setInterval(buscarMensagens, 5000);
+        buscarMensagens(); // chama imediatamente
+    </script>
+</body>
+</html>

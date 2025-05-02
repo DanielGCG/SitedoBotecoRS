@@ -4,7 +4,7 @@ const { getStorage, ref: stRef, listAll, getDownloadURL, uploadBytes, deleteObje
 const { ref: dbRef, update, push, get, set, remove } = require('firebase/database'); // Certifique-se de importar corretamente
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-const { database } = require('../../config/firebase');
+const { database } = require('../config/firebase');
 const router = express.Router();
 
 router.post('/lora_recive', async (req, res) => {
@@ -34,5 +34,24 @@ router.post('/lora_recive', async (req, res) => {
         return res.status(500).json({ erro: 'Erro interno ao processar a mensagem.' });
     }
 });
+
+router.get('/lora_notifications', async (req, res) => {
+    try {
+        const mensagensRef = dbRef(database, 'lora/notifications');
+        const snapshot = await get(mensagensRef);
+
+        if (snapshot.exists()) {
+            return res.json(snapshot.val());
+        } else {
+            return res.json({});
+        }
+    } catch (error) {
+        console.error('Erro ao buscar notificações:', error);
+        res.status(500).json({ erro: 'Erro ao buscar notificações.' });
+    }
+});
+
+
+router
 
 module.exports = router;

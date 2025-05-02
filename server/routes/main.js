@@ -217,6 +217,14 @@ router.get('/mensages', (req, res) => {
     res.render('pages/experimentais/mensages', { locals: locals });
 });
 
+router.get('/lora', (req, res) => {
+    const locals = {
+        title: "LoRa",
+        description: "LoRa LoRa LoRa LoRa LoRa"
+    }
+    res.render('pages/experimentais/lora', { locals: locals });
+});
+
 /* ------ FORUM ------*/
 
 router.get('/forum/autenticacao', (req, res) => {
