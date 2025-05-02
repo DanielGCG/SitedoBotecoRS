@@ -35,6 +35,9 @@ app.use('/API/cutucar', require('./server/routes/cutucar'));
 // Rota BSMP Skins
 app.use('/API/skins', require('./server/routes/skins'));
 
+// Rota LoRa
+app.use('/API/lora', require('./server/routes/lora'));
+
 // Rota Galeria
 app.use('', require('./server/routes/galeria'));
 
