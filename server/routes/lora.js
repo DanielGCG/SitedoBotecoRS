@@ -8,25 +8,26 @@ const { database } = require('../config/firebase');
 const router = express.Router();
 
 router.post('/lora_recive', async (req, res) => {
-    try{
-        const { mensagem } = req.body;
+    try {
+        const { mensagem, mensagemID } = req.body;
 
-        if (!mensagem) {
-            return res.status(400).json({ erro: 'Mensagem ausente no corpo da requisição.' });
+        // Valida se a mensagem e o ID foram recebidos
+        if (!mensagem || !mensagemID) {
+            return res.status(400).json({ erro: 'Mensagem ou ID ausentes no corpo da requisição.' });
         }
 
-        const mensagemID = crypto.randomUUID();
+        // Referência no banco de dados para o ID específico
         const mensagemRef = dbRef(database, `lora/notifications/${mensagemID}`);
 
+        // Salva a mensagem com o ID recebido
         await set(mensagemRef, {
             mensagemID: mensagemID,
             mensagem: mensagem,
             timestamp: Date.now(),
         });
 
-        console.log(`Nova mensagem recebida do LoRa: ${mensagem}`);
+        console.log(`Nova mensagem recebida do LoRa com ID ${mensagemID}: ${mensagem}`);
 
-        // Aqui você pode salvar a mensagem num banco de dados, arquivo, ou responder para o dispositivo
         res.json({ status: 'Mensagem recebida com sucesso.' });
 
     } catch (error) {
