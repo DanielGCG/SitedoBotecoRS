@@ -7,6 +7,18 @@
         h1 {
             color: #333;
         }
+
+        #formulario {
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
         #notificacoes {
             background: white;
             border-radius: 8px;
@@ -14,15 +26,43 @@
             max-width: 500px;
             margin: auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: left;
         }
+
         .mensagem {
             border-bottom: 1px solid #ccc;
             padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mensagem-info {
+            max-width: 85%;
+        }
+
+        .remover-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .remover-btn:hover {
+            background-color: #c0392b;
         }
     </style>
 </head>
 <body>
     <h1>📡 Notificações LoRa</h1>
+
+    <div id="formulario">
+        <input type="text" id="mensagemInput" placeholder="Digite uma nova notificação" />
+        <button onclick="enviarMensagem()">Enviar</button>
+    </div>
+
     <div id="notificacoes">Carregando...</div>
 
     <script>
@@ -32,22 +72,24 @@
                 const dados = await res.json();
 
                 const div = document.getElementById('notificacoes');
-                div.innerHTML = ''; // limpa conteúdo
+                div.innerHTML = '';
 
-                const mensagens = Object.values(dados).sort((a, b) => b.timestamp - a.timestamp);
-
-                if (mensagens.length === 0) {
+                if (dados.length === 0) {
                     div.innerHTML = "<p>Nenhuma notificação recebida ainda.</p>";
                     return;
                 }
 
-                mensagens.forEach(m => {
+                dados.forEach(m => {
                     const el = document.createElement('div');
                     el.classList.add('mensagem');
+
                     el.innerHTML = `
-                        <strong>🆔 ${m.mensagemID}</strong><br>
-                        <p>${m.mensagem}</p>
-                        <small>🕒 ${new Date(m.timestamp).toLocaleString()}</small>
+                        <div class="mensagem-info">
+                            <strong>🆔 ${m.mensagemID || m.id}</strong><br>
+                            <p>${m.mensagem}</p>
+                            <small>🕒 ${new Date(m.timestamp).toLocaleString()}</small>
+                        </div>
+                        <button class="remover-btn" onclick="removerMensagem('${m.id || m.mensagemID}')">Remover</button>
                     `;
                     div.appendChild(el);
                 });
@@ -58,9 +100,60 @@
             }
         }
 
-        // Atualiza a cada 5 segundos
+        async function enviarMensagem() {
+            const input = document.getElementById('mensagemInput');
+            const mensagem = input.value.trim();
+
+            if (!mensagem) return alert('Digite uma mensagem.');
+
+            try {
+                const res = await fetch('/API/lora/lora_add_notifications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensagem })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    input.value = '';
+                    buscarMensagens();
+                } else {
+                    alert('Erro ao enviar: ' + (data.erro || 'Erro desconhecido.'));
+                }
+
+            } catch (err) {
+                console.error('Erro ao enviar mensagem:', err);
+            }
+        }
+
+        async function removerMensagem(id) {
+            if (!confirm('Tem certeza que deseja remover esta notificação?')) return;
+
+            try {
+                const res = await fetch('/API/lora/lora_notifications', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id }) // Envia o ID no corpo da requisição
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    buscarMensagens(); // Atualiza as mensagens após remoção
+                } else {
+                    alert('Erro ao remover: ' + (data.erro || 'Erro desconhecido.'));
+                }
+
+            } catch (err) {
+                console.error('Erro ao remover mensagem:', err);
+            }
+        }
+
         setInterval(buscarMensagens, 5000);
-        buscarMensagens(); // chama imediatamente
+        buscarMensagens();
     </script>
 </body>
 </html>

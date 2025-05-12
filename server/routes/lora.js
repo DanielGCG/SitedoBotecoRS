@@ -7,19 +7,29 @@ const upload = multer({ storage });
 const { database } = require('../config/firebase');
 const router = express.Router();
 
+// Função para gerar um código legível com base64
+function gerarCodigo() {
+    const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let codigo = "";
+    for (let i = 0; i < 8; i++) {
+        const indice = Math.floor(Math.random() * caracteres.length);
+        codigo += caracteres[indice];
+    }
+
+    return codigo;
+}
+
+// Recebe mensagem do LoRa
 router.post('/lora_recive', async (req, res) => {
     try {
         const { mensagem, mensagemID } = req.body;
 
-        // Valida se a mensagem e o ID foram recebidos
         if (!mensagem || !mensagemID) {
             return res.status(400).json({ erro: 'Mensagem ou ID ausentes no corpo da requisição.' });
         }
 
-        // Referência no banco de dados para o ID específico
         const mensagemRef = dbRef(database, `lora/notifications/${mensagemID}`);
 
-        // Salva a mensagem com o ID recebido
         await set(mensagemRef, {
             mensagemID: mensagemID,
             mensagem: mensagem,
@@ -37,6 +47,7 @@ router.post('/lora_recive', async (req, res) => {
     }
 });
 
+// Obter notificações
 router.get('/lora_notifications', async (req, res) => {
     try {
         const mensagensRef = dbRef(database, 'lora/notifications');
@@ -57,7 +68,6 @@ router.get('/lora_notifications', async (req, res) => {
             }
         }
 
-        // Ordena por timestamp decrescente (mais recente primeiro)
         mensagensArray.sort((a, b) => b.timestamp - a.timestamp);
 
         return res.json(mensagensArray);
@@ -67,6 +77,56 @@ router.get('/lora_notifications', async (req, res) => {
     }
 });
 
+// Adicionar nova notificação
+router.post('/lora_add_notifications', async (req, res) => {
+    try {
+        const { mensagem, status = 'enviada' } = req.body;
+
+        if (!mensagem) {
+            return res.status(400).json({ erro: 'Mensagem é obrigatória.' });
+        }
+
+        // Gerar um código personalizado para o ID
+        const mensagemID = gerarCodigo();
+
+        // Criar uma referência com o ID gerado manualmente
+        const novaRef = dbRef(database, `lora/notifications/${mensagemID}`);
+
+        // Salvar a notificação com o ID gerado
+        await set(novaRef, {
+            mensagemID,
+            mensagem,
+            timestamp: Date.now(),
+            status
+        });
+
+        res.json({ status: 'Notificação adicionada com sucesso.', id: mensagemID });
+    } catch (error) {
+        console.error('Erro ao adicionar notificação:', error);
+        res.status(500).json({ erro: 'Erro ao adicionar notificação.' });
+    }
+});
+
+// Remover uma notificação
+router.delete('/lora_notifications', async (req, res) => {
+    try {
+        const { id } = req.body; // Agora o ID será enviado no corpo da requisição
+
+        if (!id) {
+            return res.status(400).json({ erro: 'ID da notificação é obrigatório.' });
+        }
+
+        const notifRef = dbRef(database, `lora/notifications/${id}`);
+        await remove(notifRef);
+
+        res.json({ status: 'Notificação removida com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao remover notificação:', error);
+        res.status(500).json({ erro: 'Erro ao remover notificação.' });
+    }
+});
+
+// Enviar mensagem para LoRa
 router.post('/lora_send', async (req, res) => {
     try {
         const { mensagem } = req.body;
@@ -89,8 +149,5 @@ router.post('/lora_send', async (req, res) => {
         res.status(500).json({ erro: 'Erro ao salvar mensagem.' });
     }
 });
-
-
-router
 
 module.exports = router;
