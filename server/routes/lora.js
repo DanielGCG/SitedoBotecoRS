@@ -31,7 +31,6 @@ router.post('/lora_recive', async (req, res) => {
         const mensagemRef = dbRef(database, `lora/notifications/${mensagemID}`);
 
         await set(mensagemRef, {
-            mensagemID: mensagemID,
             mensagem: mensagem,
             timestamp: Date.now(),
             status: 'enviada'
@@ -94,7 +93,6 @@ router.post('/lora_add_notifications', async (req, res) => {
 
         // Salvar a notificação com o ID gerado
         await set(novaRef, {
-            mensagemID,
             mensagem,
             timestamp: Date.now(),
             status
