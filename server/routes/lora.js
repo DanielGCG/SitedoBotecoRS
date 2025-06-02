@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { getStorage, ref: stRef, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
-const { ref: dbRef, update, push, get, set, remove } = require('firebase/database'); // Certifique-se de importar corretamente
+const { ref: dbRef, update, push, get, set, remove } = require('firebase/database');
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const { database } = require('../config/firebase');
@@ -146,6 +146,73 @@ router.post('/lora_send', async (req, res) => {
         console.error('Erro ao salvar mensagem para o LoRa:', error);
         res.status(500).json({ erro: 'Erro ao salvar mensagem.' });
     }
+});
+
+// Adicionar nova notificação
+router.post('/lora_add_notifications', async (req, res) => {
+    try {
+        const { mensagem, status = 'enviada' } = req.body;
+
+        if (!mensagem) {
+            return res.status(400).json({ erro: 'Mensagem é obrigatória.' });
+        }
+
+        // Gerar um código personalizado para o ID
+        const mensagemID = gerarCodigo();
+
+        // Criar uma referência com o ID gerado manualmente
+        const novaRef = dbRef(database, `lora/notifications/${mensagemID}`);
+
+        // Salvar a notificação com o ID gerado
+        await set(novaRef, {
+            mensagem,
+            timestamp: Date.now(),
+            status
+        });
+
+        res.json({ status: 'Notificação adicionada com sucesso.', id: mensagemID });
+    } catch (error) {
+        console.error('Erro ao adicionar notificação:', error);
+        res.status(500).json({ erro: 'Erro ao adicionar notificação.' });
+    }
+});
+
+// Rota para receber dados GPS e salvar no Firebase
+router.post('/nunca_so_gps', async (req, res) => {
+  try {
+    const { latitude, longitude, altitude, velocidade, data, hora } = req.body;
+
+    // Validação simples
+    if (
+      latitude === undefined || longitude === undefined ||
+      altitude === undefined || velocidade === undefined ||
+      !data || !hora
+    ) {
+      return res.status(400).json({ erro: 'Todos os campos GPS são obrigatórios.' });
+    }
+
+    // Gerar um ID único (exemplo)
+    const gpsID = gerarCodigo();
+
+    // Referência no Firebase (pode ajustar caminho se quiser)
+    const novaRef = dbRef(database, `gps_data/${gpsID}`);
+
+    // Salvar os dados GPS no banco
+    await set(novaRef, {
+      latitude,
+      longitude,
+      altitude,
+      velocidade,
+      data,
+      hora,
+      timestamp: Date.now()
+    });
+
+    res.json({ status: 'Dados GPS adicionados com sucesso.', id: gpsID });
+  } catch (error) {
+    console.error('Erro ao adicionar dados GPS:', error);
+    res.status(500).json({ erro: 'Erro ao adicionar dados GPS.' });
+  }
 });
 
 module.exports = router;
