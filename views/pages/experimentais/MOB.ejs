@@ -1,105 +1,191 @@
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Histórico de dados de GPS</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map {
-      height: 400px;
-      width: 100%;
-      max-width: 600px;
-      margin: 20px auto;
-      border-radius: 10px;
+    /* Fundo da página */
+    body {
+      background-color: #003f4e;
+      font-family: 'Open Sans', sans-serif;
+      color: #222;
+      margin: 0;
+      padding: 0 10px 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    #info {
-      background: white;
-      padding: 15px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      border-radius: 8px;
-    }
+
+    /* Container principal */
     .descricaoProjeto {
       max-width: 600px;
-      margin: 20px auto;
+      margin: 40px auto 20px;
       text-align: center;
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    /* Mapa */
+    #map {
+      height: 450px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      border: 3px solid rgb(118, 85, 255);
+    }
+
+    /* Caixa de informações */
+    #info {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px 25px;
+      max-width: 600px;
+      margin: 0 auto 40px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      color: #333;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    /* Popups do Leaflet */
+    .leaflet-popup-content-wrapper {
+      font-family: 'Open Sans', sans-serif !important;
+      font-size: 0.9rem !important;
+      color: #333 !important;
     }
   </style>
 </head>
 <body>
     <div class="descricaoProjeto">
-        <h1 style="text-align: center;">Histórico de dados de GPS</h1>
+        <img src="https://static.wixstatic.com/media/93ccdf_4226c4325159400b9760ae288aca6cbc~mv2.png/v1/fill/w_65,h_65,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20PNG%20Branco%2001.png">
+        <h1>Dados Coletados - Nunca Só</h1>
     </div>
-    
+  
     <div id="info">Carregando dados...</div>
-    <div id="map"></div>
-</body>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script>
-    let mapa;                
-    let marcadores = [];     
-    let dadosAnteriores = null; 
+    <div id="map" style="display: none;"></div>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+    <button id="btnDeletar" onclick="deletarTodosOsPontos()" style="
+        display: none;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    ">
+        🗑️ Deletar Todos os Pontos
+    </button>
+    </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    let mapa;
+    let marcadores = [];
+    let dadosAnteriores = null;
 
     async function carregarDadosGPS() {
-    try {
-        const res = await fetch('/API/MOB/ver_gps');
-        if (!res.ok) throw new Error('Erro ao buscar dados');
-        const dados = await res.json();
+        try {
+            const res = await fetch('/API/MOB/ver_gps');
+            if (!res.ok) throw new Error('Erro ao buscar dados');
+            const dados = await res.json();
 
-        const dadosString = JSON.stringify(dados);
-        if (dadosAnteriores === dadosString) {
-        console.log('Dados iguais, não atualizando o mapa');
-        return;
+            const dadosString = JSON.stringify(dados);
+            if (dadosAnteriores === dadosString) {
+                console.log('Dados iguais, não atualizando o mapa');
+                return;
+            }
+            dadosAnteriores = dadosString;
+
+            const chaves = Object.keys(dados);
+            if (chaves.length === 0) throw new Error('Nenhum ponto encontrado.');
+
+            // Exibe o mapa e o botão somente se houver dados
+            document.getElementById('map').style.display = 'block';
+            document.getElementById('btnDeletar').style.display = 'inline-block';
+
+            const primeiro = dados[chaves[0]];
+            const centro = [primeiro.latitude, primeiro.longitude];
+
+            if (!mapa) {
+                mapa = L.map('map').setView(centro, 17);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(mapa);
+            }
+
+            marcadores.forEach(m => mapa.removeLayer(m));
+            marcadores = [];
+
+            chaves.forEach(id => {
+                const ponto = dados[id];
+                const lat = Number(ponto.latitude);
+                const lon = Number(ponto.longitude);
+
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    const marcador = L.marker([lat, lon])
+                        .addTo(mapa)
+                        .bindPopup(`
+                            <strong>Data:</strong> ${ponto.data}<br>
+                            <strong>Hora:</strong> ${ponto.hora}<br>
+                            <strong>Velocidade:</strong> ${ponto.velocidade} km/h<br>
+                            <strong>Altitude:</strong> ${ponto.altitude} m
+                        `);
+                    marcadores.push(marcador);
+                }
+            });
+
+            const ultimaChave = chaves[chaves.length - 1];
+            const ultimoPonto = dados[ultimaChave];
+            document.getElementById('info').innerHTML = `
+                <strong>Último ponto:</strong><br>
+                <strong>Data:</strong> ${ultimoPonto.data} &nbsp;&nbsp;
+                <strong>Hora:</strong> ${ultimoPonto.hora}<br>
+                <strong>Latitude:</strong> ${ultimoPonto.latitude} <br>
+                <strong>Longitude:</strong> ${ultimoPonto.longitude}
+            `;
+            console.log('Mapa atualizado');
+        } catch (err) {
+            document.getElementById('info').textContent = 'Sem nenhum dado de GPS.';
+            document.getElementById('map').style.display = 'none';       // Oculta o mapa
+            document.getElementById('btnDeletar').style.display = 'none'; // Oculta o botão
+            console.error(err);
         }
-        dadosAnteriores = dadosString;
-
-        const chaves = Object.keys(dados);
-        if (chaves.length === 0) throw new Error('Nenhum ponto encontrado.');
-
-        const primeiro = dados[chaves[0]];
-        const centro = [primeiro.latitude, primeiro.longitude];
-
-        if (!mapa) {
-        mapa = L.map('map').setView(centro, 17);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(mapa);
-        }
-
-        marcadores.forEach(m => mapa.removeLayer(m));
-        marcadores = [];
-
-        chaves.forEach(id => {
-        const ponto = dados[id];
-        const lat = Number(ponto.latitude);
-        const lon = Number(ponto.longitude);
-
-        if (!isNaN(lat) && !isNaN(lon)) {
-            const marcador = L.marker([lat, lon])
-            .addTo(mapa)
-            .bindPopup(`
-                <strong>Data:</strong> ${ponto.data}<br>
-                <strong>Hora:</strong> ${ponto.hora}<br>
-                <strong>Velocidade:</strong> ${ponto.velocidade} km/h<br>
-                <strong>Altitude:</strong> ${ponto.altitude} m
-            `);
-            marcadores.push(marcador);
-        }
-        });
-
-        const ultimaChave = chaves[chaves.length - 1];
-        const ultimoPonto = dados[ultimaChave];
-        document.getElementById('info').innerHTML = `
-        <strong>Último ponto:</strong><br>
-        <strong>Data:</strong> ${ultimoPonto.data} &nbsp;&nbsp;
-        <strong>Hora:</strong> ${ultimoPonto.hora}<br>
-        <strong>Latitude:</strong> ${ultimoPonto.latitude} <br>
-        <strong>Longitude:</strong> ${ultimoPonto.longitude}
-        `;
-        console.log('Mapa atualizado');
-    } catch (err) {
-        document.getElementById('info').textContent = 'Sem nehum dado de GPS.';
-        console.error(err);
     }
+
+    async function deletarTodosOsPontos() {
+        if (!confirm('Tem certeza que deseja deletar todos os pontos de GPS?')) return;
+
+        try {
+            const res = await fetch('/API/MOB/deletar_gps', {
+                method: 'DELETE'
+            });
+
+            if (!res.ok) throw new Error('Erro ao deletar pontos');
+
+            alert('Todos os pontos foram deletados com sucesso.');
+            dadosAnteriores = null;
+            carregarDadosGPS();  // Recarrega o mapa limpo
+        } catch (err) {
+            console.error('Erro ao deletar pontos:', err);
+            alert('Erro ao deletar pontos.');
+        }
     }
 
-    carregarDadosGPS();            // primeira carga
-    setInterval(carregarDadosGPS, 10000);  // atualiza a cada 10 segundos
+    carregarDadosGPS();
+    setInterval(carregarDadosGPS, 10000);
 </script>
+</body>
+</html>

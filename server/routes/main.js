@@ -230,7 +230,10 @@ router.get('/MOB', (req, res) => {
         title: "Coisas da MOB",
         description: "MOB",
     }
-    res.render('pages/experimentais/MOB', { locals: locals });
+    res.render('pages/experimentais/MOB', {
+        layout: 'layouts/noheader',
+        locals: locals
+    });
 });
 
 /* ------ FORUM ------*/

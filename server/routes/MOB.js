@@ -61,5 +61,17 @@ router.get('/ver_gps', async (req, res) => {
   }
 });
 
+// Rota para deletar todos os dados GPS
+router.delete('/deletar_gps', async (req, res) => {
+  try {
+    const gpsRef = dbRef(database, 'gps_data');
+    await remove(gpsRef);
+    res.status(200).json({ status: true, mensagem: 'Todos os dados GPS foram deletados.' });
+  } catch (error) {
+    console.error('Erro ao deletar dados GPS:', error);
+    res.status(500).json({ status: false, erro: 'Erro ao deletar os dados GPS.' });
+  }
+});
+
 
 module.exports = router;
