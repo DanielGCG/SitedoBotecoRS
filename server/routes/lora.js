@@ -177,42 +177,4 @@ router.post('/lora_add_notifications', async (req, res) => {
     }
 });
 
-// Rota para receber dados GPS e salvar no Firebase
-router.post('/nunca_so_gps', async (req, res) => {
-  try {
-    const { latitude, longitude, altitude, velocidade, data, hora } = req.body;
-
-    // Validação simples
-    if (
-      latitude === undefined || longitude === undefined ||
-      altitude === undefined || velocidade === undefined ||
-      !data || !hora
-    ) {
-      return res.status(400).json({ erro: 'Todos os campos GPS são obrigatórios.' });
-    }
-
-    // Gerar um ID único (exemplo)
-    const gpsID = gerarCodigo();
-
-    // Referência no Firebase (pode ajustar caminho se quiser)
-    const novaRef = dbRef(database, `gps_data/${gpsID}`);
-
-    // Salvar os dados GPS no banco
-    await set(novaRef, {
-      latitude,
-      longitude,
-      altitude,
-      velocidade,
-      data,
-      hora,
-      timestamp: Date.now()
-    });
-
-    res.json({ status: 'Dados GPS adicionados com sucesso.', id: gpsID });
-  } catch (error) {
-    console.error('Erro ao adicionar dados GPS:', error);
-    res.status(500).json({ erro: 'Erro ao adicionar dados GPS.' });
-  }
-});
-
 module.exports = router;

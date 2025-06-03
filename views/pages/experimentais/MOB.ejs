@@ -1,0 +1,105 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      border-radius: 10px;
+    }
+    #info {
+      background: white;
+      padding: 15px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    .descricaoProjeto {
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+    <div class="descricaoProjeto">
+        <h1 style="text-align: center;">Histórico de dados de GPS</h1>
+    </div>
+    
+    <div id="info">Carregando dados...</div>
+    <div id="map"></div>
+</body>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+    let mapa;                
+    let marcadores = [];     
+    let dadosAnteriores = null; 
+
+    async function carregarDadosGPS() {
+    try {
+        const res = await fetch('/API/MOB/ver_gps');
+        if (!res.ok) throw new Error('Erro ao buscar dados');
+        const dados = await res.json();
+
+        const dadosString = JSON.stringify(dados);
+        if (dadosAnteriores === dadosString) {
+        console.log('Dados iguais, não atualizando o mapa');
+        return;
+        }
+        dadosAnteriores = dadosString;
+
+        const chaves = Object.keys(dados);
+        if (chaves.length === 0) throw new Error('Nenhum ponto encontrado.');
+
+        const primeiro = dados[chaves[0]];
+        const centro = [primeiro.latitude, primeiro.longitude];
+
+        if (!mapa) {
+        mapa = L.map('map').setView(centro, 17);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(mapa);
+        }
+
+        marcadores.forEach(m => mapa.removeLayer(m));
+        marcadores = [];
+
+        chaves.forEach(id => {
+        const ponto = dados[id];
+        const lat = Number(ponto.latitude);
+        const lon = Number(ponto.longitude);
+
+        if (!isNaN(lat) && !isNaN(lon)) {
+            const marcador = L.marker([lat, lon])
+            .addTo(mapa)
+            .bindPopup(`
+                <strong>Data:</strong> ${ponto.data}<br>
+                <strong>Hora:</strong> ${ponto.hora}<br>
+                <strong>Velocidade:</strong> ${ponto.velocidade} km/h<br>
+                <strong>Altitude:</strong> ${ponto.altitude} m
+            `);
+            marcadores.push(marcador);
+        }
+        });
+
+        const ultimaChave = chaves[chaves.length - 1];
+        const ultimoPonto = dados[ultimaChave];
+        document.getElementById('info').innerHTML = `
+        <strong>Último ponto:</strong><br>
+        <strong>Data:</strong> ${ultimoPonto.data} &nbsp;&nbsp;
+        <strong>Hora:</strong> ${ultimoPonto.hora}<br>
+        <strong>Latitude:</strong> ${ultimoPonto.latitude} <br>
+        <strong>Longitude:</strong> ${ultimoPonto.longitude}
+        `;
+        console.log('Mapa atualizado');
+    } catch (err) {
+        document.getElementById('info').textContent = 'Sem nehum dado de GPS.';
+        console.error(err);
+    }
+    }
+
+    carregarDadosGPS();            // primeira carga
+    setInterval(carregarDadosGPS, 10000);  // atualiza a cada 10 segundos
+</script>

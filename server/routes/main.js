@@ -225,6 +225,14 @@ router.get('/lora', (req, res) => {
     res.render('pages/experimentais/lora', { locals: locals });
 });
 
+router.get('/MOB', (req, res) => {
+    const locals = {
+        title: "Coisas da MOB",
+        description: "MOB",
+    }
+    res.render('pages/experimentais/MOB', { locals: locals });
+});
+
 /* ------ FORUM ------*/
 
 router.get('/forum/autenticacao', (req, res) => {
