@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Painel de Projetos do LAB">
+  <title>Painel de Projetos do LAB</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    .titulo {
+      max-width: 600px;
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      color: var(--cor_branco);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      font-size: 22px;
+    }
+
+    .lista_de_projetos {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 32px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    .item_lista_de_projetos {
+      max-width: 400px;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+    }
+
+    .item_lista_de_projetos {
+      background: var(--cor_branco);
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      color: #333;
+      text-align: center;
+    }
+
+    .projeto_titulo {
+      font-size: 20px;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      color: #003f4e;
+    }
+
+    .botoes_links {
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      padding-top: 12px;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .botao_link {
+      flex: 1 1 0;
+      text-align: center;
+      text-decoration: none;
+      background-color: var(--cor_botao);
+      color: var(--cor_branco);
+      font-weight: 600;
+      padding: 10px 10px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .botao_link:hover {
+      background-color: var(--cor_botao_hover);
+      transform: scale(1.03);
+    }
+
+    .lado_item_lista_de_projetos {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .lado_item_lista_de_projetos img {
+      max-width: 100px;
+      height: auto;
+    }
+
+    .item_com_imagem {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      text-align: left;
+      padding: 5px;
+      gap: 20px;
+    }
+
+    .coluna_info {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      height: 100%;
+      text-align: center;
+    }
+
+    .imagem_projeto {
+      width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      object-fit: cover;
+      object-position: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .markdown_descricao {
+      padding: 12px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      font-family: 'Open Sans', sans-serif;
+      color: #333;
+      font-size: 0.95em;
+      line-height: 1.6;
+      text-align: start;
+    }
+
+    .markdown_descricao h1,
+    .markdown_descricao h2 {
+      color: #003f4e;
+      margin-top: 0.5em;
+    }
+
+    .markdown_descricao h1 {
+      font-size: 20px;
+      margin-bottom: 0.5em;
+    }
+
+    .markdown_descricao h2 {
+      font-size: 18px;
+      margin-bottom: 0.5em;
+    }
+
+    .markdown_descricao h3 {
+      font-size: 16px;
+      margin-bottom: 0.5em;
+    }
+
+    .markdown_collapsible_heading {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .markdown_toggle_arrow {
+      user-select: none;
+    }
+
+    .markdown_collapsible-content {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+
+    .markdown_collapsible-content p, ul {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .markdown_collapsible-content.open {
+      opacity: 1;
+      max-height: 1000px;
+    }
+
+    .galeria_container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .galeria_container img {
+      width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .botao_galeria {
+      background: transparent;
+      color: inherit;
+      border: none;
+      padding: 0 4px;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none;
+    }
+    .botao_galeria svg {
+      display: block;
+    }
+    .botao_galeria.anterior {
+      left: 5px;
+    }
+    .botao_galeria.proximo {
+      right: 5px;
+    }
+    .botao_galeria:hover {
+      background: rgba(0,0,0,0.07);
+      border-radius: 6px;
+    }
+
+    /* Modal fullscreen */
+    .image_modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .image_modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      box-shadow: 0 0 20px #000;
+    }
+
+    .close_modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+
+
+  </style>
+</head>
+<body>
+    <div class="titulo">
+        <p>✨Projetos em andamento do LAB✨</p>
+    </div>
+    <!-- Modal para imagem ampliada -->
+    <div id="imageModal" class="image_modal">
+      <span class="close_modal">✖️</span>
+      <img id="modalImage" src="" alt="Imagem ampliada" />
+    </div>
+    <div class="lista_de_projetos">
+        <!-- Os projetos serão adicionados aqui dinamicamente -->
+    </div>
+
+<script>
+function initMarkdownDescriptions() {
+  document.querySelectorAll('.markdown_descricao').forEach(async (container) => {
+    const mdPath = container.dataset.md
+    try {
+      const response = await fetch(mdPath)
+      if (!response.ok) throw new Error('Erro ao carregar markdown')
+      const markdown = await response.text()
+      container.innerHTML = marked.parse(markdown)
+
+      const headings = container.querySelectorAll('h2, h3, h4')
+      headings.forEach((heading) => {
+        heading.classList.add('markdown_collapsible_heading')
+        heading.innerHTML = `<span class="markdown_toggle_arrow">▶️</span> ${heading.innerHTML}`
+
+        let next = heading.nextElementSibling
+        const contentDiv = document.createElement('div')
+        contentDiv.classList.add('markdown_collapsible-content')
+
+        while (next && !/^H[2-4]$/i.test(next.tagName)) {
+          const toMove = next
+          next = next.nextElementSibling
+          contentDiv.appendChild(toMove)
+        }
+
+        heading.after(contentDiv)
+
+        heading.addEventListener('click', () => {
+          contentDiv.classList.toggle('open')
+          const isOpen = contentDiv.classList.contains('open')
+          heading.querySelector('.markdown_toggle_arrow').textContent = isOpen ? '🔽' : '▶️'
+        })
+      })
+    } catch (error) {
+      container.innerHTML = "<p><em>Erro ao carregar descrição do projeto.</em></p>"
+    }
+  })
+}
+function initGalerias(imagensPorProjeto) {
+  document.querySelectorAll('.galeria_container').forEach(container => {
+    const projeto = container.dataset.projeto
+    const imagens = imagensPorProjeto[projeto]
+    let indexAtual = 0
+    const imgTag = container.querySelector('.imagem_galeria')
+    container.querySelector('.anterior').addEventListener('click', () => {
+      indexAtual = (indexAtual - 1 + imagens.length) % imagens.length
+      imgTag.src = `/projetos/${projeto}/img/${imagens[indexAtual]}`
+    })
+    container.querySelector('.proximo').addEventListener('click', () => {
+      indexAtual = (indexAtual + 1) % imagens.length
+      imgTag.src = `/projetos/${projeto}/img/${imagens[indexAtual]}`
+    })
+  })
+}
+
+function initImagemModal() {
+  const modal = document.getElementById('imageModal')
+  const modalImg = document.getElementById('modalImage')
+  const closeBtn = document.querySelector('.close_modal')
+
+  document.querySelectorAll('.imagem_galeria').forEach(img => {
+    img.style.cursor = 'zoom-in'
+    img.addEventListener('click', () => {
+      modalImg.src = img.src
+      modal.style.display = 'flex'
+    })
+  })
+
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none'
+    modalImg.src = ''
+  })
+
+  // Fechar modal ao clicar fora da imagem
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.style.display = 'none'
+      modalImg.src = ''
+    }
+  })
+}
+
+(async function() {
+  const lista = document.querySelector('.lista_de_projetos')
+  const projetos = ['nuncaso', 'sensorDeContagem', 'confortoTermico']
+
+  // Para cada projeto, vamos supor que há imagens numeradas (1.jpg, 2.jpg...)
+  const imagensPorProjeto = {
+    nuncaso: ['1.jpg', '2.jpg', '3.jpg', '4.jpg'],
+    sensorDeContagem: ['1.jpg'],
+    confortoTermico: ['1.jpg']
+  }
+
+  projetos.forEach((nome) => {
+    const div = document.createElement('div')
+    div.className = 'item_lista_de_projetos item_com_imagem'
+    div.innerHTML = `
+      <div class="coluna_info">
+        <div class="galeria_container" data-projeto="${nome}">
+          <button class="botao_galeria anterior" aria-label="Imagem anterior">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <img class="imagem_galeria" src="/projetos/${nome}/img/${imagensPorProjeto[nome][0]}" />
+          <button class="botao_galeria proximo" aria-label="Próxima imagem">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="botoes_links">
+          <a class="botao_link" href="/MOB/${nome}">▶️ Demonstração</a>
+          <a class="botao_link" href="https://github.com/redemobGIT/LAB-projects/tree/main/${encodeURIComponent(nome)}">🔗 Github</a>
+        </div>
+        <div class="markdown_descricao" data-md="/projetos/${nome}/README.md"></div>
+      </div>
+    `
+    lista.appendChild(div)
+  })
+
+  initMarkdownDescriptions()
+  initGalerias(imagensPorProjeto)
+  initImagemModal()
+})();
+</script>
+</body>
+</html>

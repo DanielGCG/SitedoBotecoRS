@@ -10,8 +10,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use((req, res, next) => {
-    if (req.headers.host === 'boteco.live') {
-      return res.redirect(301, `https://www.boteco.live${req.url}`);
+    if (req.headers.host === 'botecors.me') {
+      return res.redirect(301, `https://www.botecors.me${req.url}`);
     }
     next();
   });
@@ -38,8 +38,14 @@ app.use('/API/skins', require('./server/routes/skins'));
 // Rota LoRa
 app.use('/API/lora', require('./server/routes/lora'));
 
-// Rota MOB
-app.use('/API/mob', require('./server/routes/MOB'));
+// Rotas Nunca Só
+app.use('/api/nuncaso', require('./server/routes/MOB/nuncaso'));
+
+// Rotas ConfortoTermico
+app.use('/api/confortoTermico', require('./server/routes/MOB/confortoTermico'));
+
+// Rota teste
+app.use('/API/teste', require('./server/routes/teste'));
 
 // Rota Galeria
 app.use('', require('./server/routes/galeria'));
