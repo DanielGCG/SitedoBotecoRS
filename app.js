@@ -38,8 +38,11 @@ app.use('/API/skins', require('./server/routes/skins'));
 // Rota LoRa
 app.use('/API/lora', require('./server/routes/lora'));
 
-// Rota MOB
-app.use('/API/mob', require('./server/routes/MOB'));
+// Rotas Nunca Só
+app.use('/api/nuncaso', require('./server/routes/mob/nuncaso'));
+
+// Rotas ConfortoTermico
+app.use('/api/confortoTermico', require('./server/routes/mob/confortoTermico'));
 
 // Rota Galeria
 app.use('', require('./server/routes/galeria'));

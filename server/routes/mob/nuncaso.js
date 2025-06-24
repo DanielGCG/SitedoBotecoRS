@@ -1,10 +1,7 @@
 const express = require('express');
-const multer = require('multer');
 const { getStorage, ref: stRef, listAll, getDownloadURL, uploadBytes, deleteObject, getBytes } = require('firebase/storage');
 const { ref: dbRef, update, push, get, set, remove } = require('firebase/database');
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-const { database } = require('../config/firebase');
+const { database } = require('../../config/firebase');
 const router = express.Router();
 
 // Rota para receber dados GPS e salvar no Firebase

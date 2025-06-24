@@ -227,13 +227,18 @@ router.get('/lora', (req, res) => {
 
 router.get('/MOB', (req, res) => {
     const locals = {
-        title: "Coisas da MOB",
-        description: "MOB",
+        title: "LAB MOB 4.0",
+        description: "Painel de Projetos"
     }
-    res.render('pages/experimentais/MOB', {
-        layout: 'layouts/noheader',
-        locals: locals
-    });
+    res.render('pages/mob/inicial/index', { locals: locals, layout: 'layouts/mob' });
+});
+
+router.get('/MOB/nuncaso', (req, res) => {
+    const locals = {
+        title: "LAB MOB 4.0",
+        description: "Nunca Só"
+    }
+    res.render('pages/mob/projetos/nuncaso/nuncaso', { locals: locals, layout: 'layouts/mob' });
 });
 
 /* ------ FORUM ------*/

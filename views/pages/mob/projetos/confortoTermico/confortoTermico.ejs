@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Demonstração do Dispositivo de Conforto Térmico</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/projetos/projetos.css"/>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    .chart-container {
+      width: 400px;
+      margin: 2rem auto;
+    }
+    h2 {
+      text-align: center;
+      font-family: Poppins, sans-serif;
+      margin-bottom: 0.5rem;
+    }
+    #graficos-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--cor_branco);
+    }
+  </style>
+</head>
+<body>
+    <div class="descricaoProjeto">
+        <h1>Dados Coletados</h1>
+    </div>
+
+    <div id="graficos-container"></div>
+
+<script>
+  async function carregarDados() {
+    const resposta = await fetch('/api/confortoTermico/todas_linhas_conforto_termico')
+    const json = await resposta.json()
+
+    if (!json.status || !json.linhas) {
+      return console.error('Sem dados para exibir.')
+    }
+
+    const container = document.getElementById('graficos-container')
+    container.innerHTML = ''
+
+    // Converter objeto em array
+    const dados = Object.values(json.linhas)
+
+    dados.forEach((item) => {
+      // Título que mostra a linha
+      const titulo = document.createElement('h2')
+      titulo.innerText = `Linha ${item.id_linha}`
+
+      const divChart = document.createElement('div')
+      divChart.classList.add('chart-container')
+
+      const canvas = document.createElement('canvas')
+      divChart.appendChild(canvas)
+
+      container.appendChild(titulo)
+      container.appendChild(divChart)
+
+      new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: ['Excelente', 'Bom', 'Ruim', 'Péssimo'],
+          datasets: [{
+            label: `Votos (Linha ${item.id_linha})`,
+            data: [item.b1 || 0, item.b2 || 0, item.b3 || 0, item.b4 || 0],
+            backgroundColor: [
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(54, 162, 235, 0.6)',
+              'rgba(255, 206, 86, 0.6)',
+              'rgba(255, 99, 132, 0.6)'
+            ],
+            borderColor: 'rgba(0,0,0,0.3)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      })
+    })
+  }
+
+  carregarDados().catch(err => {
+    console.error('Erro ao carregar os dados:', err)
+  })
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= locals.title %></title>
+    <meta name="description" content ="<%= locals.description %>">
+    
+    <!-- Link para fontes do Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet">
+
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://static.wixstatic.com/media/93ccdf_4226c4325159400b9760ae288aca6cbc~mv2.png/v1/fill/w_65,h_65,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logo%20PNG%20Branco%2001.png" type="image/png">
+    
+<style>
+:root {
+    --cor-fundo: #003f4e;
+    --cor_botao: #007B8A;
+    --cor_botao_hover: #005f6b;
+    --cor_branco: rgba(255, 255, 255, 0.95);
+}
+
+body {
+    background-color: var(--cor-fundo);
+    font-family: 'Open Sans', sans-serif;
+    color: #222;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main_content {
+    flex: 1;
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+</style>
+    
+</head>
+    <%- include('../partials/mobheader') %>
+<body>
+    <div class="main_content">
+        <%- body %>
+    </div>
+    
+    <%- include('../partials/mobfooter') %>
+</body>
+
+
+</html>
