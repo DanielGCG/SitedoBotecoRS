@@ -10,7 +10,7 @@ Não estranhe caso econtre alguns erros ou bugs, ainda estou aprendendo! Tudo oq
 
 ## 🌐 Demonstração
 
-O site está disponível online no link:
+O site está disponível online no linker:
 [Boteco do R$](https://www.botecors.me)
 
 ---
