@@ -1,172 +1,78 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Texto sobre GIF Animado - Exibição + Download</title>
-
-  <style>
-    #container {
-      position: relative;
-      display: inline-block;
-      max-width: 400px;
-      width: 100%;
-    }
-
-    #fundoGif {
-      display: block;
-      max-width: 100%;
-      height: auto;
-    }
-
-    #textoSobreposto {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      color: white;
-      font-size: 28px; /* Aumentado de 24px para 28px */
-      font-weight: 700;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      text-shadow: 2px 2px 4px black;
-      max-width: 360px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      line-height: 1.2em;
-      outline: none;
-      cursor: text;
-      user-select: text;
-    }
-
-    /* Placeholder opcional */
-    #textoSobreposto:empty::before {
-      content: attr(data-placeholder);
-      color: rgba(255, 255, 255, 0.5);
-      font-style: italic;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Texto para Imagem</title>
 </head>
 <body>
-
-  <h2>Texto</h2>
-
-  <input type="file" id="gifInput" accept="image/gif" />
-  <br /><br />
-  <button onclick="mostrarGIF()">Mostrar GIF com Texto</button>
-  <button onclick="baixarImagem()" style="display:none;" id="btnDownload">Baixar Imagem com Texto</button>
-
-  <div id="container" style="display:none;">
-    <img id="fundoGif" />
-    <div
-      id="textoSobreposto"
-      contenteditable="true"
-      spellcheck="false"
-      data-placeholder="Digite o texto aqui..."
-    >Escreva aqui</div>
+  <div style="text-align: center; margin-top: 50px;">
+    <textarea id="inputText" rows="4" cols="50" placeholder="Digite seu texto aqui" style="font-family: 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; width: 200px; height: 100px;"></textarea>
+    <br><br>
+    <canvas id="textCanvas" width="80" height="80" style="border: 1px solid black; display: none;"></canvas>
+    <br><br>
+    <a id="downloadLink" style="display: none;">Baixar Imagem</a>
   </div>
 
   <script>
-    const larguraMaxContainer = 400;
-    const larguraMaxTexto = 360;
-
-    const canvasTemp = document.createElement('canvas');
-    const ctxTemp = canvasTemp.getContext('2d');
-    ctxTemp.font = '700 28px "Comic Sans MS", cursive, sans-serif'; // Fonte maior aqui
-
-    function quebraTexto(ctx, texto, larguraMax) {
-      const linhasOriginais = texto.split('\n');
-      const linhasFinal = [];
-
-      linhasOriginais.forEach(parte => {
-        const palavras = parte.split(' ');
-        let linha = '';
-        for (let i = 0; i < palavras.length; i++) {
-          const teste = linha + palavras[i] + ' ';
-          const largura = ctx.measureText(teste).width;
-          if (largura > larguraMax && i > 0) {
-            linhasFinal.push(linha.trim());
-            linha = palavras[i] + ' ';
-          } else {
-            linha = teste;
-          }
-        }
-        linhasFinal.push(linha.trim());
-      });
-
-      return linhasFinal;
-    }
-
-    function mostrarGIF() {
-      const fileInput = document.getElementById('gifInput');
-      if (fileInput.files.length === 0) {
-        alert('Selecione um arquivo GIF primeiro!');
-        return;
+function wrapText(ctx, text, maxWidth) {
+  const paragraphs = text.split("\n"); // Divide o texto em parágrafos
+  let lines = [];
+  
+  paragraphs.forEach(paragraph => {
+    const words = paragraph.split(" ");
+    let line = "";
+    
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i] + " ";
+      const testWidth = ctx.measureText(testLine).width;
+      
+      if (testWidth > maxWidth && i > 0) {
+        lines.push(line.trim());
+        line = words[i] + " ";
+      } else {
+        line = testLine;
       }
-
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const img = document.getElementById('fundoGif');
-        img.src = e.target.result;
-
-        img.onload = function () {
-          let larguraOriginal = img.naturalWidth;
-          let alturaOriginal = img.naturalHeight;
-
-          if (larguraOriginal > larguraMaxContainer) {
-            const proporcao = larguraMaxContainer / larguraOriginal;
-            img.style.width = larguraMaxContainer + 'px';
-            img.style.height = alturaOriginal * proporcao + 'px';
-          } else {
-            img.style.width = larguraOriginal + 'px';
-            img.style.height = alturaOriginal + 'px';
-          }
-
-          document.getElementById('container').style.display = 'inline-block';
-          document.getElementById('btnDownload').style.display = 'inline-block';
-        };
-      };
-      reader.readAsDataURL(fileInput.files[0]);
     }
+    lines.push(line.trim());
+  });
+  return lines;
+}
 
-    function baixarImagem() {
-      const img = document.getElementById('fundoGif');
-      const textoDiv = document.getElementById('textoSobreposto');
+function generateImage() {
+  const text = document.getElementById("inputText").value;
+  const canvas = document.getElementById("textCanvas");
+  const ctx = canvas.getContext("2d");
+  
+  canvas.width = 80;
+  canvas.height = 80;
+  
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "black";
+  ctx.font = "12px 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+  ctx.textAlign = "center";
 
-      const texto = textoDiv.innerText || textoDiv.textContent;
+  ctx.filter = "blur(0.170px)";
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+  let lines = wrapText(ctx, text, 70);
+  let lineHeight = 12;
+  let y = (canvas.height - lines.length * lineHeight) / 2 + lineHeight;
+  
+  lines.forEach((line, i) => {
+    ctx.fillText(line, canvas.width / 2, y + i * lineHeight);
+  });
 
-      let larguraOriginal = img.naturalWidth;
-      let alturaOriginal = img.naturalHeight;
+  canvas.style.display = "block";
+  
+  const downloadLink = document.getElementById("downloadLink");
+  downloadLink.href = canvas.toDataURL("image/png");
+  downloadLink.download = "texto-imagem.png";
+  downloadLink.textContent = "Clique aqui para baixar a imagem";
+  downloadLink.style.display = "block";
+}
 
-      let larguraFinal = larguraOriginal > larguraMaxContainer ? larguraMaxContainer : larguraOriginal;
-      let proporcao = larguraFinal / larguraOriginal;
-      let alturaFinal = alturaOriginal * proporcao;
-
-      canvas.width = larguraFinal;
-      canvas.height = alturaFinal;
-
-      ctx.drawImage(img, 0, 0, larguraFinal, alturaFinal);
-
-      ctx.font = '700 28px "Comic Sans MS", cursive, sans-serif'; // fonte maior e Comic Sans
-      ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 2;
-      ctx.textBaseline = 'top';
-
-      const linhas = quebraTexto(ctx, texto, larguraMaxTexto);
-      const linhaAltura = 32; // aumentei a altura da linha também para 28px + espaçamento
-
-      for (let i = 0; i < linhas.length; i++) {
-        const y = 20 + i * linhaAltura;
-        ctx.strokeText(linhas[i], 20, y);
-        ctx.fillText(linhas[i], 20, y);
-      }
-
-      const link = document.createElement('a');
-      link.download = 'imagem_com_texto.gif';
-      link.href = canvas.toDataURL('image/gif');
-      link.click();
-    }
+document.getElementById("inputText").addEventListener("input", generateImage);
   </script>
 </body>
 </html>
