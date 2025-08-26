@@ -1,12 +1,131 @@
 <style>
+    /* Popup de confirmação de exclusão */
+    #popup-confirmacao .popup-conteudo {
+        background: #fffbe6;
+        border: 2px solid #ffe58f;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(255, 193, 7, 0.12);
+        padding: 32px 24px 24px 24px;
+        max-width: 400px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #popup-confirmacao .popup-conteudo p {
+        font-size: 1.1em;
+        color: #a67c00;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+    .confirmacao-nome-filme {
+        font-size: 1.15em;
+        font-weight: bold;
+        color: #d48806;
+        background: #fffbe6;
+        border: 1px dashed #ffe58f;
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin-bottom: 10px;
+        user-select: all;
+        text-align: center;
+        word-break: break-word;
+    }
+    #input-confirmacao-nome {
+        font-size: 1em;
+        padding: 7px 10px;
+        border-radius: 5px;
+        border: 1px solid #ffe58f;
+        margin-bottom: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        transition: border 0.2s;
+    }
     main{
         text-align: center;
+    }
+    .popup-novo-layout {
+        /* metade superior (backdrop, capa, título, tipo), metade inferior (sinopse à esquerda, infos à direita) */
+    }
+    .popup-topo {
+        background-size: cover;
+        background-position: center;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        padding: 32px 24px 24px 24px;
+        gap: 32px;
+        min-height: 300px;
+    }
+    #imagem-popup {
+        width: 120px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        border: 3px solid #fff;
+    }
+    .popup-topo-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+    }
+    .popup-title {
+        font-size: 2em;
+        color: #fff;
+        text-shadow: 1px 1px 8px #000;
+    }
+    .popup-type {
+        font-size: 1.2em;
+        color: #ffd700;
+        margin-top: 8px;
+        text-shadow: 1px 1px 6px #000;
+    }
+    .popup-inferior {
+        display: flex;
+        flex-direction: row;
+        gap: 32px;
+        background: #fff;
+        border-radius: 0 0 12px 12px;
+        padding: 24px;
+    }
+    .movie-overview {
+        flex: 2;
+        font-size: 1em;
+        color: #222;
+        line-height: 1.5;
+        text-align: left;
+        max-height: 300px;
+        min-height: 120px;
+        overflow-y: auto;
+        padding-right: 24px;
+        border-right: 1px solid #eee;
+        scrollbar-gutter: stable;
+        overscroll-behavior: contain;
+    }
+    .popup-movie-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        justify-content: flex-start;
+        align-items: flex-start;
     }
 
     .container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
+    }
+    
+    /* Estilo personalizado para o popup de filmes/séries */
+    #popup .popup-conteudo {
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        padding: 0;
+        max-width: 800px;
     }
 
     .tabela {
@@ -53,6 +172,112 @@
         justify-content: flex-start;
         gap: 10px;
     }
+
+    .popup-backdrop{
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        min-height: 340px;
+        border-radius: 12px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        padding: 0;
+        justify-content: center;
+        align-items: stretch;
+    }
+
+    #backdrop-dir, #backdrop-esq {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .poster-container {
+        padding: 24px;
+    }
+    
+    .movie-info {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+    
+    .movie-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+    
+    .movie-type {
+        font-size: 1em;
+        color: #555;
+        margin-bottom: 16px;
+    }
+    
+    .movie-metadata {
+        margin-top: 20px;
+    }
+    
+    .movie-date {
+        font-size: 1em;
+        color: #222;
+        margin-bottom: 8px;
+    }
+    
+    .star-rating {
+        font-size: 1.1em;
+        margin-bottom: 2px;
+        color: gold;
+    }
+    
+    .vote-count {
+        font-size: 0.8em;
+        color: #888;
+        margin-top: 2px;
+    }
+    
+    .popup-actions {
+        margin-top: 24px;
+        display: flex;
+        gap: 10px;
+    }
+    .popup-actions .deletar {
+        background: #f8d7da;
+        color: #a94442;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+        padding: 6px 14px;
+        font-weight: 500;
+        font-size: 0.95em;
+        box-shadow: none;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+    }
+    .popup-actions .deletar:hover {
+        background: #f5c6cb;
+        color: #a94442;
+        transform: scale(1.03);
+    }
+    .popup-actions .branco {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 6px 14px;
+        font-weight: 500;
+        font-size: 0.95em;
+        box-shadow: none;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+    }
+    .popup-actions .branco:hover {
+        background: #e0e0e0;
+        color: #333;
+        transform: scale(1.03);
+    }
 </style>
 
 <link rel="stylesheet" href="/geral/popup.css">
@@ -80,9 +305,9 @@
 
     <div id="popup-pesquisa" class="popup" style="display: none;">
         <div id="popup-conteudo" class="popup-conteudo">
-            <h2>Enviar obra</h2>
+            <h2>Buscar por título</h2>
             <div id="search-form">
-                <input type="text" id="search-input" placeholder="Enter movie name">
+                <input type="text" id="search-input" placeholder="Digite o nome do título">
             </div>
             <div class="acoes">
                 <button class="branco" onclick="fecharPopupPesquisa()">Fechar</button>
@@ -96,6 +321,7 @@
     <div id="popup-confirmacao" class="popup" style="display: none;">
         <div id="popup-confirmacao-conteudo" class="popup-conteudo">
             <p>Tem certeza de que deseja excluir esta obra?</p>
+            <div id="confirmacao-nome-filme" class="confirmacao-nome-filme" style="display:none;"></div>
             <div class="acoes">
                 <button id="confirmarDelecaoBtn" class="deletar">Sim, excluir</button>
                 <button onclick="fecharConfirmacao()" class="branco">Cancelar</button>
@@ -107,19 +333,19 @@
 <script>
 
 // Vetor de obras locais
-let obraslocais = [];
+let obrasWatchlist = [];
 
-document.addEventListener('DOMContentLoaded', () => carregarListaFirebase());
+document.addEventListener('DOMContentLoaded', () => carregarWatchlist());
 
-async function carregarListaFirebase() {
+async function carregarWatchlist() {
     OnLoadingScreen();
     try {
         const response = await fetch(`/watchlistdownload-movies`);
         const data = await response.json();
 
-        // Verifique se a resposta é um array antes de atribuir a obraslocais
+        // Verifique se a resposta é um array antes de atribuir a obrasWatchlist
         if (Array.isArray(data)) {
-            obraslocais = data;
+            obrasWatchlist = data;
         } else {
             console.error('Formato de dados inválido, esperado um array:', data);
             return;
@@ -133,7 +359,7 @@ async function carregarListaFirebase() {
     OffLoadingScreen();
 }
 
-async function deleteMovie(id) {
+async function removerObra(id) {
     OnLoadingScreen();
     try {
         // Fazendo a requisição DELETE para o backend
@@ -142,7 +368,7 @@ async function deleteMovie(id) {
 
         if (data.success) {
             // Remove a obra localmente
-            obraslocais = obraslocais.filter(obra => String(obra.id) !== String(id));
+            obrasWatchlist = obrasWatchlist.filter(obra => String(obra.id) !== String(id));
 
             // Atualiza a interface
             listarObras();
@@ -174,7 +400,7 @@ function listarObras() {
     tabela.appendChild(quadroInicial)
 
     // Cria elementos para cada obra
-    obraslocais.forEach(obra => {
+    obrasWatchlist.forEach(obra => {
         const conteudo = document.createElement('div');
         conteudo.className = 'conteudo';
         const posterPath = obra.poster_path ? `https://image.tmdb.org/t/p/w500${obra.poster_path}` : 'https://via.placeholder.com/200x300?text=No+Image';
@@ -208,27 +434,93 @@ function abrirPopup(url, nome) {
     const popup = document.getElementById('popup');
     popup.style.display = '';
     const popupConteudo = document.getElementById('popup-conteudo');
+    const obra = obrasWatchlist.find(o => o.name === nome || o.title === nome);
 
-    popupConteudo.innerHTML = `
-        <img id="imagem-popup" src="${url}" alt="Imagem da obra">
-        <div class="acoes">
-            <button class="deletar" onclick="abrirConfirmacaoDelecao('${nome}')">Deletar</button>
-            <button class="branco" onclick="fecharPopup()">Fechar</button>
-        </div>
-        <div id="nome-imagem" style="margin-top: 10px;">${nome}</div>
-    `;
+    if (!obra) {
+        popupConteudo.innerHTML = `<p>Obra não encontrada!</p>`;
+        popup.style.display = 'flex';
+        return;
+    }
 
-    popup.style.display = 'flex';
-    const nomeImagem = document.getElementById('nome-imagem');
+        // Estrelas de 0 a 10
+        function renderStars(nota) {
+                const rating = Math.round(nota) / 2;
+                const fullStars = Math.floor(rating);
+                const halfStar = rating % 1 >= 0.5;
+                let stars = '';
+                for (let i = 0; i < fullStars; i++) stars += '★';
+                if (halfStar) stars += '⯨';
+                const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                for (let i = 0; i < emptyStars; i++) stars += '☆';
+                return `<span style='color: gold; font-size: 1.3em;'>${stars}</span> <span style='font-size: 1em; color: #444;'>(${(nota).toFixed(1)}/10)</span>`;
+        }
+
+        const tipo = obra.media_type === 'tv' ? 'Série' : 'Filme';
+        const backdropUrl = obra.backdrop_path ? `https://image.tmdb.org/t/p/original${obra.backdrop_path}` : '';
+        let dataFormatada = 'N/A';
+        if (obra.release_date) {
+                const match = obra.release_date.match(/^\d{4}-\d{2}-\d{2}/);
+                dataFormatada = match ? match[0] : obra.release_date;
+        }
+
+        // NOVO LAYOUT: metade superior (backdrop, capa, título, tipo), metade inferior (sinopse à esquerda, infos à direita)
+        popupConteudo.innerHTML = `
+            <div class="popup-novo-layout">
+                <div class="popup-topo" style="background-image: url('${backdropUrl}');">
+                    <img id='imagem-popup' src='${url}' alt='Imagem da obra'>
+                    <div class="popup-topo-info">
+                        <div class="popup-title">${obra.title || obra.name}</div>
+                        <div class="popup-type">${tipo}</div>
+                    </div>
+                </div>
+                <div class="popup-inferior">
+                    <div class="movie-overview">
+                        <b>Sinopse:</b><br>${obra.overview || 'Sem descrição disponível'}
+                    </div>
+                    <div class="popup-movie-info">
+                        <div class="movie-date">${dataFormatada}</div>
+                        <div class="star-rating">${renderStars(obra.vote_average)}</div>
+                        <div class="vote-count">${obra.vote_count} votos</div>
+                        ${obra.original_title && obra.original_title !== obra.title ? `<div><b>Título original:</b> ${obra.original_title}</div>` : ''}
+                        ${obra.original_language ? `<div>${obra.original_language.toUpperCase()}</div>` : ''}
+                        <div class="popup-actions">
+                            <button class='deletar' onclick="abrirConfirmacaoDelecao('${nome}')">Deletar</button>
+                            <button class='branco' onclick='fecharPopup()'>Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        popup.style.display = 'flex';
 }
 
 function abrirConfirmacaoDelecao(nome) {
     const popupConfirmacao = document.getElementById('popup-confirmacao');
     const confirmarDelecaoBtn = document.getElementById('confirmarDelecaoBtn');
-    const obra = obraslocais.find(o => o.name === nome || o.title === nome); // Encontrar a obra pelo nome
+    const obra = obrasWatchlist.find(o => o.name === nome || o.title === nome); // Encontrar a obra pelo nome
 
     if (obra) {
         confirmarDelecaoBtn.setAttribute('data-id-obra', obra.id); // Passar o ID da obra
+        confirmarDelecaoBtn.setAttribute('data-nome-obra', obra.title || obra.name);
+        // Adiciona campo para digitar o nome
+        const confirmacaoConteudo = document.getElementById('popup-confirmacao-conteudo');
+        let inputConfirmacao = document.getElementById('input-confirmacao-nome');
+        if (!inputConfirmacao) {
+            inputConfirmacao = document.createElement('input');
+            inputConfirmacao.type = 'text';
+            inputConfirmacao.id = 'input-confirmacao-nome';
+            inputConfirmacao.placeholder = `Digite o nome para confirmar: ${obra.title || obra.name}`;
+            confirmacaoConteudo.insertBefore(inputConfirmacao, confirmacaoConteudo.querySelector('.acoes'));
+        } else {
+            inputConfirmacao.value = '';
+            inputConfirmacao.placeholder = `Digite o nome para confirmar: ${obra.title || obra.name}`;
+        }
+        // Exibe o nome do filme destacado para copiar
+        const nomeFilmeDiv = document.getElementById('confirmacao-nome-filme');
+        if (nomeFilmeDiv) {
+            nomeFilmeDiv.textContent = obra.title || obra.name;
+            nomeFilmeDiv.style.display = 'block';
+        }
         popupConfirmacao.style.display = 'flex';
     } else {
         alert('Obra não encontrada!');
@@ -250,16 +542,27 @@ function fecharPopupPesquisa(){
 // Confirmar a exclusão diretamente ao clicar no botão
 document.getElementById('confirmarDelecaoBtn').addEventListener('click', async function () {
     const idObra = this.getAttribute('data-id-obra'); // Obter o ID da obra
-    if (idObra) {
-        await deleteMovie(idObra);
+    const nomeObra = this.getAttribute('data-nome-obra');
+    const inputConfirmacao = document.getElementById('input-confirmacao-nome');
+    if (idObra && inputConfirmacao) {
+        if (inputConfirmacao.value.trim() === nomeObra) {
+            await removerObra(idObra);
+            fecharConfirmacao();
+            fecharPopup();
+        } else {
+            inputConfirmacao.style.border = '2px solid #ff4e50';
+            inputConfirmacao.value = '';
+            inputConfirmacao.placeholder = 'Nome incorreto, tente novamente.';
+        }
     }
-    fecharConfirmacao();
-    fecharPopup();
 });
 
 function fecharConfirmacao() {
     const popupConfirmacao = document.getElementById('popup-confirmacao');
     popupConfirmacao.style.display = 'none';
+    // Esconde o nome do filme ao fechar
+    const nomeFilmeDiv = document.getElementById('confirmacao-nome-filme');
+    if (nomeFilmeDiv) nomeFilmeDiv.style.display = 'none';
 }
 
 let lastQuery = '';
@@ -319,9 +622,9 @@ function displayResults(items) {
             `;
 
             itemElement.addEventListener('click', () => {
-                const shouldSave = confirm(`Deseja salvar "${item.title || item.name}" no Firebase Storage?`);
+                const shouldSave = confirm(`Deseja adicionar "${item.title || item.name}" à Watchlist?`);
                 if (shouldSave) {
-                    saveMovieToFirebase(item);
+                    adicionarObra(item);
                 }
             });
 
@@ -329,46 +632,46 @@ function displayResults(items) {
         });
     }
 
-    async function saveMovieToFirebase(movie) {
-    OnLoadingScreen();
-    try {
-        // Enviando o filme/série para o backend
-        const response = await fetch('/watchlistupload-movies', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(movie),
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            // Encontrar a posição correta para inserir o filme/série na ordem alfabética
-            const index = obraslocais.findIndex(item => {
-                const itemTitle = item.title || item.name || '';
-                const movieTitle = movie.title || movie.name || '';
-                return itemTitle.localeCompare(movieTitle, undefined, { sensitivity: 'base' }) > 0;
+    async function adicionarObra(obra) {
+        OnLoadingScreen();
+        try {
+            // Enviando o filme/série para o backend
+            const response = await fetch('/watchlistupload-movies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(obra),
             });
 
-            // Adiciona o filme na posição correta
-            obraslocais.splice(
-                index === -1 ? obraslocais.length : index,
-                0,
-                { ...movie, fileUrl: data.fileUrl }
-            );
+            const data = await response.json();
+            if (data.success) {
+                // Encontrar a posição correta para inserir o filme/série na ordem alfabética
+                const index = obrasWatchlist.findIndex(item => {
+                    const itemTitle = item.title || item.name || '';
+                    const obraTitle = obra.title || obra.name || '';
+                    return itemTitle.localeCompare(obraTitle, undefined, { sensitivity: 'base' }) > 0;
+                });
 
-            // Atualiza a interface sem recarregar tudo
-            listarObras();
-            fecharPopupPesquisa();
+                // Adiciona o filme na posição correta
+                obrasWatchlist.splice(
+                    index === -1 ? obrasWatchlist.length : index,
+                    0,
+                    { ...obra, fileUrl: data.fileUrl }
+                );
+
+                // Atualiza a interface sem recarregar tudo
+                listarObras();
+                fecharPopupPesquisa();
+                OffLoadingScreen();
+            } else {
+                OffLoadingScreen();
+                alert('Erro ao adicionar o filme/série.');
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar filme/série:', error);
+            alert('Erro ao adicionar o filme/série.');
             OffLoadingScreen();
-        } else {
-            OffLoadingScreen();
-            alert('Erro ao salvar o filme/série.');
         }
-    } catch (error) {
-        console.error('Erro ao salvar filme/série:', error);
-        alert('Erro ao salvar o filme/série.');
-        OffLoadingScreen();
     }
-}
 </script>
