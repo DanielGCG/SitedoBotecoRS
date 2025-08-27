@@ -1,143 +1,350 @@
-<main>
-    <h2>Sugira uma Imagem do Dia</h2>
-    <!-- Caixa de texto bonitinha -->
-    <div class="caixa-texto">
-        <h4>Adicione uma imagem à fila</h4>
-        <h5>Deixe também um texto para a plaquinha</h5>
-    </div>
 
-    <div class="caixa-texto">
-        <!-- Campo de seleção de imagem -->
-        <input type="file" id="imagem">
-        
-        <!-- Campo de texto para o nome -->
-        <input class="entrada-texto" type="text" id="texto" placeholder="Texto da plaquinha" autocomplete="off" />
-        
-        <!-- Botão para adicionar ao Firebase -->
-        <button class="branco" id="adicionarButton">Adicionar</button>
+<main class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2 class="mb-3">Sugira uma Imagem do Dia</h2>
+            <div id="fila-indicador" class="mb-2 text-secondary small"></div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card mx-auto mb-3" style="max-width: 500px;">
+                <div class="card-body">
+                    <h4 class="mb-2">Adicione uma imagem à fila</h4>
+                    <h5 class="mb-3">Deixe também um texto para a plaquinha</h5>
+                    <!-- Botão removido daqui -->
+                    <form id="formSugestao" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <input type="file" class="form-control" id="imagem" accept="image/png,image/jpeg,image/gif" required>
+                            <div class="mt-2 d-flex justify-content-center align-items-center" id="preview-container" style="display: none; height: 0; overflow: hidden; transition: height 0.3s ease;">
+                                <div style="position:relative;display:inline-block;">
+                                    <img id="preview-img" src="" alt="Preview" style="width:220px;height:220px;border-radius:0;box-shadow:0 0 8px #ccc;object-fit:cover;background:#f8f9fa;position:relative;z-index:1;" />
+                                    <img id="preview-border" src="" alt="Border" style="width:220px;height:220px;display:none;position:absolute;left:0;top:0;z-index:2;pointer-events:none;border-radius:0;object-fit:cover;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="borderUpload" class="form-label">Escolha uma moldura personalizada (padrão já selecionado):</label>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="borderChoice" id="borderDefault" value="default" checked>
+                                    <label class="form-check-label" for="borderDefault">
+                                        Usar moldura padrão
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="borderChoice" id="borderCustom" value="custom">
+                                    <label class="form-check-label" for="borderCustom">
+                                        Enviar moldura personalizada
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="borderCustomDiv" class="mt-2" style="display:none;">
+                                <input type="file" class="form-control" id="borderUpload" accept="image/png">
+                            </div>
+                            <div class="mt-3 d-flex justify-content-center align-items-center" id="border-preview-container" style="height: 140px; overflow: hidden; transition: height 0.3s ease;">
+                                <img id="preview-border-img" src="/pages/galeria/moldura.png" alt="Preview Moldura" style="width:120px;height:120px;border-radius:0;box-shadow:0 0 8px #ccc;object-fit:cover;background:#f8f9fa;" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="texto" placeholder="Texto da plaquinha" maxlength="32" autocomplete="off" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" id="adicionarButton">
+                            <span id="btnText">Adicionar</span>
+                            <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                        <div id="feedback" class="mt-3"></div>
+                    </form>
+                </div>
+            </div>
+            <div class="card mx-auto shadow-sm" style="max-width: 500px;">
+                <div class="card-header bg-light text-dark fw-bold d-flex justify-content-between align-items-center" style="font-size:1.08rem;">
+                    <span>Fila de Imagens</span>
+                    <button id="ativarProximaBtn" class="btn btn-outline-secondary btn-sm">Passar para próxima imagem da fila</button>
+                </div>
+                <div class="card-body p-2">
+                    <span id="ativarProximaFeedback" class="ms-2 text-success" style="display:none;"></span>
+                    <div id="fila-lista"></div>
+                </div>
+            </div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
-<style>
-    main {
-        text-align: center;
-        font-family: Arial, sans-serif;
+<script>
+// Botão para ativar próxima imagem da fila (com senha)
+document.getElementById('ativarProximaBtn').addEventListener('click', async function(e) {
+    e.preventDefault();
+    const senha = prompt('Digite a senha para ativar a próxima imagem da fila:');
+    if (!senha) return;
+    if (!confirm('Tem certeza que deseja ativar a próxima imagem da fila?')) return;
+    const btn = this;
+    const feedback = document.getElementById('ativarProximaFeedback');
+    btn.disabled = true;
+    feedback.style.display = 'inline';
+    feedback.textContent = 'Processando...';
+    try {
+        const res = await fetch('/API/imagemdodia/next', {
+            method: 'POST',
+            headers: { 'x-api-key': senha.trim() }
+        });
+        if (res.ok) {
+            feedback.textContent = 'Imagem ativada!';
+            atualizarIndicadorFila();
+            atualizarFilaLista();
+        } else {
+            const data = await res.json();
+            feedback.textContent = data.message || 'Erro ao ativar.';
+        }
+    } catch {
+        feedback.textContent = 'Erro de conexão.';
     }
-
-    .caixa-texto {
-        margin: 20px auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    input {
-        margin: 10px 0;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        width: 80%;
-        max-width: 400px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .branco {
-        padding: 10px 20px;
-        background-color: white; /* Branco */
-        color: #333; /* Cor do texto */
-        border: 1px solid #ccc; /* Borda clara */
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .branco:hover {
-        background-color: #f1f1f1; /* Tom mais claro no hover */
-        cursor: url('/img/cursor-mao.png'), auto;
-    }
-
-    input[type="text"] {
-        margin-top: 10px; /* Espaçamento superior para o botão */
-        width: 80%; /* Largura ajustável */
-        max-width: 400px; /* Limita a largura máxima */
-        padding: 12px 20px; /* Espaçamento interno */
-        font-size: 16px; /* Tamanho da fonte */
-        border: 1px solid #ccc; /* Cor da borda */
-        border-radius: 8px; /* Bordas arredondadas */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-        outline: none; /* Remove o outline padrão */
-        transition: all 0.3s ease; /* Animação suave */
-        opacity: 70%;
-        margin-bottom: 20px; /* Adiciona espaçamento abaixo do input */
-        cursor: url('/img/cursor-texto.png'), auto;
-    }
-
-    input[type="text"]:focus {
-        border-color: #4caf50; /* Cor da borda ao focar */
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4); /* Sombra mais destacada */
-        opacity: 100%;
-        cursor: url('/img/cursor-texto.png'), auto;
-    }
-</style>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-    import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
-
-    // Configuração do Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyDuwnu2XcSTJ1YZkgD4570AtE6uKci_nDQ",
-        authDomain: "boteco-6fcfa.firebaseapp.com",
-        projectId: "boteco-6fcfa",
-        storageBucket: "boteco-6fcfa.appspot.com",
-        messagingSenderId: "531032694476",
-        appId: "1:531032694476:web:6e03bdd824b90fd2b2ec69"
-    };
-
-    // Inicialização do Firebase
-    const app = initializeApp(firebaseConfig);
-    const storage = getStorage(app);
-
-    // Função para capturar data e hora atual no formato desejado
-    function gerarNomeArquivo(texto) {
-        const agora = new Date();
-        const dataISO = agora.toISOString().replace(/:/g, '-'); // Substitui ":" por "-" no ISO
-        const textoFormatado = texto.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
-        return `${dataISO}-${textoFormatado}.gif`;
-    }
-
-    // Manipulador do botão de envio
-    document.getElementById("adicionarButton").addEventListener("click", async () => {
-        const imagemInput = document.getElementById("imagem");
-        const textoInput = document.getElementById("texto");
-
-        // Validações
-        if (!imagemInput.files[0]) {
-            alert("Por favor, selecione uma imagem.");
+    setTimeout(() => {
+        feedback.style.display = 'none';
+        btn.disabled = false;
+    }, 1800);
+});
+// Listagem da fila com botão de remoção
+async function atualizarFilaLista() {
+    const el = document.getElementById('fila-lista');
+    el.innerHTML = '<div class="text-secondary">Carregando fila...</div>';
+    try {
+        const res = await fetch('/API/imagemdodia/fila');
+        if (!res.ok) throw new Error();
+        const lista = await res.json();
+        if (!lista.length) {
+            el.innerHTML = '<div class="text-secondary">Nenhuma imagem na fila.</div>';
             return;
         }
-        if (!textoInput.value.trim()) {
-            alert("Por favor, insira um texto para o nome do arquivo.");
-            return;
+                el.innerHTML = lista.map(item => {
+                    const imgUrl = item.url && item.url.trim() ? item.url : '/img/gabi-not-found.png';
+                    const borderUrl = item.border_url && item.border_url.trim() ? item.border_url : '';
+                    const quadroHtml = `
+                        <div style="position:relative;width:56px;height:56px;">
+                          <img src="${imgUrl}" alt="${item.texto || 'Imagem não encontrada'}" style="width:56px;height:56px;object-fit:cover;box-shadow:0 1px 4px #ddd;position:absolute;left:0;top:0;z-index:1;background:#f8f9fa;">
+                          ${borderUrl ? `<img src="${borderUrl}" alt="Moldura" style="width:64px;height:64px;position:absolute;left:-4px;top:-4px;z-index:2;pointer-events:none;box-shadow:0 2px 8px #bbb;">` : ''}
+                        </div>
+                    `;
+                    return `
+                        <div class="d-flex align-items-center mb-2 border rounded p-2 bg-white shadow-sm" style="font-size:0.98rem;">
+                            <div style="margin-right:10px;flex-shrink:0;">
+                                ${quadroHtml}
+                            </div>
+                            <span class="flex-grow-1">${item.texto}</span>
+                            <button class="btn btn-link btn-sm text-danger ms-2 px-2 py-0" style="font-size:0.97rem;" onclick="removerDaFila(${item.id}, this)"><i class="bi bi-trash"></i> Remover</button>
+                        </div>
+                    `;
+                }).join('');
+    } catch {
+        el.innerHTML = '<div class="text-danger">Erro ao carregar fila.</div>';
+    }
+}
+
+window.removerDaFila = async function(id, btn) {
+    const senha = prompt('Digite a senha para remover esta imagem da fila:');
+    if (!senha) return;
+    if (!confirm('Remover esta imagem da fila?')) return;
+    btn.disabled = true;
+    btn.textContent = 'Removendo...';
+    try {
+        const res = await fetch(`/API/imagemdodia/fila/${id}`, {
+            method: 'DELETE',
+            headers: { 'x-api-key': senha.trim() }
+        });
+        if (res.ok) {
+            atualizarFilaLista();
+            atualizarIndicadorFila();
+        } else {
+            btn.textContent = 'Erro';
         }
+    } catch {
+        btn.textContent = 'Erro';
+    }
+}
 
-        const arquivo = imagemInput.files[0];
-        const nomeArquivo = gerarNomeArquivo(textoInput.value.trim().replace(/[^a-zA-Z0-9]/g, "_"));
+atualizarFilaLista();
+const imagemInput = document.getElementById("imagem");
+const previewImg = document.getElementById("preview-img");
+const borderUpload = document.getElementById("borderUpload");
+const previewBorder = document.getElementById("preview-border");
+const borderDefaultRadio = document.getElementById("borderDefault");
+const borderCustomRadio = document.getElementById("borderCustom");
+const borderCustomDiv = document.getElementById("borderCustomDiv");
+const previewBorderImg = document.getElementById("preview-border-img");
+const DEFAULT_BORDER_URL = "/pages/galeria/moldura.png";
 
-        // Referência no Firebase Storage
-        const storageRef = ref(storage, `imagensdodia/${nomeArquivo}`);
+// Define a moldura padrão
+let currentBorderUrl = DEFAULT_BORDER_URL;
 
-        try {
-            // Upload do arquivo
-            await uploadBytes(storageRef, arquivo);
-            alert("Imagem adicionada com sucesso!");
+// Inicializa com moldura padrão
+if (previewImg.src && previewImg.src.trim() !== '') {
+    previewBorder.src = DEFAULT_BORDER_URL;
+    previewBorder.style.display = "block";
+}
 
-            // Limpar campos após sucesso
-            imagemInput.value = "";
-            textoInput.value = "";
-        } catch (error) {
-            console.error("Erro ao enviar imagem:", error);
-            alert("Houve um erro ao adicionar a imagem. Tente novamente.");
+// Controla a exibição do input de arquivo personalizado
+document.querySelectorAll('input[name="borderChoice"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            borderCustomDiv.style.display = 'block';
+            if (!borderUpload.files.length) {
+                // Sem arquivo personalizado, mas ainda mostra o upload
+                previewBorderImg.src = DEFAULT_BORDER_URL;
+            }
+        } else {
+            borderCustomDiv.style.display = 'none';
+            // Retorna para a moldura padrão
+            previewBorderImg.src = DEFAULT_BORDER_URL;
+            currentBorderUrl = DEFAULT_BORDER_URL;
+            
+            // Atualiza a visualização principal se tiver imagem
+            if (previewImg.src && previewImg.src.trim() !== '') {
+                previewBorder.src = DEFAULT_BORDER_URL;
+                previewBorder.style.display = "block";
+            }
         }
     });
+});
+
+borderUpload.addEventListener("change", function() {
+    const file = borderUpload.files[0];
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Atualiza a imagem de preview da moldura
+            previewBorderImg.src = e.target.result;
+            currentBorderUrl = e.target.result;
+            
+            // Atualiza também a sobreposição na primeira imagem se ela existir
+            if (previewImg.src && previewImg.src.trim() !== '') {
+                previewBorder.src = e.target.result;
+                previewBorder.style.display = "block";
+            }
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // Se removeu o arquivo personalizado mas o modo personalizado ainda está ativo
+        if (borderCustomRadio.checked) {
+            previewBorderImg.src = DEFAULT_BORDER_URL;
+            currentBorderUrl = DEFAULT_BORDER_URL;
+            
+            if (previewImg.src && previewImg.src.trim() !== '') {
+                previewBorder.src = DEFAULT_BORDER_URL;
+                previewBorder.style.display = "block";
+            }
+        }
+    }
+});
+
+imagemInput.addEventListener("change", function() {
+    const file = imagemInput.files[0];
+    const previewContainer = document.getElementById("preview-container");
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            previewContainer.style.display = "flex";
+            previewContainer.style.height = "240px"; // altura suficiente para conter a imagem
+            
+            // Adiciona a moldura atual (padrão ou personalizada)
+            previewBorder.src = currentBorderUrl;
+            previewBorder.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    } else {
+        previewImg.src = "";
+        previewContainer.style.display = "none";
+        previewContainer.style.height = "0";
+        previewBorder.src = "";
+        previewBorder.style.display = "none";
+    }
+});
+
+document.getElementById("formSugestao").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const textoInput = document.getElementById("texto");
+    const btn = document.getElementById("adicionarButton");
+    const btnText = document.getElementById("btnText");
+    const spinner = document.getElementById("spinner");
+    const feedback = document.getElementById("feedback");
+
+    feedback.textContent = "";
+    btn.disabled = true;
+    btnText.classList.add("d-none");
+    spinner.classList.remove("d-none");
+
+    // Validações
+    if (!imagemInput.files[0]) {
+        feedback.textContent = "Selecione uma imagem.";
+        feedback.className = "text-danger";
+        btn.disabled = false;
+        btnText.classList.remove("d-none");
+        spinner.classList.add("d-none");
+        return;
+    }
+    if (!textoInput.value.trim()) {
+        feedback.textContent = "Insira um texto para a plaquinha.";
+        feedback.className = "text-danger";
+        btn.disabled = false;
+        btnText.classList.remove("d-none");
+        spinner.classList.add("d-none");
+        return;
+    }
+
+    // Monta FormData
+    const formData = new FormData();
+    formData.append("file", imagemInput.files[0]);
+    formData.append("texto", textoInput.value.trim());
+    
+    // Lida com a moldura (personalizada ou padrão)
+    if (borderCustomRadio.checked && borderUpload.files[0]) {
+        formData.append("border", borderUpload.files[0]);
+    } else {
+        // Se for usar a moldura padrão, enviamos uma flag especial
+        formData.append("useDefaultBorder", "true");
+    }
+
+    try {
+        const res = await fetch("/API/imagemdodia", {
+            method: "POST",
+            body: formData
+        });
+        if (res.ok) {
+            feedback.textContent = "Imagem adicionada com sucesso!";
+            feedback.className = "text-success";
+            
+            // Reset dos campos e preview da imagem principal
+            imagemInput.value = "";
+            previewImg.src = "";
+            document.getElementById("preview-container").style.display = "none";
+            document.getElementById("preview-container").style.height = "0";
+            previewBorder.style.display = "none";
+            
+            // Reset da moldura para o padrão
+            borderUpload.value = "";
+            borderDefaultRadio.checked = true; // Volta para moldura padrão
+            borderCustomDiv.style.display = "none";
+            document.getElementById("preview-border-img").src = DEFAULT_BORDER_URL;
+            currentBorderUrl = DEFAULT_BORDER_URL;
+            
+            // Reset do texto
+            textoInput.value = "";
+        } else {
+            const data = await res.json();
+            feedback.textContent = data.message || "Erro ao adicionar imagem.";
+            feedback.className = "text-danger";
+        }
+    } catch (error) {
+        feedback.textContent = "Erro de conexão. Tente novamente.";
+        feedback.className = "text-danger";
+    }
+    btn.disabled = false;
+    btnText.classList.remove("d-none");
+    spinner.classList.add("d-none");
+});
 </script>

@@ -8,7 +8,10 @@ router.get('', (req, res) => {
         title: "Site do Boteco do R$",
         description: "Oficial hein! :D"
     }
-    res.render('pages/inicial/index', { locals: locals });
+    res.render('pages/inicial/index', {
+        layout: 'layouts/main-bootstrap',
+        locals: locals
+    });
 });
 
 router.get('/sugerir', (req, res) => {
@@ -16,7 +19,21 @@ router.get('/sugerir', (req, res) => {
         title: "Sugerir Imagem do Dia",
         description: "deixe a sua imagem na fila!"
     }
-    res.render('pages/inicial/sugerir', { locals: locals });
+    res.render('pages/inicial/sugerir', {
+        layout: 'layouts/main-bootstrap',
+        locals: locals
+    });
+});
+
+router.get('/calendario-imagemdodia', (req, res) => {
+    const locals = {
+        title: "Imagem do dia: Calendário",
+        description: "Veja as imagens do dia organizadas por data!"
+    }
+    res.render('pages/inicial/calendario-imagemdodia', {
+        layout: 'layouts/main-bootstrap',
+        locals: locals
+    });
 });
 
 /* ------ WATCHLIST ------*/

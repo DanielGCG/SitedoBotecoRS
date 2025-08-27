@@ -16,6 +16,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
+    "bootstrap": "^5.3.8",
     "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "dotenv-webpack": "^8.1.0",
     "nodemon": "^3.1.7",
+    "sass": "^1.91.0",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4"
   },

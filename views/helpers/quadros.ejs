@@ -1,0 +1,20 @@
+<% /*
+	Usage:
+	<%- include('helpers/quadros', {
+		imgUrl: '...',
+		borderUrl: '...',
+		size: 160, // image size in px
+		borderSize: 180, // border size in px
+		alt: '...' }) %>
+*/ %>
+<%
+	var quadroContainerStyle = `position:relative;width:${size}px;height:${size}px;`;
+	 var borderStyle = `width:${borderSize}px;height:${borderSize}px;position:absolute;left:-${(borderSize-size)/2}px;top:-${(borderSize-size)/2}px;z-index:1;pointer-events:none;box-shadow:0 2px 12px #bbb;border-radius:0;`;
+	 var imgStyle = `width:${size}px;height:${size}px;max-width:${size}px;max-height:${size}px;object-fit:cover;box-shadow:0 1px 8px #ccc;position:absolute;left:0;top:0;z-index:2;background:#f8f9fa;border-radius:0;`;
+%>
+<div style="<%= quadroContainerStyle %>">
+	<% if (borderUrl) { %>
+		<img src="<%= borderUrl %>" alt="Moldura" style="<%= borderStyle %>">
+	<% } %>
+	<img src="<%= imgUrl && imgUrl.trim() ? imgUrl : '/img/gabi-not-found.png' %>" alt="<%= alt || 'Imagem não encontrada' %>" style="<%= imgStyle %>">
+</div>

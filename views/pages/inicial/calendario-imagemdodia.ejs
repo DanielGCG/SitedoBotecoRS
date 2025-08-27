@@ -1,0 +1,231 @@
+<main class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2 class="mb-3">Calendário das Imagens do Dia</h2>
+            <div id="calendario-loading" class="text-secondary">Carregando...</div>
+        </div>
+    </div>
+    <div id="calendario-imagens"></div>
+</main>
+
+<style>
+/* Calendário bonitinho */
+.calendario-mes {
+    margin-bottom: 2.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #eee;
+    padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+}
+.calendario-mes-titulo {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 1.2rem;
+    color: #2c3e50;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 0 #fff, 0 2px 6px #ddd;
+}
+.calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+.calendario-grid-header {
+    display: contents;
+}
+.calendario-grid-header-item {
+    text-align: center;
+    font-size: 1.05rem;
+    color: #888;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+}
+.calendario-dia {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #eee;
+    padding: 0.5rem 0.2rem;
+    text-align: center;
+    transition: box-shadow 0.2s;
+    position: relative;
+    min-height: 120px;
+}
+.calendario-dia {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #eee;
+    border: 2px solid #bdbdbd;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.calendario-dia:hover {
+    box-shadow: 0 4px 16px #ddd;
+    background: #f8f9fa;
+    border-color: #007bff;
+}
+.calendario-dia-numero {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #e0e0e0;
+    opacity: 0.45;
+    z-index: 0;
+    padding: 0.2em 0.3em;
+    pointer-events: none;
+}
+.calendario-dia-vazio {
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #e0e0e0;
+    width: 160px;
+    height: 160px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.calendario-dia-vazio .calendario-dia-numero {
+    color: #555;
+    opacity: 0.6;
+    font-size: 2.4rem;
+}
+.calendario-img {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    background: #f8f9fa;
+    box-shadow: 0 1px 4px #ddd;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    border-radius: 0;
+}
+.calendario-texto {
+    color: #333;
+    font-weight: 500;
+    word-break: break-word;
+    margin-bottom: 0.1rem;
+}
+.calendario-dia-vazio {
+    background: none;
+    box-shadow: none;
+    min-height: 60px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    const container = document.getElementById('calendario-imagens');
+    const loading = document.getElementById('calendario-loading');
+    try {
+        const res = await fetch('/API/imagemdodia/ativas');
+        if (!res.ok) throw new Error();
+        const imagens = await res.json();
+        if (!imagens.length) {
+            loading.textContent = 'Nenhuma imagem encontrada.';
+            return;
+        }
+        loading.style.display = 'none';
+        // Agrupa por mês
+        const grupos = {};
+        imagens.forEach(img => {
+            const d = new Date(img.start_at);
+            const mes = d.toLocaleString('default', { month: 'long' });
+            const ano = d.getFullYear();
+            const chave = `${mes} ${ano}`;
+            if (!grupos[chave]) grupos[chave] = [];
+            grupos[chave].push({
+                url: img.url,
+                border_url: img.border_url,
+                texto: img.texto,
+                dia: d.getDate(),
+                mes: d.getMonth(),
+                ano: d.getFullYear(),
+                data: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            });
+        });
+        // Renderiza meses como calendário real
+        container.innerHTML = Object.entries(grupos).map(([mesNome, lista]) => {
+            const ano = lista[0].ano;
+            const mes = lista[0].mes;
+            const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            const dias = Array(diasNoMes).fill(null);
+            lista.forEach(item => {
+                dias[item.dia - 1] = item;
+            });
+            let html = `<div class="calendario-mes">
+                <div class="calendario-mes-titulo">${mesNome}</div>
+                <div class="calendario-grid">
+                    <div class="calendario-grid-header calendario-grid">
+                        <div class="calendario-grid-header-item">Dom</div>
+                        <div class="calendario-grid-header-item">Seg</div>
+                        <div class="calendario-grid-header-item">Ter</div>
+                        <div class="calendario-grid-header-item">Qua</div>
+                        <div class="calendario-grid-header-item">Qui</div>
+                        <div class="calendario-grid-header-item">Sex</div>
+                        <div class="calendario-grid-header-item">Sáb</div>
+                    </div>`;
+            // Renderiza as caixinhas do calendário (incluindo vazias antes e depois)
+            let diaAtual = 1;
+            const totalCelulas = Math.ceil((primeiroDiaSemana + diasNoMes) / 7) * 7;
+            for (let i = 0; i < totalCelulas; i++) {
+                if (i < primeiroDiaSemana || diaAtual > diasNoMes) {
+                    // Caixinha vazia
+                    html += `<div class="calendario-dia-vazio">${i >= primeiroDiaSemana && diaAtual <= diasNoMes ? `<span class='calendario-dia-numero'>${diaAtual}</span>` : ''}</div>`;
+                    if (i >= primeiroDiaSemana && diaAtual <= diasNoMes) diaAtual++;
+                } else {
+                    const item = dias[diaAtual - 1];
+                    if (item && item.url && item.url.trim()) {
+                        // Tem imagem: mostra o quadrado com imagem
+                        html += `<div class="calendario-dia" style="border-radius: 0; border: none;">
+                            <span class="calendario-dia-numero">${diaAtual}</span>
+                            <div class="calendario-img-container">
+                                <div>
+                                    ${item.border_url ? `<img src="${item.border_url}" alt="Moldura" style="width:160px;height:160px;position:absolute;left:0;top:0;z-index:2;pointer-events:none;box-shadow:0 2px 12px #bbb;">` : ''}
+                                    <img src="${item.url}" alt="${item.texto || ''}" style="width:160px;height:160px;object-fit:cover;box-shadow:0 1px 8px #ccc;position:absolute;left:0;top:0;background:#f8f9fa;z-index:1;">
+                                </div>
+                            </div>
+                            <div class="calendario-texto">${item.texto || ''}</div>
+                        </div>`;
+                    } else {
+                        // Não tem imagem: mostra apenas o número do dia
+                        html += `<div class="calendario-dia-vazio" style="background:#f8f9fa;border:2px dashed #bdbdbd;border-radius:10px;">
+                            <span class="calendario-dia-numero" style="opacity:0.6;color:#555;font-size:2.4rem;">${diaAtual}</span>
+                            ${item && item.texto ? `<div class="calendario-texto">${item.texto}</div>` : ''}
+                        </div>`;
+                    }
+                    diaAtual++;
+                }
+            }
+            html += `</div></div>`;
+            return html;
+        }).join('');
+    } catch {
+        loading.textContent = 'Erro ao carregar imagens.';
+    }
+});
+</script>

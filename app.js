@@ -47,6 +47,9 @@ app.use('', require('./server/routes/galeria'));
 // Rota watchlist
 app.use('', require('./server/routes/watchlist'))
 
+// Rota watchlist
+app.use('/API/imagemdodia', require('./server/routes/imagemdodia'))
+
 // Rota principal
 app.use('/', require('./server/routes/main'));
 

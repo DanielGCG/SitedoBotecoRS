@@ -1,32 +1,67 @@
-<main>
-    <h2>Imagem do Dia</h2>
-    <!-- Caixa de texto bonitinha 
-    <div class="caixa-texto">
-        <h3>Venha conferir!</h3>
-        <a href="/pokebsmp" style="text-decoration: none; color: inherit;cursor: url('/img/cursor-mao.png'), auto;">
-            <img src="/pages/inicial/pokebsmp/Titulo_Logo.png" style="max-width: 300px;"></img>
-        </a>
+
+<main class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2 class="mb-3">Imagem do Dia</h2>
+        </div>
     </div>
-    -->
-    
-    <div class="imagem-do-dia">
-        <div class="imagem">
-            <img src="/img/carregando.gif" alt=""> <!-- A imagem será carregada dinamicamente -->
-            <div class="plaquinha">
-                <a href="" style="color: #333; text-decoration: none; cursor: url('/img/cursor-mao.png'), auto;">
-                    <!-- O nome será preenchido dinamicamente -->
-                </a>
+
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                        <div id="imagem-do-dia-container" style="margin:0 auto 1rem auto;">
+                            <% /* Render quadro using partial. Use JS to fill in data after fetch. */ %>
+                            <div id="quadro-placeholder"></div>
+                        </div>
+                        <div class="plaquinha">
+                            <a href="" class="text-dark text-decoration-none" id="imagem-do-dia-nome">
+                                <!-- Nome dinâmico -->
+                            </a>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="/calendario-imagemdodia" class="btn btn-outline-secondary btn-sm">Ver calendário de imagens</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="caixa-texto">
-        <h5>Quer sugerir imagem do dia?</h5>
-        <a class="branco" id="editarNomeBtn" href="/sugerir">Sugerir</a>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-light border-0">
+                <div class="card-body text-center">
+                    <h5 class="mb-3">Quer sugerir imagem do dia?</h5>
+                    <a class="btn btn-primary btn-sm fw-bold" id="editarNomeBtn" href="/sugerir">Sugerir</a>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
-<link rel="stylesheet" href="/pages/galeria/geral/style.css">
-<link rel="stylesheet" href="/pages/inicial/index/style.css">
-
-<script type="module" defer src="/pages/inicial/index/script.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+        const quadroPlaceholder = document.getElementById('quadro-placeholder');
+        const nomeEl = document.getElementById('imagem-do-dia-nome');
+        try {
+                const res = await fetch('/API/imagemdodia');
+                if (!res.ok) throw new Error('Não encontrada');
+                const data = await res.json();
+                // Render quadro using EJS partial via client-side template string
+                quadroPlaceholder.innerHTML = `
+                    <div style="position:relative;width:160px;height:160px;">
+                        ${data.border_url ? `<img src="${data.border_url}" alt="Moldura" style="width:180px;height:180px;position:absolute;left:-10px;top:-10px;z-index:1;pointer-events:none;box-shadow:0 2px 12px #bbb;">` : ''}
+                        <img src="${data.url || '/img/gabi-not-found.png'}" alt="${data.texto || 'Imagem do Dia'}" style="width:160px;height:160px;object-fit:cover;box-shadow:0 1px 8px #ccc;position:absolute;left:0;top:0;z-index:2;background:#f8f9fa;">
+                    </div>
+                `;
+                nomeEl.textContent = data.texto || '';
+                nomeEl.href = data.url || '#';
+        } catch (e) {
+                quadroPlaceholder.innerHTML = `<div style='position:relative;width:160px;height:160px;'><img src='/img/gabi-not-found.png' alt='Imagem não encontrada' style='width:160px;height:160px;object-fit:cover;box-shadow:0 1px 8px #ccc;position:absolute;left:0;top:0;z-index:2;background:#f8f9fa;'></div>`;
+                nomeEl.textContent = 'Nenhuma imagem disponível.';
+                nomeEl.href = '#';
+        }
+});
+</script>
