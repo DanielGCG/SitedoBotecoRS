@@ -14,6 +14,12 @@ router.get('/ativas', async (req, res) => {
 });
 // Ativa manualmente a próxima imagem da fila
 router.post('/next', async (req, res) => {
+    // Verifica senha
+    const senha = req.headers['x-api-key'];
+    if (!senha || senha !== process.env.SERVIDORDEARQUIVOS_KEY) {
+        return res.status(403).json({ message: 'Acesso negado. Senha incorreta.' });
+    }
+    
     const connection = await mysql.createConnection(dbConfig);
     try {
         // Pega a próxima da fila
@@ -140,7 +146,7 @@ router.post('/', async (req, res, next) => {
         if (err) {
             return res.status(400).json({ message: 'Erro no upload do arquivo.', error: err.message });
         }
-        const { texto } = req.body;
+        const { texto, defaultBorderUrl } = req.body;
         if (!req.files || !req.files['file'] || !texto) {
             return res.status(400).json({ message: 'Campos obrigatórios: file, texto.' });
         }
@@ -179,6 +185,8 @@ router.post('/', async (req, res, next) => {
                     }
                 );
                 border_url = borderRes.data.url;
+            } else if (defaultBorderUrl && typeof defaultBorderUrl === 'string' && defaultBorderUrl.trim() !== '') {
+                border_url = defaultBorderUrl.trim();
             }
 
             // Salva no banco
@@ -191,6 +199,63 @@ router.post('/', async (req, res, next) => {
             res.status(201).json({ id: result.insertId, url, border_url, texto });
         } catch (err) {
             res.status(500).json({ message: 'Erro ao adicionar imagem.', error: err.message });
+        }
+    });
+});
+
+// Lista molduras padrão (borders)
+router.get('/borders', async (req, res) => {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute(
+        'SELECT id, url, nome, created_at FROM br_imagemdodia_borders ORDER BY created_at DESC'
+    );
+    await connection.end();
+    res.json(rows);
+});
+
+// Adiciona nova moldura padrão (border) - requer senha
+router.post('/borders', async (req, res) => {
+    const multer = require('multer');
+    const axios = require('axios');
+    const FormData = require('form-data');
+    const upload = multer({ storage: multer.memoryStorage() });
+    const senha = req.headers['x-api-key'];
+    if (!senha || senha !== process.env.SERVIDORDEARQUIVOS_KEY) {
+        return res.status(403).json({ message: 'Acesso negado.' });
+    }
+    upload.single('file')(req, res, async function (err) {
+        if (err) {
+            return res.status(400).json({ message: 'Erro no upload do arquivo.', error: err.message });
+        }
+        if (!req.file || !req.body.nome) {
+            return res.status(400).json({ message: 'Campos obrigatórios: file, nome.' });
+        }
+        try {
+            // Upload da moldura para servidor de arquivos
+            const form = new FormData();
+            form.append('file', req.file.buffer, req.file.originalname);
+            form.append('folder', 'imagemdodia/borders');
+            const uploadRes = await axios.post(
+                process.env.SERVIDORDEARQUIVOS_URL + '/upload?folder=imagemdodia/borders',
+                form,
+                {
+                    headers: {
+                        ...form.getHeaders(),
+                        'x-api-key': process.env.SERVIDORDEARQUIVOS_KEY
+                    }
+                }
+            );
+            const url = uploadRes.data.url;
+            // Salva no banco
+            const connection = await mysql.createConnection(dbConfig);
+            const [result] = await connection.execute(
+                'INSERT INTO br_imagemdodia_borders (url, nome) VALUES (?, ?)',
+                [url, req.body.nome]
+            );
+            await connection.end();
+            res.status(201).json({ id: result.insertId, url, nome: req.body.nome });
+        } catch (err) {
+            res.status(500).json({ message: 'Erro ao adicionar moldura.', error: err.message });
         }
     });
 });

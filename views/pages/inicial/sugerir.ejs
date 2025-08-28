@@ -1,141 +1,235 @@
 
-<main class="container py-4">
+<main class="container py-5">
     <div class="row mb-4">
         <div class="col-12 text-center">
             <h2 class="mb-3">Sugira uma Imagem do Dia</h2>
-            <div id="fila-indicador" class="mb-2 text-secondary small"></div>
+            <div id="fila-indicador" class="mb-3 text-secondary small"></div>
         </div>
     </div>
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card mx-auto mb-3" style="max-width: 500px;">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light py-3">
+                    <h4 class="mb-1 fw-bold">Adicione uma imagem à fila</h4>
+                    <p class="text-muted mb-0">Deixe também um texto para a plaquinha</p>
+                </div>
                 <div class="card-body">
-                    <h4 class="mb-2">Adicione uma imagem à fila</h4>
-                    <h5 class="mb-3">Deixe também um texto para a plaquinha</h5>
                     <!-- Botão removido daqui -->
                     <form id="formSugestao" enctype="multipart/form-data">
-                        <div class="mb-3">
+                        <div class="mb-4">
+                            <label for="imagem" class="form-label fw-semibold">Selecione uma imagem:</label>
                             <input type="file" class="form-control" id="imagem" accept="image/png,image/jpeg,image/gif" required>
-                            <div class="mt-2 d-flex justify-content-center align-items-center" id="preview-container" style="display: none; height: 0; overflow: hidden; transition: height 0.3s ease;">
+                            <div class="mt-3 d-flex justify-content-center align-items-center" id="preview-container" style="display: none; height: 0; overflow: hidden; transition: height 0.3s ease;">
                                 <div style="position:relative;display:inline-block;">
                                     <img id="preview-img" src="" alt="Preview" style="width:220px;height:220px;border-radius:0;box-shadow:0 0 8px #ccc;object-fit:cover;background:#f8f9fa;position:relative;z-index:1;" />
                                     <img id="preview-border" src="" alt="Border" style="width:220px;height:220px;display:none;position:absolute;left:0;top:0;z-index:2;pointer-events:none;border-radius:0;object-fit:cover;" />
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="borderUpload" class="form-label">Escolha uma moldura personalizada (padrão já selecionado):</label>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="borderChoice" id="borderDefault" value="default" checked>
-                                    <label class="form-check-label" for="borderDefault">
-                                        Usar moldura padrão
-                                    </label>
+                        <div class="mb-4">
+                            <label for="borderUpload" class="form-label fw-semibold">Escolha uma moldura:</label>
+                            <div class="card border-light p-3 mb-3">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="borderChoice" id="borderDefault" value="default" checked>
+                                        <label class="form-check-label fw-semibold" for="borderDefault">
+                                            Usar moldura padrão
+                                        </label>
+                                    </div>
+                                    <div class="ms-4 mt-2">
+                                        <select id="defaultBorderSelect" class="form-select" style="width:100%;max-width:250px;">
+                                            <!-- Molduras padrão serão carregadas dinamicamente -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="borderChoice" id="borderCustom" value="custom">
+                                        <label class="form-check-label fw-semibold" for="borderCustom">
+                                            Enviar moldura personalizada
+                                        </label>
+                                    </div>
+                                    <div id="borderCustomDiv" class="ms-4 mt-2" style="display:none;">
+                                        <input type="file" class="form-control" id="borderUpload" accept="image/png">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="borderChoice" id="borderCustom" value="custom">
-                                    <label class="form-check-label" for="borderCustom">
-                                        Enviar moldura personalizada
-                                    </label>
-                                </div>
-                            </div>
-                            <div id="borderCustomDiv" class="mt-2" style="display:none;">
-                                <input type="file" class="form-control" id="borderUpload" accept="image/png">
-                            </div>
-                            <div class="mt-3 d-flex justify-content-center align-items-center" id="border-preview-container" style="height: 140px; overflow: hidden; transition: height 0.3s ease;">
+                            <div class="d-flex justify-content-center align-items-center" id="border-preview-container" style="height: 140px; overflow: hidden; transition: height 0.3s ease;">
                                 <img id="preview-border-img" src="/pages/galeria/moldura.png" alt="Preview Moldura" style="width:120px;height:120px;border-radius:0;box-shadow:0 0 8px #ccc;object-fit:cover;background:#f8f9fa;" />
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="texto" placeholder="Texto da plaquinha" maxlength="32" autocomplete="off" required>
+                        <div class="mb-4">
+                            <label for="texto" class="form-label fw-semibold">Texto da plaquinha:</label>
+                            <input type="text" class="form-control" id="texto" placeholder="Digite o texto que aparecerá na plaquinha" maxlength="32" autocomplete="off" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100" id="adicionarButton">
-                            <span id="btnText">Adicionar</span>
+                        <button type="submit" class="btn btn-primary w-100 py-2" id="adicionarButton">
+                            <span id="btnText">Adicionar à fila</span>
                             <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                         </button>
-                        <div id="feedback" class="mt-3"></div>
+                        <div id="feedback" class="mt-3 text-center"></div>
                     </form>
                 </div>
             </div>
-            <div class="card mx-auto shadow-sm" style="max-width: 500px;">
-                <div class="card-header bg-light text-dark fw-bold d-flex justify-content-between align-items-center" style="font-size:1.08rem;">
-                    <span>Fila de Imagens</span>
-                    <button id="ativarProximaBtn" class="btn btn-outline-secondary btn-sm">Passar para próxima imagem da fila</button>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold">Fila de Imagens</h4>
+                    <button id="ativarProximaBtn" class="btn btn-outline-secondary">Passar para próxima imagem</button>
                 </div>
-                <div class="card-body p-2">
-                    <span id="ativarProximaFeedback" class="ms-2 text-success" style="display:none;"></span>
-                    <div id="fila-lista"></div>
+                <div class="card-body">
+                    <span id="ativarProximaFeedback" class="mb-3 text-success d-block" style="display:none;"></span>
+                    <div id="fila-lista" class="mt-2"></div>
                 </div>
             </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light py-3">
+                    <h4 class="mb-0 fw-bold">Adicionar nova moldura (admin)</h4>
+                </div>
+                <div class="card-body">
+                    <label for="uploadBorderPadrao" class="form-label fw-semibold">Adicionar nova moldura padrão:</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="uploadBorderPadrao" class="form-label">Arquivo PNG:</label>
+                            <input type="file" class="form-control" id="uploadBorderPadrao" accept="image/png">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="nomeBorderPadrao" class="form-label">Nome da moldura:</label>
+                            <input type="text" class="form-control" id="nomeBorderPadrao" placeholder="Nome da moldura">
+                        </div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button class="btn btn-outline-primary" id="btnUploadBorderPadrao" type="button">Enviar nova moldura</button>
+                    </div>
+                    <div id="uploadBorderPadraoFeedback" class="mt-3 text-center"></div>
                 </div>
             </div>
         </div>
     </div>
 </main>
+</main>
 
 <script>
+// Upload de nova moldura padrão (admin)
+document.getElementById("btnUploadBorderPadrao").addEventListener("click", async function() {
+    const fileInput = document.getElementById("uploadBorderPadrao");
+    const nomeInput = document.getElementById("nomeBorderPadrao");
+    const feedback = document.getElementById("uploadBorderPadraoFeedback");
+    feedback.textContent = "";
+    feedback.className = "";
+    if (!fileInput.files[0]) {
+        feedback.textContent = "Selecione uma imagem PNG.";
+        feedback.className = "text-danger";
+        return;
+    }
+    if (!nomeInput.value.trim()) {
+        feedback.textContent = "Digite um nome para a moldura.";
+        feedback.className = "text-danger";
+        return;
+    }
+    const senha = prompt("Digite a senha de admin do servidor de imagens:");
+    if (!senha) return;
+    feedback.textContent = "Enviando...";
+    feedback.className = "text-secondary";
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    formData.append("nome", nomeInput.value.trim());
+    try {
+        const res = await fetch("/API/imagemdodia/borders", {
+            method: "POST",
+            headers: { 'x-api-key': senha },
+            body: formData
+        });
+        if (res.ok) {
+            feedback.textContent = "Moldura adicionada com sucesso!";
+            feedback.className = "text-success";
+            fileInput.value = "";
+            nomeInput.value = "";
+            await carregarMoldurasPadrao();
+        } else {
+            const data = await res.json();
+            feedback.textContent = data.message || "Erro ao adicionar moldura.";
+            feedback.className = "text-danger";
+        }
+    } catch {
+        feedback.textContent = "Erro de conexão.";
+        feedback.className = "text-danger";
+    }
+});
 // Botão para ativar próxima imagem da fila (com senha)
 document.getElementById('ativarProximaBtn').addEventListener('click', async function(e) {
     e.preventDefault();
     const senha = prompt('Digite a senha para ativar a próxima imagem da fila:');
     if (!senha) return;
     if (!confirm('Tem certeza que deseja ativar a próxima imagem da fila?')) return;
+    
     const btn = this;
     const feedback = document.getElementById('ativarProximaFeedback');
+    const originalText = btn.textContent;
+    
     btn.disabled = true;
-    feedback.style.display = 'inline';
-    feedback.textContent = 'Processando...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando...';
+    
+    feedback.style.display = 'block';
+    feedback.textContent = 'Processando solicitação...';
+    feedback.className = 'mb-3 text-secondary d-block';
+    
     try {
         const res = await fetch('/API/imagemdodia/next', {
             method: 'POST',
             headers: { 'x-api-key': senha.trim() }
         });
+        
         if (res.ok) {
-            feedback.textContent = 'Imagem ativada!';
+            feedback.textContent = '✅ Imagem ativada com sucesso!';
+            feedback.className = 'mb-3 text-success d-block';
             atualizarIndicadorFila();
             atualizarFilaLista();
         } else {
             const data = await res.json();
-            feedback.textContent = data.message || 'Erro ao ativar.';
+            feedback.textContent = '❌ ' + (data.message || 'Erro ao ativar a imagem.');
+            feedback.className = 'mb-3 text-danger d-block';
         }
     } catch {
-        feedback.textContent = 'Erro de conexão.';
+        feedback.textContent = '❌ Erro de conexão. Tente novamente.';
+        feedback.className = 'mb-3 text-danger d-block';
     }
+    
+    btn.innerHTML = originalText;
+    
     setTimeout(() => {
         feedback.style.display = 'none';
         btn.disabled = false;
-    }, 1800);
+    }, 3000);
 });
 // Listagem da fila com botão de remoção
 async function atualizarFilaLista() {
     const el = document.getElementById('fila-lista');
-    el.innerHTML = '<div class="text-secondary">Carregando fila...</div>';
+    el.innerHTML = '<div class="d-flex justify-content-center py-3"><div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Carregando...</span></div></div>';
     try {
         const res = await fetch('/API/imagemdodia/fila');
         if (!res.ok) throw new Error();
         const lista = await res.json();
         if (!lista.length) {
-            el.innerHTML = '<div class="text-secondary">Nenhuma imagem na fila.</div>';
+            el.innerHTML = '<div class="alert alert-info text-center py-3">Nenhuma imagem na fila.</div>';
             return;
         }
                 el.innerHTML = lista.map(item => {
                     const imgUrl = item.url && item.url.trim() ? item.url : '/img/gabi-not-found.png';
                     const borderUrl = item.border_url && item.border_url.trim() ? item.border_url : '';
                     const quadroHtml = `
-                        <div style="position:relative;width:56px;height:56px;">
-                          <img src="${imgUrl}" alt="${item.texto || 'Imagem não encontrada'}" style="width:56px;height:56px;object-fit:cover;box-shadow:0 1px 4px #ddd;position:absolute;left:0;top:0;z-index:1;background:#f8f9fa;">
-                          ${borderUrl ? `<img src="${borderUrl}" alt="Moldura" style="width:64px;height:64px;position:absolute;left:-4px;top:-4px;z-index:2;pointer-events:none;box-shadow:0 2px 8px #bbb;">` : ''}
+                        <div style="position:relative;width:64px;height:64px;">
+                          <img src="${imgUrl}" alt="${item.texto || 'Imagem não encontrada'}" style="width:64px;height:64px;object-fit:cover;box-shadow:0 1px 4px #ddd;position:absolute;left:0;top:0;z-index:1;background:#f8f9fa;">
+                          ${borderUrl ? `<img src="${borderUrl}" alt="Moldura" style="width:72px;height:72px;position:absolute;left:-4px;top:-4px;z-index:2;pointer-events:none;box-shadow:0 2px 8px #bbb;">` : ''}
                         </div>
                     `;
                     return `
-                        <div class="d-flex align-items-center mb-2 border rounded p-2 bg-white shadow-sm" style="font-size:0.98rem;">
-                            <div style="margin-right:10px;flex-shrink:0;">
+                        <div class="d-flex align-items-center mb-3 border rounded p-3 bg-white shadow-sm">
+                            <div style="margin-right:15px;flex-shrink:0;">
                                 ${quadroHtml}
                             </div>
-                            <span class="flex-grow-1">${item.texto}</span>
-                            <button class="btn btn-link btn-sm text-danger ms-2 px-2 py-0" style="font-size:0.97rem;" onclick="removerDaFila(${item.id}, this)"><i class="bi bi-trash"></i> Remover</button>
+                            <span class="flex-grow-1 fs-6">${item.texto}</span>
+                            <button class="btn btn-outline-danger btn-sm ms-2" onclick="removerDaFila(${item.id}, this)"><i class="bi bi-trash"></i> Remover</button>
                         </div>
                     `;
                 }).join('');
@@ -147,9 +241,13 @@ async function atualizarFilaLista() {
 window.removerDaFila = async function(id, btn) {
     const senha = prompt('Digite a senha para remover esta imagem da fila:');
     if (!senha) return;
-    if (!confirm('Remover esta imagem da fila?')) return;
+    if (!confirm('Tem certeza que deseja remover esta imagem da fila?')) return;
+    
+    // Salvar o conteúdo original do botão
+    const originalContent = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = 'Removendo...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Removendo...';
+    
     try {
         const res = await fetch(`/API/imagemdodia/fila/${id}`, {
             method: 'DELETE',
@@ -159,14 +257,40 @@ window.removerDaFila = async function(id, btn) {
             atualizarFilaLista();
             atualizarIndicadorFila();
         } else {
-            btn.textContent = 'Erro';
+            btn.innerHTML = '<i class="bi bi-exclamation-circle"></i> Erro';
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }, 2000);
         }
     } catch {
-        btn.textContent = 'Erro';
+        btn.innerHTML = '<i class="bi bi-exclamation-circle"></i> Erro';
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }, 2000);
+    }
+}
+
+// Atualiza o indicador de número de imagens na fila
+async function atualizarIndicadorFila() {
+    const el = document.getElementById('fila-indicador');
+    try {
+        const res = await fetch('/API/imagemdodia/fila/count');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data.count > 0) {
+            el.textContent = `${data.count} ${data.count === 1 ? 'imagem' : 'imagens'} na fila`;
+        } else {
+            el.textContent = 'Nenhuma imagem na fila';
+        }
+    } catch {
+        el.textContent = 'Erro ao carregar informações da fila';
     }
 }
 
 atualizarFilaLista();
+atualizarIndicadorFila();
 const imagemInput = document.getElementById("imagem");
 const previewImg = document.getElementById("preview-img");
 const borderUpload = document.getElementById("borderUpload");
@@ -175,16 +299,77 @@ const borderDefaultRadio = document.getElementById("borderDefault");
 const borderCustomRadio = document.getElementById("borderCustom");
 const borderCustomDiv = document.getElementById("borderCustomDiv");
 const previewBorderImg = document.getElementById("preview-border-img");
-const DEFAULT_BORDER_URL = "/pages/galeria/moldura.png";
+// Inicializa com um valor padrão para evitar valores nulos
+let currentBorderUrl = "";
+const defaultBorderSelect = document.getElementById("defaultBorderSelect");
 
-// Define a moldura padrão
-let currentBorderUrl = DEFAULT_BORDER_URL;
+// Carrega molduras padrão dinamicamente
+async function carregarMoldurasPadrao() {
+    try {
+        const res = await fetch("/API/imagemdodia/borders");
+        if (!res.ok) throw new Error();
+        const borders = await res.json();
 
-// Inicializa com moldura padrão
-if (previewImg.src && previewImg.src.trim() !== '') {
-    previewBorder.src = DEFAULT_BORDER_URL;
+        defaultBorderSelect.innerHTML = "";
+        borders.forEach((border, idx) => {
+            const opt = document.createElement("option");
+            opt.value = border.url;
+            opt.textContent = border.nome || `Moldura ${idx+1}`;
+            defaultBorderSelect.appendChild(opt);
+        });
+
+        // Busca moldura1 como padrão
+        let moldura1 = borders.find(b => b.nome && b.nome.toLowerCase() === "moldura1");
+        if (moldura1) {
+            defaultBorderSelect.value = moldura1.url;
+            currentBorderUrl = moldura1.url;
+            previewBorderImg.src = moldura1.url;
+            if (previewImg.src && previewImg.src.trim() !== '') {
+                previewBorder.src = moldura1.url;
+                previewBorder.style.display = "block";
+            }
+        } else if (borders.length > 0) {
+            // Se não encontrar moldura1, pega a primeira disponível
+            defaultBorderSelect.value = borders[0].url;
+            currentBorderUrl = borders[0].url;
+            previewBorderImg.src = borders[0].url;
+            if (previewImg.src && previewImg.src.trim() !== '') {
+                previewBorder.src = borders[0].url;
+                previewBorder.style.display = "block";
+            }
+        } else {
+            defaultBorderSelect.innerHTML = '<option disabled>Nenhuma moldura encontrada</option>';
+            currentBorderUrl = "";
+            previewBorderImg.src = "";
+            previewBorder.style.display = "none";
+        }
+    } catch {
+        defaultBorderSelect.innerHTML = '<option disabled>Nenhuma moldura encontrada</option>';
+        currentBorderUrl = "";
+        previewBorderImg.src = "";
+        previewBorder.style.display = "none";
+    }
+}
+
+carregarMoldurasPadrao();
+
+// Inicializa com moldura padrão na imagem principal
+if (previewImg.src && previewImg.src.trim() !== '' && currentBorderUrl) {
+    previewBorder.src = currentBorderUrl;
     previewBorder.style.display = "block";
 }
+
+// Atualiza moldura padrão ao mudar o seletor
+defaultBorderSelect.addEventListener("change", function() {
+    if (borderDefaultRadio.checked) {
+        currentBorderUrl = this.value;
+        previewBorderImg.src = this.value;
+        if (previewImg.src && previewImg.src.trim() !== '') {
+            previewBorder.src = this.value;
+            previewBorder.style.display = "block";
+        }
+    }
+});
 
 // Controla a exibição do input de arquivo personalizado
 document.querySelectorAll('input[name="borderChoice"]').forEach(radio => {
@@ -193,17 +378,17 @@ document.querySelectorAll('input[name="borderChoice"]').forEach(radio => {
             borderCustomDiv.style.display = 'block';
             if (!borderUpload.files.length) {
                 // Sem arquivo personalizado, mas ainda mostra o upload
-                previewBorderImg.src = DEFAULT_BORDER_URL;
+                previewBorderImg.src = defaultBorderSelect.value;
             }
         } else {
             borderCustomDiv.style.display = 'none';
-            // Retorna para a moldura padrão
-            previewBorderImg.src = DEFAULT_BORDER_URL;
-            currentBorderUrl = DEFAULT_BORDER_URL;
-            
+            // Retorna para a moldura padrão selecionada
+            const selectedUrl = defaultBorderSelect.value;
+            previewBorderImg.src = selectedUrl;
+            currentBorderUrl = selectedUrl;
             // Atualiza a visualização principal se tiver imagem
             if (previewImg.src && previewImg.src.trim() !== '') {
-                previewBorder.src = DEFAULT_BORDER_URL;
+                previewBorder.src = selectedUrl;
                 previewBorder.style.display = "block";
             }
         }
@@ -212,15 +397,11 @@ document.querySelectorAll('input[name="borderChoice"]').forEach(radio => {
 
 borderUpload.addEventListener("change", function() {
     const file = borderUpload.files[0];
-    
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            // Atualiza a imagem de preview da moldura
             previewBorderImg.src = e.target.result;
             currentBorderUrl = e.target.result;
-            
-            // Atualiza também a sobreposição na primeira imagem se ela existir
             if (previewImg.src && previewImg.src.trim() !== '') {
                 previewBorder.src = e.target.result;
                 previewBorder.style.display = "block";
@@ -228,13 +409,12 @@ borderUpload.addEventListener("change", function() {
         };
         reader.readAsDataURL(file);
     } else {
-        // Se removeu o arquivo personalizado mas o modo personalizado ainda está ativo
         if (borderCustomRadio.checked) {
-            previewBorderImg.src = DEFAULT_BORDER_URL;
-            currentBorderUrl = DEFAULT_BORDER_URL;
-            
+            // Se removeu o arquivo personalizado mas o modo personalizado ainda está ativo
+            previewBorderImg.src = defaultBorderSelect.value;
+            currentBorderUrl = defaultBorderSelect.value;
             if (previewImg.src && previewImg.src.trim() !== '') {
-                previewBorder.src = DEFAULT_BORDER_URL;
+                previewBorder.src = defaultBorderSelect.value;
                 previewBorder.style.display = "block";
             }
         }
@@ -303,10 +483,13 @@ document.getElementById("formSugestao").addEventListener("submit", async functio
     
     // Lida com a moldura (personalizada ou padrão)
     if (borderCustomRadio.checked && borderUpload.files[0]) {
+        // Se selecionou moldura personalizada e fez upload
         formData.append("border", borderUpload.files[0]);
     } else {
-        // Se for usar a moldura padrão, enviamos uma flag especial
+        // Sempre pega a moldura padrão selecionada de forma dinâmica
         formData.append("useDefaultBorder", "true");
+        const borderUrl = defaultBorderSelect.value || "";
+        formData.append("defaultBorderUrl", borderUrl);
     }
 
     try {
@@ -329,8 +512,19 @@ document.getElementById("formSugestao").addEventListener("submit", async functio
             borderUpload.value = "";
             borderDefaultRadio.checked = true; // Volta para moldura padrão
             borderCustomDiv.style.display = "none";
-            document.getElementById("preview-border-img").src = DEFAULT_BORDER_URL;
-            currentBorderUrl = DEFAULT_BORDER_URL;
+            // Seleciona moldura1 como padrão se existir, senão a primeira disponível
+            if (defaultBorderSelect.options.length > 0) {
+                let moldura1Opt = Array.from(defaultBorderSelect.options).find(opt => opt.textContent.toLowerCase() === "moldura1");
+                if (moldura1Opt) {
+                    document.getElementById("preview-border-img").src = moldura1Opt.value;
+                    defaultBorderSelect.value = moldura1Opt.value;
+                    currentBorderUrl = moldura1Opt.value;
+                } else {
+                    document.getElementById("preview-border-img").src = defaultBorderSelect.options[0].value;
+                    defaultBorderSelect.value = defaultBorderSelect.options[0].value;
+                    currentBorderUrl = defaultBorderSelect.options[0].value;
+                }
+            }
             
             // Reset do texto
             textoInput.value = "";
