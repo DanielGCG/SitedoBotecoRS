@@ -24,10 +24,11 @@
     color: #2c3e50;
     letter-spacing: 0.04em;
     text-shadow: 0 1px 0 #fff, 0 2px 6px #ddd;
+    text-align: center;
 }
 .calendario-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(40px, 1fr));
     gap: 0.5rem;
     width: 100%;
     margin-bottom: 1rem;
@@ -57,20 +58,24 @@
     border-radius: 10px;
     box-shadow: 0 2px 8px #eee;
     border: 2px solid #bdbdbd;
-    width: 160px;
-    height: 160px;
+    width: 130px;
+    height: 130px;
+    position: relative;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.dia-conteudo {
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
     transition: box-shadow 0.2s, border-color 0.2s;
-    position: relative;
-    margin: 0 auto;
-    box-sizing: border-box;
-    overflow: hidden;
 }
-.calendario-dia:hover {
+.calendario-dia:hover, .calendario-dia-quadro:hover {
     box-shadow: 0 4px 16px #ddd;
     background: #f8f9fa;
     border-color: #007bff;
@@ -84,7 +89,7 @@
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
-    font-size: 2.8rem;
+    font-size: 2.2rem;
     font-weight: 700;
     color: #e0e0e0;
     opacity: 0.45;
@@ -96,20 +101,17 @@
     background: #f8f9fa;
     border-radius: 10px;
     border: 2px dashed #e0e0e0;
-    width: 160px;
-    height: 160px;
+    width: 130px;
+    height: 130px;
     box-sizing: border-box;
     margin: 0 auto;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
 }
 .calendario-dia-vazio .calendario-dia-numero {
     color: #555;
     opacity: 0.6;
-    font-size: 2.4rem;
+    font-size: 2rem;
 }
 .calendario-img {
     width: 96px;
@@ -127,12 +129,148 @@
     color: #333;
     font-weight: 500;
     word-break: break-word;
-    margin-bottom: 0.1rem;
+    margin-top: auto;
+    padding: 0.2rem;
+    position: relative;
+    z-index: 3;
+    background-color: rgba(255,255,255,0.8);
+    width: 100%;
 }
 .calendario-dia-vazio {
     background: none;
     box-shadow: none;
     min-height: 60px;
+}
+
+.calendario-dia-quadro {
+    width: 130px;
+    height: 130px;
+    position: relative;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow: visible; /* Alterado de hidden para visible para permitir que a moldura ultrapasse os limites se necessário */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Media queries para responsividade */
+@media (max-width: 1200px) {
+    .calendario-dia, .calendario-dia-vazio, .calendario-dia-quadro {
+        width: 110px;
+        height: 110px;
+    }
+    .calendario-dia-numero {
+        font-size: 1.8rem;
+    }
+    .calendario-dia-vazio .calendario-dia-numero {
+        font-size: 1.6rem;
+    }
+    .calendario-texto {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 991px) {
+    .calendario-grid {
+        grid-template-columns: repeat(7, minmax(80px, 1fr));
+    }
+    .calendario-dia, .calendario-dia-vazio, .calendario-dia-quadro {
+        width: 90px;
+        height: 90px;
+    }
+    .calendario-dia-numero {
+        font-size: 1.6rem;
+    }
+    .calendario-texto {
+        font-size: 0.85rem;
+    }
+
+    /* Garante que o container e as imagens ocupem toda a célula em telas intermediárias */
+    .calendario-dia-quadro .calendario-img-container,
+    .calendario-dia-quadro img {
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block;
+    }
+}
+
+@media (max-width: 767px) {
+    .calendario-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.25rem;
+    }
+    .calendario-dia, .calendario-dia-vazio, .calendario-dia-quadro {
+        width: 100%;
+        height: 0;
+        padding-bottom: 100%; /* Faz com que a altura seja igual à largura */
+        position: relative;
+    }
+    .calendario-dia > *, .calendario-dia-vazio > *, .calendario-dia-quadro > * {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .calendario-dia-numero {
+        font-size: 1.3rem;
+    }
+    .calendario-texto {
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .calendario-grid-header-item {
+        font-size: 0.85rem;
+    }
+
+    /* Garante que o container e as imagens ocupem toda a célula em telas intermediárias pequenas */
+    .calendario-dia-quadro .calendario-img-container,
+    .calendario-dia-quadro img {
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block;
+    }
+}
+
+@media (max-width: 576px) {
+    .calendario-dia, .calendario-dia-vazio, .calendario-dia-quadro {
+        width: 100%;
+        height: 0;
+        padding-bottom: 100%; /* mantém quadrado */
+        position: relative;
+    }
+
+    /* Garante que o container e as imagens ocupem toda a célula */
+    .calendario-dia-quadro .calendario-img-container,
+    .calendario-dia-quadro img {
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block;
+    }
+
+    /* O número do dia pode ser absoluto */
+    .calendario-dia-numero {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 1.3rem;
+    }
 }
 </style>
 
@@ -200,22 +338,20 @@ document.addEventListener('DOMContentLoaded', async function() {
                 } else {
                     const item = dias[diaAtual - 1];
                     if (item && item.url && item.url.trim()) {
-                        // Tem imagem: mostra o quadrado com imagem
-                        html += `<div class="calendario-dia" style="border-radius: 0; border: none;">
+                        // Tem imagem: mostra o quadrado sem borda arredondada, permitindo que o quadro tenha sua própria borda
+                        html += `<div class="calendario-dia-quadro">
                             <span class="calendario-dia-numero">${diaAtual}</span>
-                            <div class="calendario-img-container">
-                                <div>
-                                    ${item.border_url ? `<img src="${item.border_url}" alt="Moldura" style="width:160px;height:160px;position:absolute;left:0;top:0;z-index:2;pointer-events:none;box-shadow:0 2px 12px #bbb;">` : ''}
-                                    <img src="${item.url}" alt="${item.texto || ''}" style="width:160px;height:160px;object-fit:cover;box-shadow:0 1px 8px #ccc;position:absolute;left:0;top:0;background:#f8f9fa;z-index:1;">
-                                </div>
+                            <div class="calendario-img-container" style="width:100%;height:100%;position:relative;">
+                                <img src="${item.url}" alt="${item.texto || ''}" style="width:100%;height:100%;object-fit:cover;position:absolute;left:0;top:0;background:#f8f9fa;z-index:1;">
+                                ${item.border_url ? `<img src="${item.border_url}" alt="Moldura" style="width:100%;height:100%;position:absolute;left:0;top:0;z-index:2;pointer-events:none;">` : ''}
                             </div>
-                            <div class="calendario-texto">${item.texto || ''}</div>
                         </div>`;
                     } else {
                         // Não tem imagem: mostra apenas o número do dia
-                        html += `<div class="calendario-dia-vazio" style="background:#f8f9fa;border:2px dashed #bdbdbd;border-radius:10px;">
-                            <span class="calendario-dia-numero" style="opacity:0.6;color:#555;font-size:2.4rem;">${diaAtual}</span>
-                            ${item && item.texto ? `<div class="calendario-texto">${item.texto}</div>` : ''}
+                        html += `<div class="calendario-dia-vazio">
+                            <div class="dia-conteudo">
+                                <span class="calendario-dia-numero">${diaAtual}</span>
+                            </div>
                         </div>`;
                     }
                     diaAtual++;
